@@ -1,0 +1,1 @@
+- [Estructura del proyecto](project_structure.md) — monorepo, paths de archivos clave, patrones de código, endpoints backend relevantes
