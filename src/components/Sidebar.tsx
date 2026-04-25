@@ -128,7 +128,7 @@ const menuGroups: MenuGroup[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [_userName, _setUserName] = useState<string>("");
+  const [userName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
 
   useEffect(() => {
