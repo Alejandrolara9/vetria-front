@@ -510,7 +510,7 @@ export default function LandingPage() {
                     </svg>
                   ))}
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">"{t.quote}"</p>
+                <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">&ldquo;{t.quote}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-full ${t.color} flex items-center justify-center`}>
                     <span className="text-white text-xs font-bold">{t.avatar}</span>

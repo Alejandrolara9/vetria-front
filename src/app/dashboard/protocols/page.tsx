@@ -222,7 +222,7 @@ function ProtocolModal({
 
   // Chips de sugerencia rápida — solo en modo creación
   function applyTemplate(preset: Partial<ProtocolFormData>) {
-    setForm((prev) => ({ ...DEFAULT_FORM, ...preset, active: true }));
+    setForm((_prev) => ({ ...DEFAULT_FORM, ...preset, active: true }));
   }
 
   function handleChange(
