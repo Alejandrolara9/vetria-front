@@ -26,7 +26,7 @@ pipeline {
                 git branch: "${BRANCH}",
                     url: "${GITHUB_URL}",
                     credentialsId: 'github-pat'
-                echo "Checked out commit: ${env.GIT_COMMIT}"
+                sh 'echo "Checked out commit: $(git rev-parse HEAD)"'
             }
         }
 
