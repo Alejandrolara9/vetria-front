@@ -134,9 +134,13 @@ export default function Sidebar() {
   useEffect(() => {
     try {
       const token = localStorage.getItem("token");
-      if (token) {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUserRole(payload.role ?? "");
+      if (token && token.split(".").length === 3) {
+        const raw = atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"));
+        const payload = JSON.parse(raw);
+        const allowedRoles = ["ADMIN", "VET", "RECEPTIONIST"];
+        if (allowedRoles.includes(payload.role)) {
+          setUserRole(payload.role);
+        }
       }
     } catch { /* ignore */ }
   }, []);
