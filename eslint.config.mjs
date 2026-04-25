@@ -13,11 +13,10 @@ const eslintConfig = defineConfig([
   ]),
   {
     rules: {
-      // El patrón catch (err: any) con axios es válido en todo el proyecto
       "@typescript-eslint/no-explicit-any": "off",
-      // setState en useEffect para leer localStorage es un sistema externo válido
       "react-hooks/exhaustive-deps": "warn",
       "react-hooks/set-state-in-effect": "off",
+      "@typescript-eslint/no-unused-vars": ["warn", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }],
     },
   },
 ]);
