@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AttachmentsPanel } from "@/components/AttachmentsPanel";
+import { listAttachments, type Attachment } from "@/services/attachments";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -183,7 +185,7 @@ function ProfileSkeleton() {
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type Tab = "resumen" | "citas" | "eventos" | "historias" | "recordatorios";
+type Tab = "resumen" | "citas" | "eventos" | "historias" | "recordatorios" | "attachments";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "resumen", label: "Resumen" },
@@ -191,6 +193,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "eventos", label: "Eventos Clínicos" },
   { id: "historias", label: "Historias Clínicas" },
   { id: "recordatorios", label: "Recordatorios" },
+  { id: "attachments", label: "Archivos médicos" },
 ];
 
 // ─── Página ───────────────────────────────────────────────────────────────────
@@ -202,10 +205,15 @@ export default function PetProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("resumen");
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   useEffect(() => {
     api.get<PetProfile>(`/pets/${id}/profile`)
-      .then((r) => setPet(r.data))
+      .then(async (r) => {
+        setPet(r.data);
+        const atts = await listAttachments(id as string);
+        setAttachments(atts);
+      })
       .catch(() => setError("No se pudo cargar el expediente. Verifica tu conexión."))
       .finally(() => setLoading(false));
   }, [id, router]);
@@ -327,6 +335,19 @@ export default function PetProfilePage() {
       {tab === "eventos" && <TabEventos events={pet.clinicalEvents} />}
       {tab === "historias" && <TabHistorias notes={pet.clinicalNotes} />}
       {tab === "recordatorios" && <TabRecordatorios reminders={pet.reminders} />}
+      {tab === "attachments" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Archivos médicos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AttachmentsPanel
+              petId={id as string}
+              initialAttachments={attachments}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
