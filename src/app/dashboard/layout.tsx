@@ -16,6 +16,8 @@ const ROUTE_ROLES: Record<string, Role[]> = {
   "/dashboard/inventory": ["ADMIN"],
   "/dashboard/reports": ["ADMIN"],
   "/dashboard/team": ["ADMIN"],
+  "/dashboard/settings/branding": ["ADMIN"],
+  "/dashboard/settings/profile": ["VET", "ADMIN"],
 };
 
 function decodeRole(token: string): Role | null {
