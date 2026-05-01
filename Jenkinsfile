@@ -93,9 +93,9 @@ pipeline {
                                 -Dsonar.sources=src \\
                                 -Dsonar.tests=src \\
                                 -Dsonar.test.inclusions=**/__tests__/**/*.ts,**/__tests__/**/*.tsx,**/*.spec.ts,**/*.spec.tsx,**/*.test.ts,**/*.test.tsx \\
-                                -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/public/**,**/*.d.ts,**/*.css,**/__tests__/**,**/*.spec.ts,**/*.spec.tsx,**/*.test.ts,**/*.test.tsx \\
+                                -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/public/**,**/*.d.ts,**/*.css,**/__tests__/**,**/*.spec.ts,**/*.spec.tsx,**/*.test.ts,**/*.test.tsx,**/app/**,**/components/**,**/ui/** \\
                                 -Dsonar.sourceEncoding=UTF-8 \\
-                                -Dsonar.typescript.tsconfigPath=tsconfig.json \\
+                                -Dsonar.typescript.tsconfigPath=tsconfig.sonar.json \\
                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                         """
                     }
