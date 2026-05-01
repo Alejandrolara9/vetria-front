@@ -35,7 +35,11 @@ export interface ClinicalNote {
     name: string;
     species: string;
   };
-  createdBy?: {
+  author?: {
+    id: string;
+    name: string;
+  };
+  approvedByVet?: {
     id: string;
     name: string;
   };

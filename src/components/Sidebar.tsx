@@ -6,10 +6,13 @@ import { useEffect, useState } from "react";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
+type Role = "ADMIN" | "VET" | "RECEPTIONIST";
+
 interface MenuItem {
   href: string;
   label: string;
   icon: React.ReactNode;
+  roles?: Role[];
 }
 
 interface MenuGroup {
@@ -28,7 +31,7 @@ const Icon = ({ d, d2 }: { d: string; d2?: string }) => (
 
 // ─── Menú agrupado ────────────────────────────────────────────────────────────
 
-const menuGroups: MenuGroup[] = [
+const ALL_MENU_GROUPS: MenuGroup[] = [
   {
     label: "Principal",
     items: [
@@ -73,6 +76,7 @@ const menuGroups: MenuGroup[] = [
       {
         href: "/dashboard/clinical-notes",
         label: "Historias Clínicas",
+        roles: ["ADMIN", "VET"],
         icon: (
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
@@ -82,11 +86,13 @@ const menuGroups: MenuGroup[] = [
       {
         href: "/dashboard/reminders",
         label: "Recordatorios",
+        roles: ["ADMIN", "VET"],
         icon: <Icon d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />,
       },
       {
         href: "/dashboard/protocols",
         label: "Protocolos",
+        roles: ["ADMIN", "VET"],
         icon: <Icon d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />,
       },
     ],
@@ -97,26 +103,31 @@ const menuGroups: MenuGroup[] = [
       {
         href: "/dashboard/invoices",
         label: "Facturación",
+        roles: ["ADMIN", "RECEPTIONIST"],
         icon: <Icon d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185zM9.75 9h.008v.008H9.75V9zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 4.5h.008v.008h-.008V13.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />,
       },
       {
         href: "/dashboard/services",
         label: "Catálogo",
+        roles: ["ADMIN"],
         icon: <Icon d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z" />,
       },
       {
         href: "/dashboard/inventory",
         label: "Inventario",
+        roles: ["ADMIN"],
         icon: <Icon d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />,
       },
       {
         href: "/dashboard/reports",
         label: "Informes",
+        roles: ["ADMIN"],
         icon: <Icon d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />,
       },
       {
         href: "/dashboard/team",
         label: "Equipo",
+        roles: ["ADMIN"],
         icon: <Icon d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />,
       },
     ],
@@ -175,12 +186,17 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-3 px-2">
-        {menuGroups.map((group) => (
+        {ALL_MENU_GROUPS.map((group) => {
+          const visibleItems = group.items.filter(
+            (item) => !item.roles || !userRole || item.roles.includes(userRole as Role)
+          );
+          if (visibleItems.length === 0) return null;
+          return (
           <div key={group.label} className="mb-4">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 px-3 mb-1">
               {group.label}
             </p>
-            {group.items.map((item) => {
+            {visibleItems.map((item) => {
               const isActive =
                 pathname === item.href ||
                 (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -200,7 +216,8 @@ export default function Sidebar() {
               );
             })}
           </div>
-        ))}
+        );
+        })}
       </nav>
 
       {/* Footer — usuario */}

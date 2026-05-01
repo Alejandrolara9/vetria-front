@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { api } from "@/services/api";
+import { AttachmentsPanel } from "@/components/AttachmentsPanel";
 import {
   listClinicalNotes,
   createClinicalNote,
@@ -300,6 +301,18 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
               )}
             </div>
 
+            {selectedPetId && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Archivos médicos (opcional)
+                </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Sube radiografías o resultados de laboratorio. La IA los analizará e incluirá el contexto al generar la historia clínica.
+                </p>
+                <AttachmentsPanel petId={selectedPetId} />
+              </div>
+            )}
+
             <div className="flex gap-2 pt-2">
               <button type="submit"
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center justify-center gap-2">
@@ -488,6 +501,16 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
               <p className="text-xs text-gray-400">Fecha</p>
               <p className="font-medium">{new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })}</p>
             </div>
+            <div>
+              <p className="text-xs text-gray-400">Veterinario tratante</p>
+              <p className="font-medium">{note.author?.name ?? "—"}</p>
+            </div>
+            {note.approvedByVet?.name && (
+              <div>
+                <p className="text-xs text-gray-400">Aprobado por</p>
+                <p className="font-medium">{note.approvedByVet.name}</p>
+              </div>
+            )}
           </div>
 
           {note.chiefComplaint && (
@@ -714,9 +737,14 @@ export default function ClinicalNotesPage() {
                 <p className="text-sm font-medium mb-1 line-clamp-1">{note.chiefComplaint}</p>
               )}
               <p className="text-xs text-gray-400 line-clamp-2 italic">{note.rawInput}</p>
-              <p className="text-xs text-gray-300 mt-3">
-                {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
-              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-xs text-gray-300">
+                  {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+                {note.author?.name && (
+                  <p className="text-xs text-gray-400">Dr. {note.author?.name}</p>
+                )}
+              </div>
             </button>
           ))}
         </div>

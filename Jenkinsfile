@@ -17,6 +17,7 @@ pipeline {
         GITHUB_URL              = 'https://github.com/Alejandrolara9/vetria-front.git'
         BRANCH                  = 'main'
         NEXT_TELEMETRY_DISABLED = '1'
+        SONARQUBE_URL           = 'http://localhost:9000'
     }
 
     stages {
@@ -41,7 +42,7 @@ pipeline {
         stage('Dependency Audit') {
             steps {
                 sh 'mkdir -p reports'
-                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                     sh '''
                         npm audit --audit-level=high --json > reports/npm-audit.json || true
                         npm audit --audit-level=high
@@ -69,7 +70,7 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                sh 'npm test -- --ci --forceExit'
+                sh 'npm test -- --ci --forceExit --coverage'
             }
             post {
                 always {
@@ -92,7 +93,7 @@ pipeline {
                                 -Dsonar.sources=src \\
                                 -Dsonar.tests=src \\
                                 -Dsonar.test.inclusions=**/__tests__/**/*.ts,**/__tests__/**/*.tsx,**/*.spec.ts,**/*.spec.tsx,**/*.test.ts,**/*.test.tsx \\
-                                -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/public/**,**/*.d.ts,**/*.css \\
+                                -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/public/**,**/*.d.ts,**/*.css,**/__tests__/**,**/*.spec.ts,**/*.spec.tsx,**/*.test.ts,**/*.test.tsx \\
                                 -Dsonar.sourceEncoding=UTF-8 \\
                                 -Dsonar.typescript.tsconfigPath=tsconfig.json \\
                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
@@ -108,6 +109,11 @@ pipeline {
                     waitForQualityGate abortPipeline: true
                 }
             }
+            post {
+                failure {
+                    echo "QUALITY GATE FAILED - Pipeline bloqueado. El codigo no cumple las politicas de SonarQube. Revisa y corrige los hallazgos en ${SONARQUBE_URL}/dashboard?id=${PROJECT_KEY} antes de volver a hacer push."
+                }
+            }
         }
     }
 
@@ -121,7 +127,7 @@ pipeline {
             echo "Pipeline ${PROJECT_NAME} - Build #${BUILD_NUMBER} completed successfully."
         }
         failure {
-            echo "Pipeline ${PROJECT_NAME} - Build #${BUILD_NUMBER} FAILED."
+            echo "Pipeline ${PROJECT_NAME} - Build #${BUILD_NUMBER} FALLIDO. Revisa los hallazgos en ${SONARQUBE_URL}/dashboard?id=${PROJECT_KEY}"
         }
     }
 }
