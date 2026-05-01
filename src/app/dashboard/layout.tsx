@@ -8,6 +8,7 @@ type Role = "ADMIN" | "VET" | "RECEPTIONIST";
 
 const ROUTE_ROLES: Record<string, Role[]> = {
   "/dashboard/clinical-notes": ["ADMIN", "VET"],
+  "/dashboard/prescriptions": ["VET", "ADMIN"],
   "/dashboard/reminders": ["ADMIN", "VET"],
   "/dashboard/protocols": ["ADMIN", "VET"],
   "/dashboard/invoices": ["ADMIN", "RECEPTIONIST"],
