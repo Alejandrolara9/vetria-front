@@ -139,6 +139,12 @@ export default function PrescriptionDetailPage() {
       <div className="flex flex-wrap gap-3">
         {p.status === "DRAFT" && (
           <>
+            <Link
+              href={`/dashboard/prescriptions/${id}/edit`}
+              className="px-4 py-2 bg-white text-gray-700 border rounded-lg text-sm font-medium hover:bg-gray-50"
+            >
+              Editar borrador
+            </Link>
             <button
               onClick={handleGeneratePdf}
               disabled={actionLoading !== null}
