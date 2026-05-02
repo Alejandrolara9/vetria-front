@@ -12,6 +12,7 @@ export interface BrandingConfig {
   clinicPhone: string | null;
   clinicAddress: string | null;
   clinicCity: string | null;
+  clinicDepartment: string | null;
 }
 
 export interface UpdateBrandingDto {
@@ -19,6 +20,7 @@ export interface UpdateBrandingDto {
   clinicPhone?: string;
   clinicAddress?: string;
   clinicCity?: string;
+  clinicDepartment?: string;
   watermarkOpacity?: number;
   watermarkEnabled?: boolean;
 }

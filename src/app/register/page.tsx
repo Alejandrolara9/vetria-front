@@ -1,10 +1,13 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { GoogleLogin } from "@react-oauth/google";
+import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/PasswordStrengthChecklist";
+import SearchableSelect from "@/components/SearchableSelect";
+import { COLOMBIA_DEPARTMENTS, getCitiesByDepartment } from "@/lib/colombia-locations";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -12,12 +15,16 @@ export default function RegisterPage() {
   const [tenantName, setTenantName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [department, setDepartment] = useState("");
+  const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Google SSO — paso intermedio para pedir nombre de clínica
+  // Google SSO — paso intermedio
   const [pendingCredential, setPendingCredential] = useState<string | null>(null);
   const [googleClinicName, setGoogleClinicName] = useState("");
+  const [googleDepartment, setGoogleDepartment] = useState("");
+  const [googleCity, setGoogleCity] = useState("");
 
   const handleGoogleSuccess = (credentialResponse: { credential?: string }) => {
     if (!credentialResponse.credential) return;
@@ -33,6 +40,8 @@ export default function RegisterPage() {
       const response = await axios.post("http://localhost:3333/auth/google", {
         credential: pendingCredential,
         clinicName: googleClinicName.trim(),
+        ...(googleDepartment ? { clinicDepartment: googleDepartment } : {}),
+        ...(googleCity ? { clinicCity: googleCity } : {}),
       });
       localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
@@ -54,6 +63,8 @@ export default function RegisterPage() {
         email,
         password,
         tenantName,
+        ...(department ? { clinicDepartment: department } : {}),
+        ...(city ? { clinicCity: city } : {}),
       });
       localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
@@ -74,8 +85,8 @@ export default function RegisterPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-white">Un último dato</h2>
-            <p className="text-slate-400 text-sm mt-1">¿Cómo se llama tu clínica veterinaria?</p>
+            <h2 className="text-xl font-bold text-white">Un último paso</h2>
+            <p className="text-slate-400 text-sm mt-1">Cuéntanos sobre tu clínica veterinaria</p>
           </div>
           {error && (
             <div className="mb-4 px-4 py-3 bg-red-500/15 border border-red-500/30 rounded-xl text-red-400 text-sm text-center">
@@ -85,7 +96,7 @@ export default function RegisterPage() {
           <form onSubmit={handleGoogleRegister} className="space-y-4">
             <input
               type="text"
-              placeholder="Ej: Clínica Veterinaria Los Andes"
+              placeholder="Nombre de la clínica *"
               required
               autoFocus
               value={googleClinicName}
@@ -93,6 +104,24 @@ export default function RegisterPage() {
               className="w-full px-4 py-3 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
               style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
             />
+
+            <SearchableSelect
+              options={COLOMBIA_DEPARTMENTS.map((d) => d.name)}
+              value={googleDepartment}
+              onChange={(v) => { setGoogleDepartment(v); setGoogleCity(""); }}
+              placeholder="Departamento (opcional)"
+              variant="dark"
+            />
+
+            <SearchableSelect
+              options={getCitiesByDepartment(googleDepartment)}
+              value={googleCity}
+              onChange={setGoogleCity}
+              placeholder="Ciudad / Municipio (opcional)"
+              disabled={!googleDepartment}
+              variant="dark"
+            />
+
             <button
               type="submit"
               disabled={loading || !googleClinicName.trim()}
@@ -134,11 +163,9 @@ export default function RegisterPage() {
         </Link>
       </nav>
 
-      {/* Contenido centrado */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
 
-          {/* Badge */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/15 border border-blue-400/25 rounded-full text-blue-300 text-xs font-semibold">
               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
@@ -146,7 +173,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Card */}
           <div className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-8 shadow-2xl">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-extrabold text-white mb-1">Crea tu clínica</h1>
@@ -190,6 +216,35 @@ export default function RegisterPage() {
                 />
               </div>
 
+              {/* Ubicación */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Departamento
+                  </label>
+                  <SearchableSelect
+                    options={COLOMBIA_DEPARTMENTS.map((d) => d.name)}
+                    value={department}
+                    onChange={(v) => { setDepartment(v); setCity(""); }}
+                    placeholder="Buscar..."
+                    variant="dark"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Ciudad
+                  </label>
+                  <SearchableSelect
+                    options={getCitiesByDepartment(department)}
+                    value={city}
+                    onChange={setCity}
+                    placeholder="Buscar..."
+                    disabled={!department}
+                    variant="dark"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
                   Correo electrónico
@@ -213,17 +268,17 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="Mínimo 8 caracteres"
                   required
-                  minLength={8}
                   className="w-full px-4 py-3 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                 />
+                <PasswordStrengthChecklist password={password} />
               </div>
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !isPasswordStrong(password)}
                 className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/30 text-sm mt-2"
               >
                 {loading ? "Creando tu clínica..." : "Crear cuenta gratis →"}
@@ -259,7 +314,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Trust indicators */}
           <div className="flex items-center justify-center gap-6 mt-6">
             {["30 días gratis", "Cancela cuando quieras", "Datos seguros"].map((t) => (
               <div key={t} className="flex items-center gap-1.5 text-slate-500 text-xs">

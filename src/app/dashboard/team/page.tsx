@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
+import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/PasswordStrengthChecklist";
 
 type Role = "ADMIN" | "VET" | "RECEPTIONIST";
 
@@ -151,16 +152,23 @@ export default function TeamPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Contraseña temporal</label>
+                <label className="block text-sm font-medium mb-1">Contraseña</label>
                 <input
                   type="password"
                   required
-                  minLength={6}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                 />
+                {form.password && (
+                  <div className="mt-2 p-2.5 bg-gray-50 rounded-lg border">
+                    <PasswordStrengthChecklist
+                      password={form.password}
+                      className="[&_li]:text-gray-500 [&_li.text-green-400]:text-green-600"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Rol</label>
@@ -184,7 +192,7 @@ export default function TeamPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || !isPasswordStrong(form.password)}
                   className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
                 >
                   {submitting ? "Creando..." : "Crear usuario"}
@@ -234,12 +242,19 @@ export default function TeamPage() {
                 </label>
                 <input
                   type="password"
-                  minLength={8}
                   value={editForm.password}
                   onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Mínimo 8 caracteres"
                 />
+                {editForm.password && (
+                  <div className="mt-2 p-2.5 bg-gray-50 rounded-lg border">
+                    <PasswordStrengthChecklist
+                      password={editForm.password}
+                      className="[&_li]:text-gray-500 [&_li.text-green-400]:text-green-600"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Rol</label>
@@ -263,7 +278,7 @@ export default function TeamPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || (!!editForm.password && !isPasswordStrong(editForm.password))}
                   className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
                 >
                   {submitting ? "Guardando..." : "Guardar cambios"}
