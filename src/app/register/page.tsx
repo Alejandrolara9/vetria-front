@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,6 +14,23 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    if (!credentialResponse.credential) return;
+    setError("");
+    setLoading(true);
+    try {
+      const response = await axios.post("http://localhost:3333/auth/google", {
+        credential: credentialResponse.credential,
+      });
+      localStorage.setItem("token", response.data.token);
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Error al registrarse con Google");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,6 +168,25 @@ export default function RegisterPage() {
                 {loading ? "Creando tu clínica..." : "Crear cuenta gratis →"}
               </button>
             </form>
+
+            <div className="mt-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-slate-500">o regístrate con</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError("Error al registrarse con Google")}
+                  theme="filled_black"
+                  shape="rectangular"
+                  size="large"
+                  width="368"
+                  text="signup_with"
+                />
+              </div>
+            </div>
 
             <div className="mt-6 pt-6 border-t border-white/10 text-center">
               <p className="text-slate-400 text-sm">

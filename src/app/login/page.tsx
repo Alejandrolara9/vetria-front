@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { GoogleLogin } from "@react-oauth/google";
 import { api } from "@/services/api";
 
 export default function LoginPage() {
@@ -11,6 +12,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    if (!credentialResponse.credential) return;
+    setError("");
+    setLoading(true);
+    try {
+      const response = await api.post("/auth/google", { credential: credentialResponse.credential });
+      localStorage.setItem("token", response.data.token);
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Error al iniciar sesión con Google");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +120,25 @@ export default function LoginPage() {
                 {loading ? "Ingresando..." : "Iniciar sesión →"}
               </button>
             </form>
+
+            <div className="mt-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-slate-500">o continúa con</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError("Error al iniciar sesión con Google")}
+                  theme="filled_black"
+                  shape="rectangular"
+                  size="large"
+                  width="368"
+                  text="signin_with"
+                />
+              </div>
+            </div>
 
             <div className="mt-6 pt-6 border-t border-white/10 text-center">
               <p className="text-slate-400 text-sm">
