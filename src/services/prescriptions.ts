@@ -1,7 +1,5 @@
 import { api } from "./api";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type PrescriptionStatus = "DRAFT" | "SENT" | "PRINTED";
 
 export interface PrescriptionItem {
@@ -54,8 +52,6 @@ export interface Prescription {
   };
 }
 
-// ─── DTOs ─────────────────────────────────────────────────────────────────────
-
 export interface PrescriptionItemInput {
   productId?: string;
   productName: string;
@@ -86,11 +82,7 @@ export interface ListPrescriptionsFilters {
   to?: string;
 }
 
-// ─── API functions ────────────────────────────────────────────────────────────
-
-export async function listPrescriptions(
-  filters?: ListPrescriptionsFilters
-): Promise<Prescription[]> {
+export async function listPrescriptions(filters?: ListPrescriptionsFilters): Promise<Prescription[]> {
   const params = new URLSearchParams();
   if (filters?.petId) params.append("petId", filters.petId);
   if (filters?.vetId) params.append("vetId", filters.vetId);
@@ -107,17 +99,12 @@ export async function getPrescription(id: string): Promise<Prescription> {
   return res.data;
 }
 
-export async function createPrescription(
-  data: CreatePrescriptionDto
-): Promise<Prescription> {
+export async function createPrescription(data: CreatePrescriptionDto): Promise<Prescription> {
   const res = await api.post<Prescription>("/prescriptions", data);
   return res.data;
 }
 
-export async function updatePrescription(
-  id: string,
-  data: UpdatePrescriptionDto
-): Promise<Prescription> {
+export async function updatePrescription(id: string, data: UpdatePrescriptionDto): Promise<Prescription> {
   const res = await api.patch<Prescription>(`/prescriptions/${id}`, data);
   return res.data;
 }

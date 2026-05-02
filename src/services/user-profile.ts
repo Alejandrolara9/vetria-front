@@ -1,7 +1,5 @@
 import { api } from "./api";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface UserProfile {
   id: string;
   name: string;
@@ -11,13 +9,6 @@ export interface UserProfile {
   licenseNumber: string | null;
 }
 
-// ─── API functions ────────────────────────────────────────────────────────────
-
-/**
- * Obtiene el perfil del usuario autenticado desde el backend.
- * Nota: El endpoint GET /users/me puede no existir aún en el backend.
- * El error se maneja gracefully en el componente consumidor.
- */
 export async function getMyProfile(): Promise<UserProfile> {
   const res = await api.get<UserProfile>("/users/me");
   return res.data;

@@ -81,7 +81,6 @@ export default function PrescriptionsPage() {
         </Link>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
@@ -102,7 +101,6 @@ export default function PrescriptionsPage() {
         </select>
       </div>
 
-      {/* Table */}
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (

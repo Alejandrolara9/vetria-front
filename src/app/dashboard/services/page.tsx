@@ -114,7 +114,7 @@ function ServiceModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-foreground text-xl leading-none"
+            className="text-muted-foreground hover:text-foreground text-xl leading-none"
           >
             &times;
           </button>
@@ -161,7 +161,7 @@ function ServiceModal({
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Categoria <span className="text-muted text-xs">(opcional)</span>
+              Categoria <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <input
               name="category"
@@ -175,7 +175,7 @@ function ServiceModal({
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Descripcion <span className="text-muted text-xs">(opcional)</span>
+              Descripcion <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <textarea
               name="description"
@@ -273,7 +273,7 @@ export default function ServicesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Catalogo de Servicios</h1>
-          <p className="text-muted text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             {services.length} servicio{services.length !== 1 ? "s" : ""} registrado{services.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -301,11 +301,11 @@ export default function ServicesPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-border">
             <tr>
-              <th className="text-left px-6 py-3 font-medium text-muted">Nombre</th>
-              <th className="text-left px-6 py-3 font-medium text-muted">Categoria</th>
-              <th className="text-right px-6 py-3 font-medium text-muted">Precio</th>
-              <th className="text-center px-6 py-3 font-medium text-muted">Estado</th>
-              <th className="text-right px-6 py-3 font-medium text-muted">Acciones</th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Nombre</th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Categoria</th>
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Precio</th>
+              <th className="text-center px-6 py-3 font-medium text-muted-foreground">Estado</th>
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -317,7 +317,7 @@ export default function ServicesPage() {
               </>
             ) : services.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-12 text-muted">
+                <td colSpan={5} className="text-center py-12 text-muted-foreground">
                   {search
                     ? "No se encontraron servicios con ese nombre"
                     : "No hay servicios registrados. Crea el primero."}
@@ -332,12 +332,12 @@ export default function ServicesPage() {
                   <td className="px-6 py-4">
                     <p className="font-medium">{svc.name}</p>
                     {svc.description && (
-                      <p className="text-xs text-muted mt-0.5 line-clamp-1">
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                         {svc.description}
                       </p>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-muted">
+                  <td className="px-6 py-4 text-muted-foreground">
                     {svc.category ?? "—"}
                   </td>
                   <td className="px-6 py-4 text-right font-semibold">

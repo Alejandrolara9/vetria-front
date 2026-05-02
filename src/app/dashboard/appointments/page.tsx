@@ -247,7 +247,7 @@ function CreateAppointmentModal({ pets, vets, onClose, onCreated }: CreateModalP
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-semibold">Nueva Cita</h2>
-          <button onClick={onClose} className="text-muted hover:text-foreground text-xl leading-none">&times;</button>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">&times;</button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
@@ -266,7 +266,7 @@ function CreateAppointmentModal({ pets, vets, onClose, onCreated }: CreateModalP
                 <button
                   type="button"
                   onClick={() => { setForm({ ...form, petId: "" }); setPetSearch(""); }}
-                  className="text-muted hover:text-red-500 ml-2 text-xs"
+                  className="text-muted-foreground hover:text-red-500 ml-2 text-xs"
                 >
                   ✕ cambiar
                 </button>
@@ -285,7 +285,7 @@ function CreateAppointmentModal({ pets, vets, onClose, onCreated }: CreateModalP
                 {showPetResults && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {filteredPets.length === 0 ? (
-                      <p className="px-3 py-2 text-sm text-muted">Sin resultados</p>
+                      <p className="px-3 py-2 text-sm text-muted-foreground">Sin resultados</p>
                     ) : (
                       filteredPets.slice(0, 8).map((p) => (
                         <button
@@ -299,8 +299,8 @@ function CreateAppointmentModal({ pets, vets, onClose, onCreated }: CreateModalP
                           }}
                         >
                           <span className="font-medium">{p.name}</span>
-                          <span className="text-muted ml-1">({p.species})</span>
-                          <span className="text-muted ml-1">— {p.client.name}</span>
+                          <span className="text-muted-foreground ml-1">({p.species})</span>
+                          <span className="text-muted-foreground ml-1">— {p.client.name}</span>
                         </button>
                       ))
                     )}
@@ -592,7 +592,7 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
               </span>
               <h2 className="text-lg font-semibold mt-1">{appointment.pet.name}</h2>
             </div>
-            <button onClick={onClose} className="text-muted hover:text-foreground text-xl leading-none">&times;</button>
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">&times;</button>
           </div>
         </div>
 
@@ -611,27 +611,27 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
           {/* Info */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <p className="text-muted text-xs">Fecha y hora</p>
+              <p className="text-muted-foreground text-xs">Fecha y hora</p>
               <p className="font-medium">
                 {scheduledDate.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })}
               </p>
-              <p className="text-muted">{appointment.startTime} — {appointment.endTime}</p>
+              <p className="text-muted-foreground">{appointment.startTime} — {appointment.endTime}</p>
             </div>
             <div>
-              <p className="text-muted text-xs">Veterinario</p>
+              <p className="text-muted-foreground text-xs">Veterinario</p>
               <p className="font-medium">{appointment.vet.name}</p>
             </div>
           </div>
 
           <div className="text-sm">
-            <p className="text-muted text-xs">Especie</p>
+            <p className="text-muted-foreground text-xs">Especie</p>
             <p className="font-medium">{appointment.pet.species}</p>
           </div>
 
           {appointment.notes && (
             <div className="text-sm">
-              <p className="text-muted text-xs">Notas</p>
-              <p className="text-muted">{appointment.notes}</p>
+              <p className="text-muted-foreground text-xs">Notas</p>
+              <p className="text-muted-foreground">{appointment.notes}</p>
             </div>
           )}
 
@@ -818,7 +818,7 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
             <button
               onClick={handleDelete}
               disabled={acting}
-              className="text-xs text-muted hover:text-danger disabled:opacity-50"
+              className="text-xs text-muted-foreground hover:text-danger disabled:opacity-50"
             >
               Eliminar cita permanentemente
             </button>
@@ -969,7 +969,7 @@ export default function AppointmentsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Agenda</h1>
-          <p className="text-muted text-sm mt-1">Gestion de citas veterinarias</p>
+          <p className="text-muted-foreground text-sm mt-1">Gestion de citas veterinarias</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
@@ -1036,9 +1036,9 @@ export default function AppointmentsPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <span className="text-sm font-medium text-muted">{weekLabel}</span>
+        <span className="text-sm font-medium text-muted-foreground">{weekLabel}</span>
         {loadingCalendar && (
-          <span className="text-xs text-muted animate-pulse">Cargando...</span>
+          <span className="text-xs text-muted-foreground animate-pulse">Cargando...</span>
         )}
       </div>
 
@@ -1055,7 +1055,7 @@ export default function AppointmentsPage() {
                 key={dayStr}
                 className={`p-3 text-center border-r last:border-r-0 border-border ${isToday ? "bg-blue-50" : "bg-gray-50"}`}
               >
-                <p className={`text-xs uppercase font-medium ${isToday ? "text-blue-700" : "text-muted"}`}>
+                <p className={`text-xs uppercase font-medium ${isToday ? "text-blue-700" : "text-muted-foreground"}`}>
                   {formatDateLong(day)}
                 </p>
                 {count > 0 && (
@@ -1081,7 +1081,7 @@ export default function AppointmentsPage() {
                 className={`p-2 border-r last:border-r-0 border-border min-h-32 ${isToday ? "bg-blue-50/30" : ""}`}
               >
                 {dayAppts.length === 0 ? (
-                  <p className="text-xs text-muted/50 text-center mt-4">—</p>
+                  <p className="text-xs text-muted-foreground/50 text-center mt-4">—</p>
                 ) : (
                   dayAppts.map((appt) => (
                     <AppointmentBlock
@@ -1107,11 +1107,11 @@ export default function AppointmentsPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-border">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-muted">Mascota</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted">Veterinario</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted">Fecha y hora</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted">Tipo</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted">Estado</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Veterinario</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fecha y hora</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
                 </tr>
               </thead>
               <tbody>
@@ -1122,8 +1122,8 @@ export default function AppointmentsPage() {
                     className="border-b border-border last:border-0 hover:bg-gray-50 cursor-pointer"
                   >
                     <td className="px-4 py-3 font-medium">{appt.pet.name}</td>
-                    <td className="px-4 py-3 text-muted">{appt.vet.name}</td>
-                    <td className="px-4 py-3 text-muted">
+                    <td className="px-4 py-3 text-muted-foreground">{appt.vet.name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
                       {new Date(appt.date).toLocaleDateString("es-CO", {
                         weekday: "short", day: "numeric", month: "short",
                       })}{" "}
@@ -1191,7 +1191,7 @@ function StatCard({
         <span className="text-white text-sm font-bold">{value}</span>
       </div>
       <div>
-        <p className="text-xs text-muted">{label}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-xl font-bold">{value}</p>
       </div>
     </div>

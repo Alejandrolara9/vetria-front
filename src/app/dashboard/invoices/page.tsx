@@ -97,9 +97,9 @@ function StatCard({
 }) {
   return (
     <div className="bg-card-bg rounded-xl border border-border p-5">
-      <p className="text-xs text-muted font-medium uppercase tracking-wide">{label}</p>
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold mt-1 ${color ?? ""}`}>{value}</p>
-      {sub && <p className="text-xs text-muted mt-1">{sub}</p>}
+      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
     </div>
   );
 }
@@ -186,16 +186,16 @@ function ItemDescriptionInput({
       {showDropdown && (
         <div className="absolute z-20 left-0 top-full mt-1 w-72 bg-white border border-border rounded-lg shadow-xl text-sm overflow-hidden">
           {loading && (
-            <div className="px-3 py-2 text-muted text-xs">Buscando...</div>
+            <div className="px-3 py-2 text-muted-foreground text-xs">Buscando...</div>
           )}
 
           {!loading && suggestions.length === 0 && (
-            <div className="px-3 py-2 text-muted text-xs">Sin coincidencias</div>
+            <div className="px-3 py-2 text-muted-foreground text-xs">Sin coincidencias</div>
           )}
 
           {!loading && serviceItems.length > 0 && (
             <>
-              <div className="px-3 py-1.5 text-xs font-semibold text-muted uppercase tracking-wide bg-gray-50 border-b border-border">
+              <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-gray-50 border-b border-border">
                 Servicios
               </div>
               {serviceItems.map((item) => (
@@ -208,7 +208,7 @@ function ItemDescriptionInput({
                   <div className="min-w-0">
                     <span className="font-medium truncate block">{item.name}</span>
                     {item.category && (
-                      <span className="text-xs text-muted">{item.category}</span>
+                      <span className="text-xs text-muted-foreground">{item.category}</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -226,7 +226,7 @@ function ItemDescriptionInput({
 
           {!loading && productItems.length > 0 && (
             <>
-              <div className="px-3 py-1.5 text-xs font-semibold text-muted uppercase tracking-wide bg-gray-50 border-b border-border">
+              <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-gray-50 border-b border-border">
                 Productos
               </div>
               {productItems.map((item) => (
@@ -239,7 +239,7 @@ function ItemDescriptionInput({
                   <div className="min-w-0">
                     <span className="font-medium truncate block">{item.name}</span>
                     {item.stock !== undefined && (
-                      <span className="text-xs text-muted">
+                      <span className="text-xs text-muted-foreground">
                         Stock: {item.stock} {item.unit ?? ""}
                       </span>
                     )}
@@ -389,7 +389,7 @@ function CreateInvoiceModal({
           <h2 className="text-lg font-semibold">Nueva Factura</h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-foreground text-xl leading-none"
+            className="text-muted-foreground hover:text-foreground text-xl leading-none"
           >
             &times;
           </button>
@@ -436,7 +436,7 @@ function CreateInvoiceModal({
                       onMouseDown={() => selectClient(c)}
                     >
                       <span className="font-medium">{c.name}</span>
-                      <span className="text-muted ml-2">{c.phone}</span>
+                      <span className="text-muted-foreground ml-2">{c.phone}</span>
                     </li>
                   ))}
                 </ul>
@@ -447,7 +447,7 @@ function CreateInvoiceModal({
           {/* Selector de mascota (opcional, filtra por cliente) */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Mascota <span className="text-muted text-xs">(opcional)</span>
+              Mascota <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <select
               className="w-full px-4 py-2 border border-border rounded-lg text-sm bg-white"
@@ -463,7 +463,7 @@ function CreateInvoiceModal({
               ))}
             </select>
             {selectedClient && clientPets.length === 0 && (
-              <p className="text-xs text-muted mt-1">Este cliente no tiene mascotas registradas</p>
+              <p className="text-xs text-muted-foreground mt-1">Este cliente no tiene mascotas registradas</p>
             )}
           </div>
 
@@ -476,10 +476,10 @@ function CreateInvoiceModal({
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-border">
                   <tr>
-                    <th className="text-left px-3 py-2 font-medium text-muted">Descripcion</th>
-                    <th className="text-center px-3 py-2 font-medium text-muted w-20">Cant.</th>
-                    <th className="text-right px-3 py-2 font-medium text-muted w-28">P. Unit.</th>
-                    <th className="text-right px-3 py-2 font-medium text-muted w-24">Total</th>
+                    <th className="text-left px-3 py-2 font-medium text-muted-foreground">Descripcion</th>
+                    <th className="text-center px-3 py-2 font-medium text-muted-foreground w-20">Cant.</th>
+                    <th className="text-right px-3 py-2 font-medium text-muted-foreground w-28">P. Unit.</th>
+                    <th className="text-right px-3 py-2 font-medium text-muted-foreground w-24">Total</th>
                     <th className="w-8" />
                   </tr>
                 </thead>
@@ -527,7 +527,7 @@ function CreateInvoiceModal({
                             required
                           />
                         </td>
-                        <td className="px-3 py-2 text-right text-muted">
+                        <td className="px-3 py-2 text-right text-muted-foreground">
                           {formatCurrency(lineTotal)}
                         </td>
                         <td className="px-2 py-2 text-center">
@@ -535,7 +535,7 @@ function CreateInvoiceModal({
                             type="button"
                             onClick={() => removeItem(idx)}
                             disabled={items.length === 1}
-                            className="text-muted hover:text-danger disabled:opacity-30 text-lg leading-none"
+                            className="text-muted-foreground hover:text-danger disabled:opacity-30 text-lg leading-none"
                           >
                             &times;
                           </button>
@@ -571,7 +571,7 @@ function CreateInvoiceModal({
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                Vencimiento <span className="text-muted text-xs">(opcional)</span>
+                Vencimiento <span className="text-muted-foreground text-xs">(opcional)</span>
               </label>
               <input
                 type="date"
@@ -585,7 +585,7 @@ function CreateInvoiceModal({
           {/* Notas */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Notas <span className="text-muted text-xs">(opcional)</span>
+              Notas <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <textarea
               rows={2}
@@ -598,11 +598,11 @@ function CreateInvoiceModal({
 
           {/* Resumen de totales */}
           <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-2">
-            <div className="flex justify-between text-muted">
+            <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
-            <div className="flex justify-between text-muted">
+            <div className="flex justify-between text-muted-foreground">
               <span>Impuesto ({taxPct}%)</span>
               <span>{formatCurrency(taxAmount)}</span>
             </div>
@@ -692,7 +692,7 @@ function InvoiceDetailModal({
         {/* Encabezado */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
-            <p className="text-xs text-muted uppercase tracking-wide font-medium">Factura</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Factura</p>
             <h2 className="text-xl font-bold">{invoice.number}</h2>
           </div>
           <div className="flex items-center gap-3">
@@ -703,7 +703,7 @@ function InvoiceDetailModal({
             </span>
             <button
               onClick={onClose}
-              className="text-muted hover:text-foreground text-xl leading-none"
+              className="text-muted-foreground hover:text-foreground text-xl leading-none"
             >
               &times;
             </button>
@@ -720,23 +720,23 @@ function InvoiceDetailModal({
           {/* Datos del cliente y mascota */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-xs text-muted font-medium uppercase mb-2">Cliente</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase mb-2">Cliente</p>
               <p className="font-semibold">{invoice.client.name}</p>
-              <p className="text-sm text-muted">{invoice.client.email}</p>
-              <p className="text-sm text-muted">{invoice.client.phone}</p>
+              <p className="text-sm text-muted-foreground">{invoice.client.email}</p>
+              <p className="text-sm text-muted-foreground">{invoice.client.phone}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-xs text-muted font-medium uppercase mb-2">Mascota</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase mb-2">Mascota</p>
               {invoice.pet ? (
                 <>
                   <p className="font-semibold">{invoice.pet.name}</p>
-                  <p className="text-sm text-muted">{invoice.pet.species}</p>
+                  <p className="text-sm text-muted-foreground">{invoice.pet.species}</p>
                   {invoice.pet.breed && (
-                    <p className="text-sm text-muted">{invoice.pet.breed}</p>
+                    <p className="text-sm text-muted-foreground">{invoice.pet.breed}</p>
                   )}
                 </>
               ) : (
-                <p className="text-sm text-muted">No especificada</p>
+                <p className="text-sm text-muted-foreground">No especificada</p>
               )}
             </div>
           </div>
@@ -744,16 +744,16 @@ function InvoiceDetailModal({
           {/* Fechas */}
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
-              <p className="text-muted font-medium text-xs uppercase">Emision</p>
+              <p className="text-muted-foreground font-medium text-xs uppercase">Emision</p>
               <p>{formatDate(invoice.issuedAt)}</p>
             </div>
             <div>
-              <p className="text-muted font-medium text-xs uppercase">Vencimiento</p>
+              <p className="text-muted-foreground font-medium text-xs uppercase">Vencimiento</p>
               <p>{formatDate(invoice.dueAt)}</p>
             </div>
             {invoice.paidAt && (
               <div>
-                <p className="text-muted font-medium text-xs uppercase">Fecha de pago</p>
+                <p className="text-muted-foreground font-medium text-xs uppercase">Fecha de pago</p>
                 <p className="text-green-700">{formatDate(invoice.paidAt)}</p>
               </div>
             )}
@@ -764,18 +764,18 @@ function InvoiceDetailModal({
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-border">
                 <tr>
-                  <th className="text-left px-4 py-2 font-medium text-muted">Descripcion</th>
-                  <th className="text-center px-4 py-2 font-medium text-muted">Cant.</th>
-                  <th className="text-right px-4 py-2 font-medium text-muted">P. Unit.</th>
-                  <th className="text-right px-4 py-2 font-medium text-muted">Total</th>
+                  <th className="text-left px-4 py-2 font-medium text-muted-foreground">Descripcion</th>
+                  <th className="text-center px-4 py-2 font-medium text-muted-foreground">Cant.</th>
+                  <th className="text-right px-4 py-2 font-medium text-muted-foreground">P. Unit.</th>
+                  <th className="text-right px-4 py-2 font-medium text-muted-foreground">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {invoice.items.map((item) => (
                   <tr key={item.id} className="border-b border-border last:border-0">
                     <td className="px-4 py-3">{item.description}</td>
-                    <td className="px-4 py-3 text-center text-muted">{item.quantity}</td>
-                    <td className="px-4 py-3 text-right text-muted">
+                    <td className="px-4 py-3 text-center text-muted-foreground">{item.quantity}</td>
+                    <td className="px-4 py-3 text-right text-muted-foreground">
                       {formatCurrency(item.unitPrice)}
                     </td>
                     <td className="px-4 py-3 text-right">{formatCurrency(item.total)}</td>
@@ -787,11 +787,11 @@ function InvoiceDetailModal({
 
           {/* Totales */}
           <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-2 ml-auto max-w-xs">
-            <div className="flex justify-between text-muted">
+            <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
               <span>{formatCurrency(invoice.subtotal)}</span>
             </div>
-            <div className="flex justify-between text-muted">
+            <div className="flex justify-between text-muted-foreground">
               <span>Impuesto ({invoice.tax}%)</span>
               <span>{formatCurrency(taxAmount)}</span>
             </div>
@@ -804,7 +804,7 @@ function InvoiceDetailModal({
           {/* Notas */}
           {invoice.notes && (
             <div>
-              <p className="text-xs text-muted font-medium uppercase mb-1">Notas</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase mb-1">Notas</p>
               <p className="text-sm">{invoice.notes}</p>
             </div>
           )}
@@ -848,7 +848,7 @@ function InvoiceDetailModal({
               </>
             )}
             {(invoice.status === "PAID" || invoice.status === "CANCELLED") && (
-              <p className="text-sm text-muted italic">Esta factura es de solo lectura.</p>
+              <p className="text-sm text-muted-foreground italic">Esta factura es de solo lectura.</p>
             )}
             <button
               onClick={onClose}
@@ -932,7 +932,7 @@ export default function InvoicesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Facturacion</h1>
-          <p className="text-muted text-sm mt-1">{stats?.total ?? 0} facturas en total</p>
+          <p className="text-muted-foreground text-sm mt-1">{stats?.total ?? 0} facturas en total</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
@@ -989,13 +989,13 @@ export default function InvoicesPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-border">
             <tr>
-              <th className="text-left px-6 py-3 font-medium text-muted">Numero</th>
-              <th className="text-left px-6 py-3 font-medium text-muted">Cliente</th>
-              <th className="text-left px-6 py-3 font-medium text-muted">Mascota</th>
-              <th className="text-right px-6 py-3 font-medium text-muted">Total</th>
-              <th className="text-center px-6 py-3 font-medium text-muted">Estado</th>
-              <th className="text-left px-6 py-3 font-medium text-muted">Fecha</th>
-              <th className="text-right px-6 py-3 font-medium text-muted">Acciones</th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Numero</th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Cliente</th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Mascota</th>
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Total</th>
+              <th className="text-center px-6 py-3 font-medium text-muted-foreground">Estado</th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Fecha</th>
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -1007,7 +1007,7 @@ export default function InvoicesPage() {
               </>
             ) : invoices.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-12 text-muted">
+                <td colSpan={7} className="text-center py-12 text-muted-foreground">
                   No se encontraron facturas
                 </td>
               </tr>
@@ -1021,7 +1021,7 @@ export default function InvoicesPage() {
                     {inv.number}
                   </td>
                   <td className="px-6 py-4 font-medium">{inv.client.name}</td>
-                  <td className="px-6 py-4 text-muted">
+                  <td className="px-6 py-4 text-muted-foreground">
                     {inv.pet ? inv.pet.name : "—"}
                   </td>
                   <td className="px-6 py-4 text-right font-semibold">
@@ -1034,7 +1034,7 @@ export default function InvoicesPage() {
                       {STATUS_LABELS[inv.status]}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-muted">
+                  <td className="px-6 py-4 text-muted-foreground">
                     {formatDate(inv.issuedAt)}
                   </td>
                   <td className="px-6 py-4 text-right">

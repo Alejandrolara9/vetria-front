@@ -85,7 +85,6 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      {/* Basic info */}
       <div className="bg-white rounded-xl border p-5 space-y-3">
         <h2 className="font-semibold text-gray-800">Información básica</h2>
         {user && (
@@ -106,7 +105,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* License + signature form */}
       <form onSubmit={handleSaveProfile} className="bg-white rounded-xl border p-5 space-y-4">
         <h2 className="font-semibold text-gray-800">Datos profesionales</h2>
         <div>
@@ -141,7 +139,6 @@ export default function ProfilePage() {
         </div>
       </form>
 
-      {/* Signature upload */}
       <div className="bg-white rounded-xl border p-5 space-y-4">
         <h2 className="font-semibold text-gray-800">Firma personal</h2>
         <p className="text-sm text-gray-500">

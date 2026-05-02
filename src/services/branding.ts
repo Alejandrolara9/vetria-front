@@ -1,7 +1,5 @@
 import { api } from "./api";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface BrandingConfig {
   id: string;
   name: string;
@@ -24,8 +22,6 @@ export interface UpdateBrandingDto {
   watermarkOpacity?: number;
   watermarkEnabled?: boolean;
 }
-
-// ─── API functions ────────────────────────────────────────────────────────────
 
 export async function getBranding(): Promise<BrandingConfig> {
   const res = await api.get<BrandingConfig>("/tenants/me/branding");

@@ -25,6 +25,8 @@ export default function ArchivedPetsPage() {
     try {
       const res = await api.get("/pets/archived");
       setPets(res.data);
+    } catch {
+      setPets([]);
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,7 @@ export default function ArchivedPetsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Mascotas Archivadas</h1>
-          <p className="text-muted text-sm mt-1">{pets.length} mascotas archivadas</p>
+          <p className="text-muted-foreground text-sm mt-1">{pets.length} mascotas archivadas</p>
         </div>
         <Link
           href="/dashboard/pets"
@@ -63,9 +65,9 @@ export default function ArchivedPetsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-muted">Cargando...</div>
+        <div className="text-center py-12 text-muted-foreground">Cargando...</div>
       ) : pets.length === 0 ? (
-        <div className="text-center py-12 text-muted">
+        <div className="text-center py-12 text-muted-foreground">
           <p className="text-lg mb-2">No hay mascotas archivadas</p>
           <p className="text-sm">Las mascotas eliminadas aparecerán aquí</p>
         </div>
@@ -74,22 +76,22 @@ export default function ArchivedPetsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-gray-50">
-                <th className="text-left px-6 py-3 font-medium text-muted">Mascota</th>
-                <th className="text-left px-6 py-3 font-medium text-muted">Especie / Raza</th>
-                <th className="text-left px-6 py-3 font-medium text-muted">Tutor</th>
-                <th className="text-left px-6 py-3 font-medium text-muted">Archivada el</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Acción</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Mascota</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Especie / Raza</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Tutor</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Archivada el</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Acción</th>
               </tr>
             </thead>
             <tbody>
               {pets.map((pet) => (
                 <tr key={pet.id} className="border-b border-border last:border-0 hover:bg-gray-50">
                   <td className="px-6 py-4 font-medium">{pet.name}</td>
-                  <td className="px-6 py-4 text-muted">
+                  <td className="px-6 py-4 text-muted-foreground">
                     {pet.species}{pet.breed ? ` - ${pet.breed}` : ""}
                   </td>
-                  <td className="px-6 py-4 text-muted">{pet.client.name}</td>
-                  <td className="px-6 py-4 text-muted">{formatDate(pet.deletedAt)}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{pet.client.name}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{formatDate(pet.deletedAt)}</td>
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => handleRestore(pet.id)}

@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   getPrescription,
   deletePrescription,
-  generatePdf,
   sendPrescription,
   type Prescription,
   type PrescriptionStatus,
@@ -55,18 +54,8 @@ export default function PrescriptionDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  async function handleGeneratePdf() {
-    if (!confirm("¿Generar el PDF de esta fórmula?")) return;
-    setActionLoading("pdf");
-    try {
-      const updated = await generatePdf(id);
-      setPrescription(updated);
-      if (updated.pdfUrl) window.open(updated.pdfUrl, "_blank");
-    } catch {
-      alert("Error al generar el PDF");
-    } finally {
-      setActionLoading(null);
-    }
+  function handleGeneratePdf() {
+    window.open(`/dashboard/prescriptions/${id}/print`, "_blank");
   }
 
   async function handleSend() {
@@ -168,15 +157,13 @@ export default function PrescriptionDetailPage() {
             </button>
           </>
         )}
-        {(p.status === "PRINTED" || p.status === "SENT") && p.pdfUrl && (
-          <a
-            href={p.pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+        {(p.status === "PRINTED" || p.status === "SENT") && (
+          <button
+            onClick={handleGeneratePdf}
             className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100"
           >
-            Ver PDF
-          </a>
+            Ver / Imprimir plantilla
+          </button>
         )}
         {p.status === "PRINTED" && (
           <button

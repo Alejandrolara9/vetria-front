@@ -30,11 +30,8 @@ export default function TeamPage() {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "VET" as Role });
-
-  const [editTarget, setEditTarget] = useState<TeamMember | null>(null);
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", password: "", role: "VET" as Role });
-  const [editSubmitting, setEditSubmitting] = useState(false);
-  const [editError, setEditError] = useState("");
 
   useEffect(() => { loadTeam(); }, []);
 
@@ -42,6 +39,8 @@ export default function TeamPage() {
     try {
       const res = await api.get("/users");
       setMembers(res.data);
+    } catch {
+      setMembers([]);
     } finally {
       setLoading(false);
     }
@@ -62,38 +61,29 @@ export default function TeamPage() {
     }
   }
 
-  function openEdit(member: TeamMember) {
-    setEditTarget(member);
+  function startEdit(member: TeamMember) {
+    setEditingMember(member);
     setEditForm({ name: member.name, email: member.email, password: "", role: member.role });
-    setEditError("");
-  }
-
-  function closeEdit() {
-    setEditTarget(null);
-    setEditError("");
   }
 
   async function handleEditSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!editTarget) return;
-    setEditSubmitting(true);
-    setEditError("");
-
-    const payload: Record<string, string> = {
-      name: editForm.name,
-      email: editForm.email,
-      role: editForm.role,
-    };
-    if (editForm.password) payload.password = editForm.password;
-
+    if (!editingMember) return;
+    setSubmitting(true);
     try {
-      const res = await api.patch(`/users/${editTarget.id}`, payload);
-      setMembers((prev) => prev.map((m) => (m.id === editTarget.id ? res.data : m)));
-      closeEdit();
+      const payload: Record<string, string> = {
+        name: editForm.name,
+        email: editForm.email,
+        role: editForm.role,
+      };
+      if (editForm.password) payload.password = editForm.password;
+      await api.patch(`/users/${editingMember.id}`, payload);
+      setEditingMember(null);
+      loadTeam();
     } catch (error: any) {
-      setEditError(error.response?.data?.message || "Error al actualizar");
+      alert(error.response?.data?.message || "Error al actualizar usuario");
     } finally {
-      setEditSubmitting(false);
+      setSubmitting(false);
     }
   }
 
@@ -112,7 +102,7 @@ export default function TeamPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Equipo</h1>
-          <p className="text-muted text-sm mt-1">{members.length} usuarios registrados</p>
+          <p className="text-muted-foreground text-sm mt-1">{members.length} usuarios registrados</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
@@ -131,7 +121,7 @@ export default function TeamPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Crear usuario</h2>
-              <button onClick={() => setShowForm(false)} className="text-muted hover:text-foreground">
+              <button onClick={() => setShowForm(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -206,12 +196,12 @@ export default function TeamPage() {
       )}
 
       {/* Modal de edición */}
-      {editTarget && (
+      {editingMember && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Editar usuario</h2>
-              <button onClick={closeEdit} className="text-muted hover:text-foreground">
+              <button onClick={() => setEditingMember(null)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -240,7 +230,7 @@ export default function TeamPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Nueva contraseña <span className="text-muted font-normal">(dejar vacío para no cambiar)</span>
+                  Nueva contraseña <span className="text-muted-foreground font-normal">(dejar vacío para no cambiar)</span>
                 </label>
                 <input
                   type="password"
@@ -263,25 +253,20 @@ export default function TeamPage() {
                   <option value="ADMIN">Administrador</option>
                 </select>
               </div>
-              {editError && (
-                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                  {editError}
-                </p>
-              )}
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={closeEdit}
+                  onClick={() => setEditingMember(null)}
                   className="flex-1 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={editSubmitting}
+                  disabled={submitting}
                   className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {editSubmitting ? "Guardando..." : "Guardar cambios"}
+                  {submitting ? "Guardando..." : "Guardar cambios"}
                 </button>
               </div>
             </form>
@@ -297,7 +282,7 @@ export default function TeamPage() {
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div className="text-center py-16 text-muted">
+        <div className="text-center py-16 text-muted-foreground">
           <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -313,7 +298,7 @@ export default function TeamPage() {
                 </div>
                 <div>
                   <p className="font-medium text-sm">{member.name}</p>
-                  <p className="text-xs text-muted">{member.email}</p>
+                  <p className="text-xs text-muted-foreground">{member.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -321,17 +306,17 @@ export default function TeamPage() {
                   {ROLE_LABELS[member.role]}
                 </span>
                 <button
-                  onClick={() => openEdit(member)}
-                  className="text-muted hover:text-primary transition-colors"
+                  onClick={() => startEdit(member)}
+                  className="text-muted-foreground hover:text-primary transition-colors"
                   title="Editar"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </button>
                 <button
                   onClick={() => handleDelete(member.id, member.name)}
-                  className="text-muted hover:text-red-500 transition-colors"
+                  className="text-muted-foreground hover:text-red-500 transition-colors"
                   title="Eliminar"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

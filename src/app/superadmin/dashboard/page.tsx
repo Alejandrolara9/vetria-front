@@ -96,7 +96,7 @@ export default function SuperAdminDashboard() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Panel de plataforma</h1>
-        <p className="text-sm text-muted mt-1">Resumen de clínicas registradas en OKVet</p>
+        <p className="text-sm text-muted-foreground mt-1">Resumen de clínicas registradas en OKVet</p>
       </div>
 
       {stats && (
@@ -108,7 +108,7 @@ export default function SuperAdminDashboard() {
             { label: "Total mascotas", value: stats.totalPets },
           ].map((card) => (
             <div key={card.label} className="bg-white rounded-xl border p-4">
-              <p className="text-sm text-muted">{card.label}</p>
+              <p className="text-sm text-muted-foreground">{card.label}</p>
               <p className="text-3xl font-bold mt-1">{card.value}</p>
             </div>
           ))}
@@ -148,13 +148,13 @@ export default function SuperAdminDashboard() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left px-4 py-3 font-medium text-muted">Clínica</th>
-              <th className="text-left px-4 py-3 font-medium text-muted">Plan</th>
-              <th className="text-left px-4 py-3 font-medium text-muted">Estado</th>
-              <th className="text-right px-4 py-3 font-medium text-muted">Usuarios</th>
-              <th className="text-right px-4 py-3 font-medium text-muted">Mascotas</th>
-              <th className="text-right px-4 py-3 font-medium text-muted">Citas</th>
-              <th className="text-left px-4 py-3 font-medium text-muted">Registro</th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Clínica</th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Plan</th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Usuarios</th>
+              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Mascotas</th>
+              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Citas</th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Registro</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
@@ -177,13 +177,13 @@ export default function SuperAdminDashboard() {
                 <td className="px-4 py-3 text-right">{t._count.users}</td>
                 <td className="px-4 py-3 text-right">{t._count.pets}</td>
                 <td className="px-4 py-3 text-right">{t._count.appointments}</td>
-                <td className="px-4 py-3 text-muted">
+                <td className="px-4 py-3 text-muted-foreground">
                   {new Date(t.createdAt).toLocaleDateString("es-CL")}
                 </td>
                 <td className="px-4 py-3">
                   <button
                     onClick={() => openEdit(t)}
-                    className="text-muted hover:text-primary transition-colors"
+                    className="text-muted-foreground hover:text-primary transition-colors"
                     title="Editar"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,7 +196,7 @@ export default function SuperAdminDashboard() {
           </tbody>
         </table>
         {filtered.length === 0 && (
-          <div className="text-center py-10 text-muted text-sm">
+          <div className="text-center py-10 text-muted-foreground text-sm">
             No hay clínicas que coincidan con los filtros
           </div>
         )}
@@ -207,7 +207,7 @@ export default function SuperAdminDashboard() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">{editTarget.name}</h2>
-              <button onClick={closeEdit} className="text-muted hover:text-foreground">
+              <button onClick={closeEdit} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -221,7 +221,7 @@ export default function SuperAdminDashboard() {
                   {editUsers.map((u) => (
                     <div key={u.id} className="flex items-center justify-between px-3 py-2 text-sm">
                       <span>{u.name}</span>
-                      <span className="text-muted text-xs">{u.role}</span>
+                      <span className="text-muted-foreground text-xs">{u.role}</span>
                     </div>
                   ))}
                 </div>

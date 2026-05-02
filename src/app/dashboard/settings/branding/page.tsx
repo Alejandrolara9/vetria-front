@@ -154,7 +154,6 @@ export default function BrandingPage() {
         </p>
       </div>
 
-      {/* Images */}
       <div className="bg-white rounded-xl border p-5 space-y-6">
         <h2 className="font-semibold text-gray-800">Imágenes de la clínica</h2>
         <AssetUploader
@@ -182,7 +181,6 @@ export default function BrandingPage() {
         />
       </div>
 
-      {/* Text fields + color */}
       <form onSubmit={handleSave} className="space-y-6">
         <div className="bg-white rounded-xl border p-5 space-y-4">
           <h2 className="font-semibold text-gray-800">Color principal</h2>

@@ -53,7 +53,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         <span className="font-bold text-lg text-primary">OKVet SuperAdmin</span>
         <button
           onClick={handleLogout}
-          className="text-sm text-muted hover:text-foreground transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           Cerrar sesión
         </button>
