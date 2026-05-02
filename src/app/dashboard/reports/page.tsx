@@ -104,9 +104,9 @@ function KpiCard({
 }) {
   return (
     <div className="bg-card-bg rounded-xl border border-border p-5">
-      <p className="text-xs text-muted font-medium uppercase tracking-wide">{label}</p>
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold mt-1 ${color ?? ""}`}>{value}</p>
-      {sub && <p className="text-xs text-muted mt-1">{sub}</p>}
+      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
     </div>
   );
 }
@@ -168,7 +168,7 @@ function ProgressBar({
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-xs text-muted w-8 text-right">{pct}%</span>
+      <span className="text-xs text-muted-foreground w-8 text-right">{pct}%</span>
     </div>
   );
 }
@@ -187,14 +187,14 @@ function RevenueBar({
   return (
     <div className="flex items-end gap-2">
       <div className="flex flex-col items-center" style={{ width: "48px" }}>
-        <span className="text-xs text-muted mb-1">{formatCurrency(amount)}</span>
+        <span className="text-xs text-muted-foreground mb-1">{formatCurrency(amount)}</span>
         <div className="w-full bg-gray-100 rounded-t relative" style={{ height: "80px" }}>
           <div
             className="absolute bottom-0 w-full bg-primary rounded-t transition-all"
             style={{ height: `${pct}%` }}
           />
         </div>
-        <span className="text-xs text-muted mt-1 truncate max-w-full">{label}</span>
+        <span className="text-xs text-muted-foreground mt-1 truncate max-w-full">{label}</span>
       </div>
     </div>
   );
@@ -246,7 +246,7 @@ function DashboardTab() {
             className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
               period === p
                 ? "bg-primary text-white border-primary"
-                : "border-border text-muted hover:bg-gray-50"
+                : "border-border text-muted-foreground hover:bg-gray-50"
             }`}
           >
             {periodLabel[p]}
@@ -309,7 +309,7 @@ function DashboardTab() {
               {Object.entries(data.appointmentsByStatus).map(([status, count]) => (
                 <div key={status}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted">
+                    <span className="text-muted-foreground">
                       {STATUS_LABELS[status] ?? status}
                     </span>
                     <span className="font-medium">{count}</span>
@@ -319,7 +319,7 @@ function DashboardTab() {
               ))}
             </div>
           ) : (
-            <p className="text-muted text-sm">Sin datos en este periodo</p>
+            <p className="text-muted-foreground text-sm">Sin datos en este periodo</p>
           )}
         </div>
 
@@ -344,7 +344,7 @@ function DashboardTab() {
               ))}
             </div>
           ) : (
-            <p className="text-muted text-sm">Sin datos en este periodo</p>
+            <p className="text-muted-foreground text-sm">Sin datos en este periodo</p>
           )}
         </div>
       </div>
@@ -364,7 +364,7 @@ function DashboardTab() {
                   {STATUS_LABELS[status] ?? status}
                 </span>
                 <p className="text-xl font-bold">{count}</p>
-                <p className="text-xs text-muted">
+                <p className="text-xs text-muted-foreground">
                   {totalInvoices > 0
                     ? `${Math.round((count / totalInvoices) * 100)}%`
                     : "0%"}
@@ -410,7 +410,7 @@ function AppointmentsTab() {
       {/* Filtros de fecha */}
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="block text-xs text-muted font-medium mb-1">Desde</label>
+          <label className="block text-xs text-muted-foreground font-medium mb-1">Desde</label>
           <input
             type="date"
             value={from}
@@ -419,7 +419,7 @@ function AppointmentsTab() {
           />
         </div>
         <div>
-          <label className="block text-xs text-muted font-medium mb-1">Hasta</label>
+          <label className="block text-xs text-muted-foreground font-medium mb-1">Hasta</label>
           <input
             type="date"
             value={to}
@@ -458,7 +458,7 @@ function AppointmentsTab() {
       ) : (
         <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
           <div className="px-6 py-4 border-b border-border">
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted-foreground">
               {total} cita{total !== 1 ? "s" : ""} en el rango seleccionado
             </p>
           </div>
@@ -466,18 +466,18 @@ function AppointmentsTab() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-border">
                 <tr>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Fecha</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Servicio</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Mascota</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Cliente</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Veterinario</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Estado</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Fecha</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Servicio</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Mascota</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Cliente</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Veterinario</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Estado</th>
                 </tr>
               </thead>
               <tbody>
                 {data?.appointments.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-muted">
+                    <td colSpan={6} className="text-center py-12 text-muted-foreground">
                       No hay citas en el rango seleccionado
                     </td>
                   </tr>
@@ -489,7 +489,7 @@ function AppointmentsTab() {
                     >
                       <td className="px-6 py-3 whitespace-nowrap">
                         <p className="font-medium">{formatDate(appt.date)}</p>
-                        <p className="text-xs text-muted">
+                        <p className="text-xs text-muted-foreground">
                           {appt.startTime} - {appt.endTime}
                         </p>
                       </td>
@@ -498,7 +498,7 @@ function AppointmentsTab() {
                         {appt.pet ? (
                           <span>
                             {appt.pet.name}{" "}
-                            <span className="text-muted text-xs">
+                            <span className="text-muted-foreground text-xs">
                               ({appt.pet.species})
                             </span>
                           </span>
@@ -600,7 +600,7 @@ function ClientsTab() {
               ))}
             </div>
           ) : (
-            <p className="text-muted text-sm">Sin datos</p>
+            <p className="text-muted-foreground text-sm">Sin datos</p>
           )}
         </div>
 
@@ -622,7 +622,7 @@ function ClientsTab() {
                     </span>
                     <div>
                       <p className="text-sm font-medium">{client.name}</p>
-                      <p className="text-xs text-muted">{client.email}</p>
+                      <p className="text-xs text-muted-foreground">{client.email}</p>
                     </div>
                   </div>
                   <span className="text-sm font-semibold text-purple-600">
@@ -632,7 +632,7 @@ function ClientsTab() {
               ))}
             </div>
           ) : (
-            <p className="text-muted text-sm">Sin datos</p>
+            <p className="text-muted-foreground text-sm">Sin datos</p>
           )}
         </div>
       </div>
@@ -678,7 +678,7 @@ function ClientsTab() {
                     <td className="py-2 font-medium">{pet.name}</td>
                     <td className="py-2 capitalize">{pet.species}</td>
                     <td className="py-2">{pet.ownerName}</td>
-                    <td className="py-2 text-muted">
+                    <td className="py-2 text-muted-foreground">
                       {pet.lastAppointmentDate
                         ? formatDate(pet.lastAppointmentDate)
                         : "Nunca"}
@@ -733,7 +733,7 @@ function FinancialTab() {
       {/* Filtros */}
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="block text-xs text-muted font-medium mb-1">Desde</label>
+          <label className="block text-xs text-muted-foreground font-medium mb-1">Desde</label>
           <input
             type="date"
             value={from}
@@ -742,7 +742,7 @@ function FinancialTab() {
           />
         </div>
         <div>
-          <label className="block text-xs text-muted font-medium mb-1">Hasta</label>
+          <label className="block text-xs text-muted-foreground font-medium mb-1">Hasta</label>
           <input
             type="date"
             value={to}
@@ -810,7 +810,7 @@ function FinancialTab() {
       ) : (
         <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
           <div className="px-6 py-4 border-b border-border">
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted-foreground">
               {data?.invoices.length ?? 0} factura
               {(data?.invoices.length ?? 0) !== 1 ? "s" : ""} en el rango
             </p>
@@ -819,18 +819,18 @@ function FinancialTab() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-border">
                 <tr>
-                  <th className="text-left px-6 py-3 font-medium text-muted">N°</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Cliente</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Mascota</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Fecha</th>
-                  <th className="text-right px-6 py-3 font-medium text-muted">Total</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Estado</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">N°</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Cliente</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Mascota</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Fecha</th>
+                  <th className="text-right px-6 py-3 font-medium text-muted-foreground">Total</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Estado</th>
                 </tr>
               </thead>
               <tbody>
                 {data?.invoices.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-muted">
+                    <td colSpan={6} className="text-center py-12 text-muted-foreground">
                       No hay facturas en el rango seleccionado
                     </td>
                   </tr>
@@ -845,7 +845,7 @@ function FinancialTab() {
                       </td>
                       <td className="px-6 py-3">{inv.clientName}</td>
                       <td className="px-6 py-3">{inv.petName ?? "—"}</td>
-                      <td className="px-6 py-3 text-muted">
+                      <td className="px-6 py-3 text-muted-foreground">
                         {formatDate(inv.issuedAt)}
                       </td>
                       <td className="px-6 py-3 text-right font-semibold">
@@ -936,11 +936,11 @@ function InventoryTab() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-border">
               <tr>
-                <th className="text-left px-6 py-3 font-medium text-muted">Producto</th>
-                <th className="text-left px-6 py-3 font-medium text-muted">Categoria</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Stock actual</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Stock minimo</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Costo unit.</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Producto</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Categoria</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Stock actual</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Stock minimo</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Costo unit.</th>
               </tr>
             </thead>
             <tbody>
@@ -950,11 +950,11 @@ function InventoryTab() {
                   className="border-b border-border last:border-0 bg-red-50/30"
                 >
                   <td className="px-6 py-3 font-medium">{p.name}</td>
-                  <td className="px-6 py-3 text-muted text-xs">{p.category}</td>
+                  <td className="px-6 py-3 text-muted-foreground text-xs">{p.category}</td>
                   <td className="px-6 py-3 text-right font-semibold text-red-600">
                     {p.stock} {p.unit}
                   </td>
-                  <td className="px-6 py-3 text-right text-muted">
+                  <td className="px-6 py-3 text-right text-muted-foreground">
                     {p.minStock} {p.unit}
                   </td>
                   <td className="px-6 py-3 text-right">
@@ -979,18 +979,18 @@ function InventoryTab() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-border">
                 <tr>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Producto</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Tipo</th>
-                  <th className="text-right px-6 py-3 font-medium text-muted">Cantidad</th>
-                  <th className="text-right px-6 py-3 font-medium text-muted">Stock resultante</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Motivo</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted">Fecha</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Producto</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Tipo</th>
+                  <th className="text-right px-6 py-3 font-medium text-muted-foreground">Cantidad</th>
+                  <th className="text-right px-6 py-3 font-medium text-muted-foreground">Stock resultante</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Motivo</th>
+                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Fecha</th>
                 </tr>
               </thead>
               <tbody>
                 {data?.recentMovements.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-muted">
+                    <td colSpan={6} className="text-center py-12 text-muted-foreground">
                       Sin movimientos en los ultimos 30 dias
                     </td>
                   </tr>
@@ -1014,13 +1014,13 @@ function InventoryTab() {
                         {m.type === "IN" ? "+" : m.type === "OUT" ? "-" : "="}
                         {m.quantity}
                       </td>
-                      <td className="px-6 py-3 text-right text-muted">
+                      <td className="px-6 py-3 text-right text-muted-foreground">
                         {m.stockAfter}
                       </td>
-                      <td className="px-6 py-3 text-muted text-xs">
+                      <td className="px-6 py-3 text-muted-foreground text-xs">
                         {m.reason ?? "—"}
                       </td>
-                      <td className="px-6 py-3 text-muted">
+                      <td className="px-6 py-3 text-muted-foreground">
                         {formatDate(m.createdAt)}
                       </td>
                     </tr>
@@ -1035,7 +1035,7 @@ function InventoryTab() {
       {/* Productos sin movimiento */}
       {!loading && data && data.productsWithoutMovement.length > 0 && (
         <div className="bg-card-bg rounded-xl border border-border p-5">
-          <h3 className="font-semibold mb-3 text-muted">
+          <h3 className="font-semibold mb-3 text-muted-foreground">
             Productos sin movimiento en 30 dias ({data.productsWithoutMovement.length})
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -1087,7 +1087,7 @@ function RemindersTab() {
       {/* Filtros */}
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="block text-xs text-muted font-medium mb-1">Desde</label>
+          <label className="block text-xs text-muted-foreground font-medium mb-1">Desde</label>
           <input
             type="date"
             value={from}
@@ -1096,7 +1096,7 @@ function RemindersTab() {
           />
         </div>
         <div>
-          <label className="block text-xs text-muted font-medium mb-1">Hasta</label>
+          <label className="block text-xs text-muted-foreground font-medium mb-1">Hasta</label>
           <input
             type="date"
             value={to}
@@ -1153,7 +1153,7 @@ function RemindersTab() {
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-muted">Entregados</span>
+                <span className="text-muted-foreground">Entregados</span>
                 <span className="font-medium">
                   {notif.sent} / {notif.total}
                 </span>
@@ -1166,7 +1166,7 @@ function RemindersTab() {
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-muted">Abiertos</span>
+                <span className="text-muted-foreground">Abiertos</span>
                 <span className="font-medium">
                   {notif.opened} ({notif.openRate}%)
                 </span>
@@ -1179,7 +1179,7 @@ function RemindersTab() {
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-muted">Confirmados</span>
+                <span className="text-muted-foreground">Confirmados</span>
                 <span className="font-medium">
                   {notif.confirmed} ({notif.confirmRate}%)
                 </span>
@@ -1205,18 +1205,18 @@ function RemindersTab() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-border">
               <tr>
-                <th className="text-left px-6 py-3 font-medium text-muted">Tipo</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Total</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Programados</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Enviados</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Confirmados</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Vencidos</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Tipo</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Total</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Programados</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Enviados</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Confirmados</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Vencidos</th>
               </tr>
             </thead>
             <tbody>
               {data?.byEventType.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-muted">
+                  <td colSpan={6} className="text-center py-12 text-muted-foreground">
                     Sin recordatorios en el rango seleccionado
                   </td>
                 </tr>
@@ -1232,7 +1232,7 @@ function RemindersTab() {
                     <td className="px-6 py-3 text-right font-semibold">
                       {row.total}
                     </td>
-                    <td className="px-6 py-3 text-right text-muted">
+                    <td className="px-6 py-3 text-right text-muted-foreground">
                       {row.scheduled}
                     </td>
                     <td className="px-6 py-3 text-right text-blue-600">
@@ -1282,7 +1282,7 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Informes y Analitica</h1>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted-foreground text-sm mt-1">
           Datos en tiempo real de tu clinica veterinaria
         </p>
       </div>
@@ -1296,7 +1296,7 @@ export default function ReportsPage() {
             className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors -mb-px ${
               activeTab === tab.key
                 ? "border-primary text-primary"
-                : "border-transparent text-muted hover:text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             {tab.label}

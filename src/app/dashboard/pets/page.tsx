@@ -74,6 +74,9 @@ export default function PetsPage() {
       ]);
       setPets(petsRes.data);
       setClients(clientsRes.data);
+    } catch {
+      setPets([]);
+      setClients([]);
     } finally {
       setLoading(false);
     }
@@ -135,7 +138,7 @@ export default function PetsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Mascotas</h1>
-          <p className="text-muted text-sm mt-1">{pets.length} mascotas registradas</p>
+          <p className="text-muted-foreground text-sm mt-1">{pets.length} mascotas registradas</p>
         </div>
         <div className="flex gap-2">
           <Link
@@ -228,9 +231,9 @@ export default function PetsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-muted">Cargando...</div>
+        <div className="text-center py-12 text-muted-foreground">Cargando...</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted">No se encontraron mascotas</div>
+        <div className="text-center py-12 text-muted-foreground">No se encontraron mascotas</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((pet) => (
@@ -238,11 +241,11 @@ export default function PetsPage() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-lg">{pet.name}</h3>
-                  <p className="text-sm text-muted">{pet.species} {pet.breed ? `- ${pet.breed}` : ""}</p>
+                  <p className="text-sm text-muted-foreground">{pet.species} {pet.breed ? `- ${pet.breed}` : ""}</p>
                 </div>
                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">{getAge(pet.birthDate)}</span>
               </div>
-              <p className="text-sm text-muted mb-4">Tutor: {pet.client.name}</p>
+              <p className="text-sm text-muted-foreground mb-4">Tutor: {pet.client.name}</p>
               <div className="flex gap-2">
                 <Link
                   href={`/dashboard/pets/${pet.id}`}

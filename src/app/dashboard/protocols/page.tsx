@@ -307,7 +307,7 @@ function ProtocolModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-foreground text-xl leading-none"
+            className="text-muted-foreground hover:text-foreground text-xl leading-none"
           >
             &times;
           </button>
@@ -316,7 +316,7 @@ function ProtocolModal({
         {/* Chips de plantillas rápidas — solo en modo creación */}
         {!isEditing && (
           <div className="px-6 pt-4">
-            <p className="text-xs text-muted font-medium mb-2">
+            <p className="text-xs text-muted-foreground font-medium mb-2">
               Comenzar desde una plantilla:
             </p>
             <div className="flex flex-wrap gap-2">
@@ -328,7 +328,7 @@ function ProtocolModal({
                   className="flex flex-col items-start px-3 py-2 border border-border rounded-lg text-left hover:border-primary hover:bg-blue-50 transition-colors"
                 >
                   <span className="text-xs font-semibold text-foreground">{tpl.label}</span>
-                  <span className="text-xs text-muted">{tpl.description}</span>
+                  <span className="text-xs text-muted-foreground">{tpl.description}</span>
                 </button>
               ))}
             </div>
@@ -395,7 +395,7 @@ function ProtocolModal({
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                Raza <span className="text-muted text-xs">(opcional)</span>
+                Raza <span className="text-muted-foreground text-xs">(opcional)</span>
               </label>
               <input
                 name="breed"
@@ -411,7 +411,7 @@ function ProtocolModal({
           {/* Rango de edad en días */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Rango de edad en dias <span className="text-muted text-xs">(opcional)</span>
+              Rango de edad en dias <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div className="relative">
@@ -424,7 +424,7 @@ function ProtocolModal({
                   value={form.minAgeDays}
                   onChange={handleChange}
                 />
-                <span className="absolute right-3 top-2.5 text-xs text-muted">dias</span>
+                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">dias</span>
               </div>
               <div className="relative">
                 <input
@@ -436,10 +436,10 @@ function ProtocolModal({
                   value={form.maxAgeDays}
                   onChange={handleChange}
                 />
-                <span className="absolute right-3 top-2.5 text-xs text-muted">dias</span>
+                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">dias</span>
               </div>
             </div>
-            <p className="text-xs text-muted mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Deja en blanco para aplicar a cualquier edad. Ejemplo: 60 – 180 dias para cachorros.
             </p>
           </div>
@@ -447,7 +447,7 @@ function ProtocolModal({
           {/* Peso mínimo */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Peso minimo en kg <span className="text-muted text-xs">(opcional)</span>
+              Peso minimo en kg <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <div className="relative max-w-[200px]">
               <input
@@ -460,7 +460,7 @@ function ProtocolModal({
                 value={form.minWeightKg}
                 onChange={handleChange}
               />
-              <span className="absolute right-3 top-2.5 text-xs text-muted">kg</span>
+              <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">kg</span>
             </div>
           </div>
 
@@ -478,7 +478,7 @@ function ProtocolModal({
                   className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                     form.intervalDays === q.value
                       ? "bg-primary text-white border-primary"
-                      : "border-border text-muted hover:border-primary hover:text-primary"
+                      : "border-border text-muted-foreground hover:border-primary hover:text-primary"
                   }`}
                 >
                   {q.label}
@@ -495,9 +495,9 @@ function ProtocolModal({
                 value={form.intervalDays}
                 onChange={handleChange}
               />
-              <span className="absolute right-3 top-2.5 text-xs text-muted">dias</span>
+              <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">dias</span>
             </div>
-            <p className="text-xs text-muted mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Deja en blanco si la vacuna se aplica una sola vez.
             </p>
           </div>
@@ -508,7 +508,7 @@ function ProtocolModal({
               Aviso previo al vencimiento <span className="text-red-500">*</span>
               <span
                 title="El sistema enviara el recordatorio este numero de dias antes del vencimiento de la vacuna"
-                className="ml-1 text-muted cursor-help text-xs border border-border rounded-full w-4 h-4 inline-flex items-center justify-center"
+                className="ml-1 text-muted-foreground cursor-help text-xs border border-border rounded-full w-4 h-4 inline-flex items-center justify-center"
               >
                 ?
               </span>
@@ -523,9 +523,9 @@ function ProtocolModal({
                 value={form.preReminderDays}
                 onChange={handleChange}
               />
-              <span className="absolute right-3 top-2.5 text-xs text-muted">dias antes</span>
+              <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">dias antes</span>
             </div>
-            <p className="text-xs text-muted mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Se envia el recordatorio PRE {form.preReminderDays || "?"} dias antes del vencimiento.
             </p>
           </div>
@@ -536,7 +536,7 @@ function ProtocolModal({
               Seguimiento post vencimiento <span className="text-red-500">*</span>
               <span
                 title="Si el tutor no confirma la cita, el sistema enviara un seguimiento este numero de dias despues del vencimiento"
-                className="ml-1 text-muted cursor-help text-xs border border-border rounded-full w-4 h-4 inline-flex items-center justify-center"
+                className="ml-1 text-muted-foreground cursor-help text-xs border border-border rounded-full w-4 h-4 inline-flex items-center justify-center"
               >
                 ?
               </span>
@@ -551,9 +551,9 @@ function ProtocolModal({
                 value={form.postReminderDays}
                 onChange={handleChange}
               />
-              <span className="absolute right-3 top-2.5 text-xs text-muted">dias despues</span>
+              <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">dias despues</span>
             </div>
-            <p className="text-xs text-muted mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Se envia el seguimiento POST {form.postReminderDays || "?"} dias despues si no hay confirmacion.
             </p>
           </div>
@@ -561,7 +561,7 @@ function ProtocolModal({
           {/* Mensaje personalizado */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Mensaje personalizado <span className="text-muted text-xs">(opcional)</span>
+              Mensaje personalizado <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <textarea
               name="customMessage"
@@ -619,7 +619,7 @@ function EmptyState({ onNew }: { onNew: () => void }) {
     <div className="bg-card-bg border border-border rounded-xl p-10 text-center">
       <div className="text-5xl mb-4">💉</div>
       <h3 className="text-lg font-semibold mb-2">Sin protocolos configurados</h3>
-      <p className="text-muted text-sm max-w-md mx-auto mb-6">
+      <p className="text-muted-foreground text-sm max-w-md mx-auto mb-6">
         Los protocolos definen cuándo y cómo notificar a los tutores. Una vez creados,
         el sistema los aplica automaticamente al registrar vacunas o tratamientos.
       </p>
@@ -680,7 +680,7 @@ function ActiveAlerts({ reminders }: { reminders: Reminder[] }) {
   );
 
   if (sorted.length === 0) return (
-    <div className="bg-card-bg rounded-xl border border-border p-8 text-center text-muted text-sm">
+    <div className="bg-card-bg rounded-xl border border-border p-8 text-center text-muted-foreground text-sm">
       <p className="mb-1 font-medium">Sin alertas programadas</p>
       <p className="text-xs">Al registrar una atención con fecha de próxima cita, el recordatorio aparece aquí.</p>
     </div>
@@ -691,11 +691,11 @@ function ActiveAlerts({ reminders }: { reminders: Reminder[] }) {
       <table className="w-full text-sm">
         <thead className="bg-gray-50 border-b border-border">
           <tr>
-            <th className="text-left px-4 py-3 font-medium text-muted">Mascota</th>
-            <th className="text-left px-4 py-3 font-medium text-muted">Tutor</th>
-            <th className="text-left px-4 py-3 font-medium text-muted">Tipo</th>
-            <th className="text-left px-4 py-3 font-medium text-muted">Próxima fecha</th>
-            <th className="text-left px-4 py-3 font-medium text-muted">Tiempo restante</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tutor</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Próxima fecha</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tiempo restante</th>
           </tr>
         </thead>
         <tbody>
@@ -707,9 +707,9 @@ function ActiveAlerts({ reminders }: { reminders: Reminder[] }) {
               <tr key={r.id} className="border-b border-border last:border-0 hover:bg-gray-50">
                 <td className="px-4 py-3">
                   <p className="font-medium">{r.pet?.name ?? "—"}</p>
-                  <p className="text-xs text-muted">{r.pet?.species}</p>
+                  <p className="text-xs text-muted-foreground">{r.pet?.species}</p>
                 </td>
-                <td className="px-4 py-3 text-muted text-xs">
+                <td className="px-4 py-3 text-muted-foreground text-xs">
                   {r.pet?.client?.name ?? "—"}
                 </td>
                 <td className="px-4 py-3">
@@ -723,7 +723,7 @@ function ActiveAlerts({ reminders }: { reminders: Reminder[] }) {
                     {EVENT_LABEL[r.eventType] ?? r.eventType}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-muted">{formatShortDate(r.calculatedDueDate)}</td>
+                <td className="px-4 py-3 text-muted-foreground">{formatShortDate(r.calculatedDueDate)}</td>
                 <td className="px-4 py-3">
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                     isOverdue ? "bg-red-100 text-red-800" :
@@ -812,7 +812,7 @@ export default function ProtocolsPage() {
       <div className="flex items-start justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold">Protocolos de Vacunacion</h1>
-          <p className="text-muted text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             Define cuándo y cómo notificar a los tutores según la especie y tipo de vacuna.
             {!loading && protocols.length > 0 && (
               <span> {activeCount} activo{activeCount !== 1 ? "s" : ""} de {protocols.length} total.</span>
@@ -834,7 +834,7 @@ export default function ProtocolsPage() {
           className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
             activeTab === "protocols"
               ? "text-primary border-b-2 border-primary -mb-px"
-              : "text-muted hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Protocolos
@@ -844,7 +844,7 @@ export default function ProtocolsPage() {
           className={`px-4 py-2.5 text-sm font-medium transition-colors relative flex items-center gap-2 ${
             activeTab === "alerts"
               ? "text-primary border-b-2 border-primary -mb-px"
-              : "text-muted hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Alertas programadas
@@ -883,15 +883,15 @@ export default function ProtocolsPage() {
               <table className="w-full text-sm min-w-[800px]">
                 <thead className="bg-gray-50 border-b border-border">
                   <tr>
-                    <th className="text-left px-4 py-3 font-medium text-muted">Nombre</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted">Tipo vacuna</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted">Especie</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted">Raza</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted">Recurrencia</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted">Aviso previo</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted">Seguimiento</th>
-                    <th className="text-center px-4 py-3 font-medium text-muted">Estado</th>
-                    <th className="text-right px-4 py-3 font-medium text-muted">Acciones</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo vacuna</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Especie</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Raza</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Recurrencia</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Aviso previo</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Seguimiento</th>
+                    <th className="text-center px-4 py-3 font-medium text-muted-foreground">Estado</th>
+                    <th className="text-right px-4 py-3 font-medium text-muted-foreground">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -906,11 +906,11 @@ export default function ProtocolsPage() {
                             <span className="text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5 inline-block">Global</span>
                           )}
                         </td>
-                        <td className="px-4 py-4 text-muted">{protocol.vaccineType}</td>
+                        <td className="px-4 py-4 text-muted-foreground">{protocol.vaccineType}</td>
                         <td className="px-4 py-4">
                           <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">{protocol.species}</span>
                         </td>
-                        <td className="px-4 py-4 text-muted">{protocol.breed ?? <span className="italic text-xs">Todas</span>}</td>
+                        <td className="px-4 py-4 text-muted-foreground">{protocol.breed ?? <span className="italic text-xs">Todas</span>}</td>
                         <td className="px-4 py-4 font-medium">{formatDays(protocol.intervalDays)}</td>
                         <td className="px-4 py-4"><span className="text-amber-700">{protocol.preReminderDays}d antes</span></td>
                         <td className="px-4 py-4"><span className="text-rose-600">+{protocol.postReminderDays}d despues</span></td>
@@ -924,7 +924,7 @@ export default function ProtocolsPage() {
                           {protocol.tenantId !== null ? (
                             <button onClick={() => handleDelete(protocol)} className="text-danger hover:underline">Eliminar</button>
                           ) : (
-                            <span className="text-muted text-xs italic">Solo lectura</span>
+                            <span className="text-muted-foreground text-xs italic">Solo lectura</span>
                           )}
                         </td>
                       </tr>
@@ -945,7 +945,7 @@ export default function ProtocolsPage() {
             <p>Al registrar una atención en una cita (Agenda → Registrar atención) con fecha de próxima cita, el sistema crea automáticamente un recordatorio aquí. El correo al cliente se envía según los días de aviso definidos en el protocolo correspondiente.</p>
           </div>
           {loading ? (
-            <div className="text-center py-10 text-muted text-sm">Cargando...</div>
+            <div className="text-center py-10 text-muted-foreground text-sm">Cargando...</div>
           ) : (
             <ActiveAlerts reminders={allReminders} />
           )}

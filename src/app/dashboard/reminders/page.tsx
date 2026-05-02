@@ -105,7 +105,7 @@ function StatCard({
         <span className="text-white text-sm font-bold">{value}</span>
       </div>
       <div>
-        <p className="text-xs text-muted">{label}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-xl font-bold">{value}</p>
       </div>
     </div>
@@ -148,7 +148,7 @@ function ReminderCard({ reminder, showOverdueBadge, onResent }: ReminderCardProp
       <div className="flex items-start justify-between mb-3">
         <div>
           <p className="font-semibold text-sm">{reminder.pet?.name ?? "Mascota"}</p>
-          <p className="text-xs text-muted">{reminder.pet?.species}</p>
+          <p className="text-xs text-muted-foreground">{reminder.pet?.species}</p>
         </div>
         <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${EVENT_TYPE_BADGE[eventType]}`}>
           {EVENT_TYPE_LABELS[eventType]}
@@ -157,7 +157,7 @@ function ReminderCard({ reminder, showOverdueBadge, onResent }: ReminderCardProp
 
       {/* Fecha de vencimiento */}
       <div className="text-sm mb-2">
-        <p className="text-xs text-muted">Vencimiento</p>
+        <p className="text-xs text-muted-foreground">Vencimiento</p>
         <p className="font-medium">{formatDate(reminder.calculatedDueDate)}</p>
       </div>
 
@@ -187,7 +187,7 @@ function ReminderCard({ reminder, showOverdueBadge, onResent }: ReminderCardProp
         </span>
         <div className="flex items-center gap-2">
           {notificationsSent > 0 && (
-            <span className="text-xs text-muted">
+            <span className="text-xs text-muted-foreground">
               {notificationsSent} enviada{notificationsSent !== 1 ? "s" : ""}
             </span>
           )}
@@ -268,7 +268,7 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-semibold">Nuevo Recordatorio</h2>
-          <button onClick={onClose} className="text-muted hover:text-foreground text-xl leading-none">&times;</button>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">&times;</button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -290,7 +290,7 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
                 <button
                   type="button"
                   onClick={() => { setSelectedPetId(""); setPetSearch(""); }}
-                  className="text-muted hover:text-red-500 ml-2 text-xs"
+                  className="text-muted-foreground hover:text-red-500 ml-2 text-xs"
                 >
                   cambiar
                 </button>
@@ -309,7 +309,7 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
                 {showPetResults && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {filteredPets.length === 0 ? (
-                      <p className="px-3 py-2 text-sm text-muted">Sin resultados</p>
+                      <p className="px-3 py-2 text-sm text-muted-foreground">Sin resultados</p>
                     ) : (
                       filteredPets.slice(0, 8).map((p) => (
                         <button
@@ -323,8 +323,8 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
                           }}
                         >
                           <span className="font-medium">{p.name}</span>
-                          <span className="text-muted ml-1">({p.species})</span>
-                          <span className="text-muted ml-1">— {p.client.name}</span>
+                          <span className="text-muted-foreground ml-1">({p.species})</span>
+                          <span className="text-muted-foreground ml-1">— {p.client.name}</span>
                         </button>
                       ))
                     )}
@@ -365,7 +365,7 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
           {/* Peso de la mascota (opcional, útil para dosificación) */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Peso de la mascota (kg) <span className="text-muted text-xs font-normal">— opcional</span>
+              Peso de la mascota (kg) <span className="text-muted-foreground text-xs font-normal">— opcional</span>
             </label>
             <input
               type="number"
@@ -376,7 +376,7 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
               value={petWeightKg}
               onChange={(e) => setPetWeightKg(e.target.value)}
             />
-            <p className="text-xs text-muted mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Se usa para calcular dosis en desparasitantes y antiparasitarios.
             </p>
           </div>
@@ -433,7 +433,7 @@ function AllRemindersTable({ reminders }: { reminders: Reminder[] }) {
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
               statusFilter === s.value
                 ? "bg-primary text-white border-primary"
-                : "border-border text-muted hover:bg-gray-50"
+                : "border-border text-muted-foreground hover:bg-gray-50"
             }`}
           >
             {s.label}
@@ -442,7 +442,7 @@ function AllRemindersTable({ reminders }: { reminders: Reminder[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-10 text-muted text-sm">
+        <div className="text-center py-10 text-muted-foreground text-sm">
           No hay recordatorios con este estado.
         </div>
       ) : (
@@ -450,12 +450,12 @@ function AllRemindersTable({ reminders }: { reminders: Reminder[] }) {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-border">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-muted">Mascota</th>
-                <th className="text-left px-4 py-3 font-medium text-muted">Tipo</th>
-                <th className="text-left px-4 py-3 font-medium text-muted">Vencimiento</th>
-                <th className="text-left px-4 py-3 font-medium text-muted">Dias</th>
-                <th className="text-left px-4 py-3 font-medium text-muted">Estado</th>
-                <th className="text-left px-4 py-3 font-medium text-muted">Notif.</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vencimiento</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dias</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Notif.</th>
               </tr>
             </thead>
             <tbody>
@@ -471,7 +471,7 @@ function AllRemindersTable({ reminders }: { reminders: Reminder[] }) {
                   <tr key={r.id} className="border-b border-border last:border-0 hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <p className="font-medium">{r.pet?.name ?? "—"}</p>
-                      <p className="text-xs text-muted">{r.pet?.species}</p>
+                      <p className="text-xs text-muted-foreground">{r.pet?.species}</p>
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -480,7 +480,7 @@ function AllRemindersTable({ reminders }: { reminders: Reminder[] }) {
                         {EVENT_TYPE_LABELS[eventType]}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted">{formatDate(r.calculatedDueDate)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatDate(r.calculatedDueDate)}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`text-xs font-medium ${
@@ -499,7 +499,7 @@ function AllRemindersTable({ reminders }: { reminders: Reminder[] }) {
                         {STATUS_LABELS[status]}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted text-xs">{notifSent}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{notifSent}</td>
                   </tr>
                 );
               })}
@@ -591,7 +591,7 @@ export default function RemindersPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Recordatorios</h1>
-          <p className="text-muted text-sm mt-1">Vacunas, desparasitantes y revisiones</p>
+          <p className="text-muted-foreground text-sm mt-1">Vacunas, desparasitantes y revisiones</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -650,7 +650,7 @@ export default function RemindersPage() {
             className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
               activeTab === tab.id
                 ? "text-primary border-b-2 border-primary -mb-px"
-                : "text-muted hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {tab.label}
@@ -685,7 +685,7 @@ export default function RemindersPage() {
           {activeTab === "upcoming" && (
             <div>
               {upcoming.length === 0 ? (
-                <div className="text-center py-16 text-muted">
+                <div className="text-center py-16 text-muted-foreground">
                   <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
@@ -710,12 +710,12 @@ export default function RemindersPage() {
           {activeTab === "overdue" && (
             <div>
               {overdue.length === 0 ? (
-                <div className="text-center py-16 text-muted">
+                <div className="text-center py-16 text-muted-foreground">
                   <svg className="w-12 h-12 mx-auto mb-3 opacity-30 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <p className="text-green-600 font-medium">Sin recordatorios vencidos</p>
-                  <p className="text-xs text-muted mt-1">Todos los recordatorios estan al dia</p>
+                  <p className="text-xs text-muted-foreground mt-1">Todos los recordatorios estan al dia</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

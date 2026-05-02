@@ -90,11 +90,11 @@ function StatCard({
 }) {
   return (
     <div className="bg-card-bg rounded-xl border border-border p-5">
-      <p className="text-xs text-muted font-medium uppercase tracking-wide">
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
         {label}
       </p>
       <p className={`text-2xl font-bold mt-1 ${color ?? ""}`}>{value}</p>
-      {sub && <p className="text-xs text-muted mt-1">{sub}</p>}
+      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
     </div>
   );
 }
@@ -186,7 +186,7 @@ function ProductModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-foreground text-xl leading-none"
+            className="text-muted-foreground hover:text-foreground text-xl leading-none"
           >
             &times;
           </button>
@@ -217,7 +217,7 @@ function ProductModal({
             <div>
               <label className="block text-sm font-medium mb-1">
                 SKU{" "}
-                <span className="text-muted text-xs">(opcional)</span>
+                <span className="text-muted-foreground text-xs">(opcional)</span>
               </label>
               <input
                 name="sku"
@@ -233,7 +233,7 @@ function ProductModal({
           <div>
             <label className="block text-sm font-medium mb-1">
               Descripcion{" "}
-              <span className="text-muted text-xs">(opcional)</span>
+              <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <textarea
               name="description"
@@ -347,7 +347,7 @@ function ProductModal({
             <div>
               <label className="block text-sm font-medium mb-1">
                 Stock Maximo{" "}
-                <span className="text-muted text-xs">(opc.)</span>
+                <span className="text-muted-foreground text-xs">(opc.)</span>
               </label>
               <input
                 name="maxStock"
@@ -468,11 +468,11 @@ function MovementModal({
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
             <h2 className="text-lg font-semibold">Movimiento de Stock</h2>
-            <p className="text-sm text-muted mt-0.5">{product.name}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">{product.name}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-muted hover:text-foreground text-xl leading-none"
+            className="text-muted-foreground hover:text-foreground text-xl leading-none"
           >
             &times;
           </button>
@@ -503,7 +503,7 @@ function MovementModal({
                         : t === "OUT"
                         ? "bg-red-600 text-white border-red-600"
                         : "bg-blue-600 text-white border-blue-600"
-                      : "border-border text-muted hover:bg-gray-50"
+                      : "border-border text-muted-foreground hover:bg-gray-50"
                   }`}
                 >
                   {t === "IN" ? "+ Entrada" : t === "OUT" ? "- Salida" : "Ajuste"}
@@ -540,13 +540,13 @@ function MovementModal({
               }`}
             >
               <div className="flex justify-between">
-                <span className="text-muted">Stock actual</span>
+                <span className="text-muted-foreground">Stock actual</span>
                 <span className="font-medium">
                   {product.stock} {product.unit}
                 </span>
               </div>
               <div className="flex justify-between mt-1">
-                <span className="text-muted">
+                <span className="text-muted-foreground">
                   {type === "IN"
                     ? "Entrada"
                     : type === "OUT"
@@ -592,7 +592,7 @@ function MovementModal({
           <div>
             <label className="block text-sm font-medium mb-1">
               Motivo{" "}
-              <span className="text-muted text-xs">(opcional)</span>
+              <span className="text-muted-foreground text-xs">(opcional)</span>
             </label>
             <input
               type="text"
@@ -694,7 +694,7 @@ export default function InventoryPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Inventario</h1>
-          <p className="text-muted text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             {stats?.totalProducts ?? 0} productos activos
           </p>
         </div>
@@ -802,7 +802,7 @@ export default function InventoryPage() {
           className={`px-4 py-2 rounded-lg text-sm border transition-colors ${
             onlyLowStock
               ? "bg-orange-100 text-orange-700 border-orange-300"
-              : "border-border text-muted hover:bg-gray-50"
+              : "border-border text-muted-foreground hover:bg-gray-50"
           }`}
         >
           Solo stock bajo
@@ -814,22 +814,22 @@ export default function InventoryPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-border">
             <tr>
-              <th className="text-left px-6 py-3 font-medium text-muted">
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">
                 Producto
               </th>
-              <th className="text-left px-6 py-3 font-medium text-muted">
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">
                 Categoria
               </th>
-              <th className="text-left px-6 py-3 font-medium text-muted">
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">
                 SKU
               </th>
-              <th className="text-right px-6 py-3 font-medium text-muted">
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">
                 Stock
               </th>
-              <th className="text-right px-6 py-3 font-medium text-muted">
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">
                 Precio Venta
               </th>
-              <th className="text-right px-6 py-3 font-medium text-muted">
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">
                 Acciones
               </th>
             </tr>
@@ -844,7 +844,7 @@ export default function InventoryPage() {
               </>
             ) : filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-12 text-muted">
+                <td colSpan={6} className="text-center py-12 text-muted-foreground">
                   No se encontraron productos
                 </td>
               </tr>
@@ -860,7 +860,7 @@ export default function InventoryPage() {
                     <td className="px-6 py-4">
                       <p className="font-medium">{product.name}</p>
                       {product.description && (
-                        <p className="text-xs text-muted mt-0.5 truncate max-w-xs">
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xs">
                           {product.description}
                         </p>
                       )}
@@ -878,7 +878,7 @@ export default function InventoryPage() {
                     </td>
 
                     {/* SKU */}
-                    <td className="px-6 py-4 text-muted font-mono text-xs">
+                    <td className="px-6 py-4 text-muted-foreground font-mono text-xs">
                       {product.sku ?? "—"}
                     </td>
 
@@ -891,7 +891,7 @@ export default function InventoryPage() {
                       >
                         {product.stock}
                       </span>
-                      <span className="text-muted text-xs ml-1">
+                      <span className="text-muted-foreground text-xs ml-1">
                         {product.unit}
                       </span>
                       {isLow && (
@@ -915,7 +915,7 @@ export default function InventoryPage() {
                       </button>
                       <button
                         onClick={() => setEditingProduct(product)}
-                        className="text-muted hover:text-foreground hover:underline mr-3 text-xs"
+                        className="text-muted-foreground hover:text-foreground hover:underline mr-3 text-xs"
                       >
                         Editar
                       </button>

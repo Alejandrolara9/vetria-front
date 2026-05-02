@@ -25,6 +25,8 @@ export default function ClientsPage() {
     try {
       const res = await api.get("/clients");
       setClients(res.data);
+    } catch {
+      setClients([]);
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export default function ClientsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Clientes</h1>
-          <p className="text-muted text-sm mt-1">{clients.length} clientes registrados</p>
+          <p className="text-muted-foreground text-sm mt-1">{clients.length} clientes registrados</p>
         </div>
         <button
           onClick={() => { setShowForm(true); setEditingId(null); setForm({ name: "", phone: "", email: "" }); }}
@@ -126,28 +128,28 @@ export default function ClientsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-muted">Cargando...</div>
+        <div className="text-center py-12 text-muted-foreground">Cargando...</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted">No se encontraron clientes</div>
+        <div className="text-center py-12 text-muted-foreground">No se encontraron clientes</div>
       ) : (
         <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-border">
               <tr>
-                <th className="text-left px-6 py-3 font-medium text-muted">Nombre</th>
-                <th className="text-left px-6 py-3 font-medium text-muted">Telefono</th>
-                <th className="text-left px-6 py-3 font-medium text-muted">Email</th>
-                <th className="text-left px-6 py-3 font-medium text-muted">Registro</th>
-                <th className="text-right px-6 py-3 font-medium text-muted">Acciones</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Nombre</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Telefono</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Email</th>
+                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Registro</th>
+                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((client) => (
                 <tr key={client.id} className="border-b border-border last:border-0 hover:bg-gray-50">
                   <td className="px-6 py-4 font-medium">{client.name}</td>
-                  <td className="px-6 py-4 text-muted">{client.phone}</td>
-                  <td className="px-6 py-4 text-muted">{client.email}</td>
-                  <td className="px-6 py-4 text-muted">{new Date(client.createdAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{client.phone}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{client.email}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{new Date(client.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 text-right">
                     <button onClick={() => startEdit(client)} className="text-primary hover:underline mr-3">Editar</button>
                     <button onClick={() => handleDelete(client.id)} className="text-danger hover:underline">Eliminar</button>

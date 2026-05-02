@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -37,7 +37,7 @@ export default function ConfirmReminderPage() {
       <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center">
         {/* Logo */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Vetria</h1>
+          <h1 className="text-2xl font-bold text-gray-900">VetCloud</h1>
           <p className="text-sm text-gray-500">Sistema Veterinario</p>
         </div>
 
@@ -94,7 +94,7 @@ export default function ConfirmReminderPage() {
         )}
 
         <p className="text-xs text-gray-400 mt-8">
-          Powered by Vetria · Sistema de gestión veterinaria
+          Powered by VetCloud · Sistema de gestión veterinaria
         </p>
       </div>
     </div>
