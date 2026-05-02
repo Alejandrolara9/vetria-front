@@ -7,6 +7,8 @@ import {
   uploadBrandingAsset,
   type BrandingConfig,
 } from "@/services/branding";
+import { COLOMBIA_DEPARTMENTS, getCitiesByDepartment } from "@/lib/colombia-locations";
+import SearchableSelect from "@/components/SearchableSelect";
 
 const PRESET_COLORS = [
   "#1e40af", "#0f766e", "#7c3aed", "#b91c1c",
@@ -88,6 +90,7 @@ export default function BrandingPage() {
   const [primaryColor, setPrimaryColor] = useState("#1e40af");
   const [clinicPhone, setClinicPhone] = useState("");
   const [clinicAddress, setClinicAddress] = useState("");
+  const [clinicDepartment, setClinicDepartment] = useState("");
   const [clinicCity, setClinicCity] = useState("");
   const [watermarkEnabled, setWatermarkEnabled] = useState(true);
   const [watermarkOpacity, setWatermarkOpacity] = useState(0.12);
@@ -102,6 +105,7 @@ export default function BrandingPage() {
         setPrimaryColor(b.primaryColor ?? "#1e40af");
         setClinicPhone(b.clinicPhone ?? "");
         setClinicAddress(b.clinicAddress ?? "");
+        setClinicDepartment(b.clinicDepartment ?? "");
         setClinicCity(b.clinicCity ?? "");
         setWatermarkEnabled(b.watermarkEnabled);
         setWatermarkOpacity(b.watermarkOpacity);
@@ -121,6 +125,7 @@ export default function BrandingPage() {
         primaryColor,
         clinicPhone: clinicPhone || undefined,
         clinicAddress: clinicAddress || undefined,
+        clinicDepartment: clinicDepartment || undefined,
         clinicCity: clinicCity || undefined,
         watermarkEnabled,
         watermarkOpacity,
@@ -231,24 +236,40 @@ export default function BrandingPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Dirección
+            </label>
             <input
               type="text"
               value={clinicAddress}
               onChange={(e) => setClinicAddress(e.target.value)}
-              placeholder="ej: Calle 45 # 12-34"
+              placeholder="ej: Calle 45 # 12-34, Barrio Centro"
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
+            <p className="text-xs text-gray-400 mt-1">Aparece en el encabezado de las fórmulas médicas</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-            <input
-              type="text"
-              value={clinicCity}
-              onChange={(e) => setClinicCity(e.target.value)}
-              placeholder="ej: Bogotá D.C."
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+              <SearchableSelect
+                options={COLOMBIA_DEPARTMENTS.map((d) => d.name)}
+                value={clinicDepartment}
+                onChange={(v) => { setClinicDepartment(v); setClinicCity(""); }}
+                placeholder="Buscar departamento..."
+                variant="light"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad / Municipio</label>
+              <SearchableSelect
+                options={getCitiesByDepartment(clinicDepartment)}
+                value={clinicCity}
+                onChange={setClinicCity}
+                placeholder="Buscar ciudad..."
+                disabled={!clinicDepartment}
+                variant="light"
+              />
+            </div>
           </div>
         </div>
 

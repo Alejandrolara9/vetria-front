@@ -19,6 +19,8 @@ export interface TenantSummary {
   plan: "FREE" | "BASIC" | "PRO";
   active: boolean;
   createdAt: string;
+  clinicDepartment: string | null;
+  clinicCity: string | null;
   _count: { users: number; pets: number; appointments: number };
 }
 

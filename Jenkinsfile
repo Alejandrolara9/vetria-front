@@ -15,7 +15,7 @@ pipeline {
         PROJECT_KEY             = 'vetria-frontend'
         PROJECT_NAME            = 'Vetria Frontend'
         GITHUB_URL              = 'https://github.com/Alejandrolara9/vetria-front.git'
-        BRANCH                  = 'main'
+        BRANCH                  = 'develop'
         NEXT_TELEMETRY_DISABLED = '1'
         SONARQUBE_URL           = 'http://localhost:9000'
     }

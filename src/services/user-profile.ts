@@ -5,8 +5,10 @@ export interface UserProfile {
   name: string;
   email: string;
   role: string;
+  tenantId: string;
   signatureUrl: string | null;
   licenseNumber: string | null;
+  hasPassword: boolean;
 }
 
 export async function getMyProfile(): Promise<UserProfile> {
@@ -17,6 +19,13 @@ export async function getMyProfile(): Promise<UserProfile> {
 export async function updateMyProfile(data: { licenseNumber?: string }): Promise<UserProfile> {
   const res = await api.patch<UserProfile>("/users/me/profile", data);
   return res.data;
+}
+
+export async function setMyPassword(data: {
+  currentPassword?: string;
+  newPassword: string;
+}): Promise<void> {
+  await api.patch("/users/me/password", data);
 }
 
 export async function uploadMySignature(file: File): Promise<{ key: string }> {
