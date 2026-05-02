@@ -15,18 +15,30 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+  // Google SSO — paso intermedio para pedir nombre de clínica
+  const [pendingCredential, setPendingCredential] = useState<string | null>(null);
+  const [googleClinicName, setGoogleClinicName] = useState("");
+
+  const handleGoogleSuccess = (credentialResponse: { credential?: string }) => {
     if (!credentialResponse.credential) return;
     setError("");
+    setPendingCredential(credentialResponse.credential);
+  };
+
+  const handleGoogleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingCredential || !googleClinicName.trim()) return;
     setLoading(true);
     try {
       const response = await axios.post("http://localhost:3333/auth/google", {
-        credential: credentialResponse.credential,
+        credential: pendingCredential,
+        clinicName: googleClinicName.trim(),
       });
       localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.message || "Error al registrarse con Google");
+      setPendingCredential(null);
     } finally {
       setLoading(false);
     }
@@ -51,6 +63,55 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (pendingCredential) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center px-6">
+        <div className="w-full max-w-md bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-8 shadow-2xl">
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white">Un último dato</h2>
+            <p className="text-slate-400 text-sm mt-1">¿Cómo se llama tu clínica veterinaria?</p>
+          </div>
+          {error && (
+            <div className="mb-4 px-4 py-3 bg-red-500/15 border border-red-500/30 rounded-xl text-red-400 text-sm text-center">
+              {error}
+            </div>
+          )}
+          <form onSubmit={handleGoogleRegister} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Ej: Clínica Veterinaria Los Andes"
+              required
+              autoFocus
+              value={googleClinicName}
+              onChange={(e) => setGoogleClinicName(e.target.value)}
+              className="w-full px-4 py-3 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
+              style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
+            />
+            <button
+              type="submit"
+              disabled={loading || !googleClinicName.trim()}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all text-sm"
+            >
+              {loading ? "Creando tu clínica..." : "Continuar →"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPendingCredential(null); setError(""); }}
+              className="w-full py-2 text-slate-400 hover:text-white text-sm transition-colors"
+            >
+              ← Volver
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex flex-col">

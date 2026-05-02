@@ -19,10 +19,19 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const response = await api.post("/auth/google", { credential: credentialResponse.credential });
+      if (response.data.isNew) {
+        router.push("/register");
+        return;
+      }
       localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Error al iniciar sesión con Google");
+      const msg = err.response?.data?.message;
+      if (msg === "CLINIC_NAME_REQUIRED") {
+        router.push("/register");
+        return;
+      }
+      setError(msg || "Error al iniciar sesión con Google");
     } finally {
       setLoading(false);
     }
