@@ -23,10 +23,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                cleanWs()
-                git branch: "${BRANCH}",
-                    url: "${GITHUB_URL}",
-                    credentialsId: 'github-pat'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "refs/heads/${BRANCH}"]],
+                    userRemoteConfigs: [[
+                        url: "${GITHUB_URL}",
+                        credentialsId: 'github-pat',
+                        refspec: "+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}"
+                    ]],
+                    extensions: [[$class: 'WipeWorkspace']]
+                ])
                 sh 'echo "Checked out commit: $(git rev-parse HEAD)"'
             }
         }
