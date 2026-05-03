@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
+import { inviteClientToPortal } from "@/services/owner-portal";
 
 interface Client {
   id: string;
@@ -18,6 +19,8 @@ export default function ClientsPage() {
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [inviting, setInviting] = useState<string | null>(null);
+  const [inviteMsg, setInviteMsg] = useState<Record<string, string>>({});
 
   useEffect(() => { loadClients(); }, []);
 
@@ -64,6 +67,21 @@ export default function ClientsPage() {
     setEditingId(client.id);
     setShowForm(true);
   }
+
+  const handleInvite = async (clientId: string) => {
+    setInviting(clientId);
+    try {
+      const res = await inviteClientToPortal(clientId);
+      setInviteMsg((prev) => ({ ...prev, [clientId]: res.message }));
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Error al enviar la invitación";
+      setInviteMsg((prev) => ({ ...prev, [clientId]: msg }));
+    } finally {
+      setInviting(null);
+    }
+  };
 
   const filtered = clients.filter(
     (c) =>
@@ -152,7 +170,19 @@ export default function ClientsPage() {
                   <td className="px-6 py-4 text-muted-foreground">{new Date(client.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 text-right">
                     <button onClick={() => startEdit(client)} className="text-primary hover:underline mr-3">Editar</button>
-                    <button onClick={() => handleDelete(client.id)} className="text-danger hover:underline">Eliminar</button>
+                    <button onClick={() => handleDelete(client.id)} className="text-danger hover:underline mr-3">Eliminar</button>
+                    <div className="inline-flex flex-col items-end">
+                      <button
+                        onClick={() => handleInvite(client.id)}
+                        disabled={inviting === client.id}
+                        className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors whitespace-nowrap"
+                      >
+                        {inviting === client.id ? "Enviando..." : "Invitar al portal"}
+                      </button>
+                      {inviteMsg[client.id] && (
+                        <p className="text-xs text-green-400 mt-0.5">{inviteMsg[client.id]}</p>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
