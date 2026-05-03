@@ -15,7 +15,7 @@ pipeline {
         PROJECT_KEY             = 'vetria-frontend'
         PROJECT_NAME            = 'Vetria Frontend'
         GITHUB_URL              = 'https://github.com/Alejandrolara9/vetria-front.git'
-        BRANCH                  = 'main'
+        BRANCH                  = 'develop'
         NEXT_TELEMETRY_DISABLED = '1'
         SONARQUBE_URL           = 'http://localhost:9000'
     }
@@ -23,10 +23,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                cleanWs()
-                git branch: "${BRANCH}",
-                    url: "${GITHUB_URL}",
-                    credentialsId: 'github-pat'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "refs/heads/${BRANCH}"]],
+                    userRemoteConfigs: [[
+                        url: "${GITHUB_URL}",
+                        credentialsId: 'github-pat',
+                        refspec: "+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}"
+                    ]],
+                    extensions: [[$class: 'WipeWorkspace']]
+                ])
                 sh 'echo "Checked out commit: $(git rev-parse HEAD)"'
             }
         }

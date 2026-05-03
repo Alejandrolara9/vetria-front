@@ -10,6 +10,8 @@ import {
   TenantUser,
   PlatformStats,
 } from "@/services/superadmin.service";
+import { COLOMBIA_DEPARTMENTS } from "@/lib/colombia-locations";
+import SearchableSelect from "@/components/SearchableSelect";
 
 const PLAN_COLORS: Record<string, string> = {
   FREE: "bg-gray-100 text-gray-600",
@@ -24,6 +26,7 @@ export default function SuperAdminDashboard() {
   const [search, setSearch] = useState("");
   const [filterPlan, setFilterPlan] = useState<"" | "FREE" | "BASIC" | "PRO">("");
   const [filterActive, setFilterActive] = useState<"" | "true" | "false">("");
+  const [filterDepartment, setFilterDepartment] = useState("");
 
   const [editTarget, setEditTarget] = useState<TenantSummary | null>(null);
   const [editUsers, setEditUsers] = useState<TenantUser[]>([]);
@@ -81,6 +84,7 @@ export default function SuperAdminDashboard() {
     if (search && !t.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterPlan && t.plan !== filterPlan) return false;
     if (filterActive !== "" && String(t.active) !== filterActive) return false;
+    if (filterDepartment && t.clinicDepartment !== filterDepartment) return false;
     return true;
   });
 
@@ -142,6 +146,14 @@ export default function SuperAdminDashboard() {
           <option value="true">Activas</option>
           <option value="false">Inactivas</option>
         </select>
+        <SearchableSelect
+          options={COLOMBIA_DEPARTMENTS.map((d) => d.name)}
+          value={filterDepartment}
+          onChange={setFilterDepartment}
+          placeholder="Filtrar por departamento..."
+          variant="light"
+          className="w-52"
+        />
       </div>
 
       <div className="bg-white rounded-xl border overflow-hidden">
@@ -149,6 +161,7 @@ export default function SuperAdminDashboard() {
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Clínica</th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Ubicación</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Plan</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Usuarios</th>
@@ -162,6 +175,15 @@ export default function SuperAdminDashboard() {
             {filtered.map((t) => (
               <tr key={t.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 font-medium">{t.name}</td>
+                <td className="px-4 py-3 text-sm text-muted-foreground">
+                  {t.clinicDepartment ? (
+                    <span>
+                      {t.clinicCity ? `${t.clinicCity}, ` : ""}{t.clinicDepartment}
+                    </span>
+                  ) : (
+                    <span className="text-xs italic opacity-40">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${PLAN_COLORS[t.plan]}`}>
                     {t.plan}
