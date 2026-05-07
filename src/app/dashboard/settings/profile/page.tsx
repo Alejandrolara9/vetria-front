@@ -71,8 +71,9 @@ export default function ProfilePage() {
       setConfirmPassword("");
       setProfile((prev) => prev ? { ...prev, hasPassword: true } : prev);
       setTimeout(() => setPasswordMsg(""), 4000);
-    } catch (err: any) {
-      setPasswordError(err.response?.data?.message || "Error al cambiar la contraseña");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setPasswordError(msg ?? "Error al cambiar la contraseña");
     } finally {
       setPasswordSaving(false);
     }

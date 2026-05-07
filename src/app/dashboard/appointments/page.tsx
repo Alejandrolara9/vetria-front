@@ -96,8 +96,8 @@ const APPOINTMENT_TO_EVENT_TYPE: Record<AppointmentType, string> = {
   OTHER:        "OTHER",
 };
 
-// Días sugeridos de próxima dosis por vacuna (reservado para uso futuro)
-const _VACCINE_NEXT_DAYS: Record<string, number> = {
+// Días sugeridos de próxima dosis por vacuna
+export const VACCINE_NEXT_DAYS: Record<string, number> = {
   "Antirrábica": 365,
   "Parvovirus": 365,
   "Moquillo": 365,
@@ -133,7 +133,7 @@ function toDateStr(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-function _formatTime(isoString: string): string {
+export function formatTime(isoString: string): string {
   const d = new Date(isoString);
   return d.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
@@ -488,20 +488,6 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
       onClose();
     } catch {
       setError("No se pudo confirmar la cita.");
-    } finally {
-      setActing(false);
-    }
-  }
-
-  async function _handleComplete() {
-    setActing(true);
-    setError(null);
-    try {
-      await completeAppointment(appointment.id);
-      onUpdated();
-      onClose();
-    } catch {
-      setError("No se pudo completar la cita.");
     } finally {
       setActing(false);
     }
@@ -896,8 +882,6 @@ export default function AppointmentsPage() {
   const loadCalendar = useCallback(async () => {
     setLoadingCalendar(true);
     try {
-      // Cargar los 7 dias de la semana visible en una sola query pasando la fecha de inicio
-      const _endDate = addDays(weekStart, 6);
       // El backend acepta ?date para filtrar; cargamos todo el rango haciendo una query sin filtro
       // y filtramos en el cliente por la semana visible
       const data = await listAppointments();

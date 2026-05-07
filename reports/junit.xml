@@ -1,83 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="97" failures="0" errors="0" time="7.086">
-  <testsuite name="superAdminLogin" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.34" tests="8">
-    <testcase classname="superAdminLogin POSTs to /superadmin/login and returns the token" name="superAdminLogin POSTs to /superadmin/login and returns the token" time="0.033">
+<testsuites name="jest tests" tests="157" failures="0" errors="0" time="6.547">
+  <testsuite name="createReminder" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.496" tests="10">
+    <testcase classname="createReminder POSTs to /reminders" name="createReminder POSTs to /reminders" time="0.018">
     </testcase>
-    <testcase classname="fetchTenants GETs /superadmin/tenants" name="fetchTenants GETs /superadmin/tenants" time="0.003">
+    <testcase classname="listReminders GETs /reminders without params when no status" name="listReminders GETs /reminders without params when no status" time="0.003">
     </testcase>
-    <testcase classname="updateTenant PATCHes /superadmin/tenants/:id" name="updateTenant PATCHes /superadmin/tenants/:id" time="0.003">
+    <testcase classname="listReminders GETs /reminders with status param" name="listReminders GETs /reminders with status param" time="0.002">
     </testcase>
-    <testcase classname="fetchTenantUsers GETs /superadmin/tenants/:id/users" name="fetchTenantUsers GETs /superadmin/tenants/:id/users" time="0.003">
+    <testcase classname="getReminderStats GETs /reminders/stats" name="getReminderStats GETs /reminders/stats" time="0.003">
     </testcase>
-    <testcase classname="fetchStats GETs /superadmin/stats" name="fetchStats GETs /superadmin/stats" time="0.003">
+    <testcase classname="getUpcomingReminders GETs /reminders/upcoming with default days=7" name="getUpcomingReminders GETs /reminders/upcoming with default days=7" time="0.003">
     </testcase>
-    <testcase classname="changeSuperAdminPassword PATCHes /superadmin/me/password" name="changeSuperAdminPassword PATCHes /superadmin/me/password" time="0.003">
+    <testcase classname="getUpcomingReminders GETs /reminders/upcoming with custom days" name="getUpcomingReminders GETs /reminders/upcoming with custom days" time="0.01">
     </testcase>
-    <testcase classname="superAdminApi interceptor adds Authorization header from superadmin_token" name="superAdminApi interceptor adds Authorization header from superadmin_token" time="0.004">
+    <testcase classname="getOverdueReminders GETs /reminders/overdue" name="getOverdueReminders GETs /reminders/overdue" time="0.008">
     </testcase>
-    <testcase classname="superAdminApi interceptor does not add Authorization header when no superadmin_token" name="superAdminApi interceptor does not add Authorization header when no superadmin_token" time="0.001">
+    <testcase classname="getReminderById GETs /reminders/:id" name="getReminderById GETs /reminders/:id" time="0.002">
     </testcase>
-  </testsuite>
-  <testsuite name="listProtocols" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.569" tests="5">
-    <testcase classname="listProtocols GETs /vaccination-protocols" name="listProtocols GETs /vaccination-protocols" time="0.021">
+    <testcase classname="updateReminder PUTs to /reminders/:id" name="updateReminder PUTs to /reminders/:id" time="0.003">
     </testcase>
-    <testcase classname="getProtocol GETs /vaccination-protocols/:id" name="getProtocol GETs /vaccination-protocols/:id" time="0.023">
-    </testcase>
-    <testcase classname="createProtocol POSTs to /vaccination-protocols" name="createProtocol POSTs to /vaccination-protocols" time="0.006">
-    </testcase>
-    <testcase classname="updateProtocol PUTs to /vaccination-protocols/:id" name="updateProtocol PUTs to /vaccination-protocols/:id" time="0.003">
-    </testcase>
-    <testcase classname="deleteProtocol DELETEs /vaccination-protocols/:id" name="deleteProtocol DELETEs /vaccination-protocols/:id" time="0.002">
+    <testcase classname="getAllNotifications GETs /reminders/notifications/all" name="getAllNotifications GETs /reminders/notifications/all" time="0.002">
     </testcase>
   </testsuite>
-  <testsuite name="createClinicalNote" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.506" tests="11">
-    <testcase classname="createClinicalNote POSTs to /clinical-notes" name="createClinicalNote POSTs to /clinical-notes" time="0.028">
+  <testsuite name="getInvoices" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.555" tests="8">
+    <testcase classname="getInvoices GETs /invoices? without filters" name="getInvoices GETs /invoices? without filters" time="0.024">
     </testcase>
-    <testcase classname="generateClinicalNote POSTs to /clinical-notes/:id/generate" name="generateClinicalNote POSTs to /clinical-notes/:id/generate" time="0.003">
+    <testcase classname="getInvoices appends status filter to query string" name="getInvoices appends status filter to query string" time="0.002">
     </testcase>
-    <testcase classname="reviewClinicalNote PATCHes /clinical-notes/:id/review with APPROVED status" name="reviewClinicalNote PATCHes /clinical-notes/:id/review with APPROVED status" time="0.004">
+    <testcase classname="getInvoices appends clientId filter to query string" name="getInvoices appends clientId filter to query string" time="0.002">
     </testcase>
-    <testcase classname="listClinicalNotes GETs /clinical-notes" name="listClinicalNotes GETs /clinical-notes" time="0.002">
+    <testcase classname="getInvoiceStats GETs /invoices/stats" name="getInvoiceStats GETs /invoices/stats" time="0.003">
     </testcase>
-    <testcase classname="getClinicalNotesByPet GETs /clinical-notes/pet/:petId" name="getClinicalNotesByPet GETs /clinical-notes/pet/:petId" time="0.002">
+    <testcase classname="getInvoiceById GETs /invoices/:id" name="getInvoiceById GETs /invoices/:id" time="0.004">
     </testcase>
-    <testcase classname="getClinicalNoteById GETs /clinical-notes/:id" name="getClinicalNoteById GETs /clinical-notes/:id" time="0.002">
+    <testcase classname="createInvoice POSTs to /invoices" name="createInvoice POSTs to /invoices" time="0.003">
     </testcase>
-    <testcase classname="deleteClinicalNote DELETEs /clinical-notes/:id" name="deleteClinicalNote DELETEs /clinical-notes/:id" time="0.002">
+    <testcase classname="updateInvoice PUTs to /invoices/:id" name="updateInvoice PUTs to /invoices/:id" time="0.002">
     </testcase>
-    <testcase classname="streamClinicalNote calls onToken and onComplete for valid SSE events" name="streamClinicalNote calls onToken and onComplete for valid SSE events" time="0.004">
-    </testcase>
-    <testcase classname="streamClinicalNote calls onError for error SSE event" name="streamClinicalNote calls onError for error SSE event" time="0.005">
-    </testcase>
-    <testcase classname="streamClinicalNote calls onError when response is not ok" name="streamClinicalNote calls onError when response is not ok" time="0.01">
-    </testcase>
-    <testcase classname="streamClinicalNote sends Authorization header with token from localStorage" name="streamClinicalNote sends Authorization header with token from localStorage" time="0.002">
+    <testcase classname="deleteInvoice DELETEs /invoices/:id" name="deleteInvoice DELETEs /invoices/:id" time="0.003">
     </testcase>
   </testsuite>
-  <testsuite name="cn" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:28" time="0.165" tests="5">
-    <testcase classname="cn returns a single class" name="cn returns a single class" time="0.033">
+  <testsuite name="getDashboardStats" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.679" tests="7">
+    <testcase classname="getDashboardStats GETs /reports/dashboard with default period=month" name="getDashboardStats GETs /reports/dashboard with default period=month" time="0.018">
     </testcase>
-    <testcase classname="cn merges multiple classes" name="cn merges multiple classes" time="0.001">
+    <testcase classname="getDashboardStats GETs /reports/dashboard with explicit period" name="getDashboardStats GETs /reports/dashboard with explicit period" time="0.002">
     </testcase>
-    <testcase classname="cn filters out falsy values" name="cn filters out falsy values" time="0.001">
+    <testcase classname="getAppointmentsReport GETs /reports/appointments with from and to params" name="getAppointmentsReport GETs /reports/appointments with from and to params" time="0.003">
     </testcase>
-    <testcase classname="cn resolves tailwind conflicts (last wins)" name="cn resolves tailwind conflicts (last wins)" time="0.001">
+    <testcase classname="getClientsReport GETs /reports/clients" name="getClientsReport GETs /reports/clients" time="0.003">
     </testcase>
-    <testcase classname="cn handles conditional object syntax" name="cn handles conditional object syntax" time="0.004">
+    <testcase classname="getFinancialReport GETs /reports/financial with from and to params" name="getFinancialReport GETs /reports/financial with from and to params" time="0.002">
+    </testcase>
+    <testcase classname="getInventoryReport GETs /reports/inventory" name="getInventoryReport GETs /reports/inventory" time="0.002">
+    </testcase>
+    <testcase classname="getRemindersReport GETs /reports/reminders with from and to params" name="getRemindersReport GETs /reports/reminders with from and to params" time="0.002">
     </testcase>
   </testsuite>
-  <testsuite name="createAppointment" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.459" tests="11">
-    <testcase classname="createAppointment POSTs to /appointments and returns the created appointment" name="createAppointment POSTs to /appointments and returns the created appointment" time="0.019">
+  <testsuite name="createAppointment" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.503" tests="11">
+    <testcase classname="createAppointment POSTs to /appointments and returns the created appointment" name="createAppointment POSTs to /appointments and returns the created appointment" time="0.022">
     </testcase>
     <testcase classname="listAppointments GETs /appointments without params" name="listAppointments GETs /appointments without params" time="0.003">
     </testcase>
-    <testcase classname="listAppointments GETs /appointments with query params" name="listAppointments GETs /appointments with query params" time="0.01">
+    <testcase classname="listAppointments GETs /appointments with query params" name="listAppointments GETs /appointments with query params" time="0.003">
     </testcase>
-    <testcase classname="getAppointmentStatsToday GETs /appointments/stats/today" name="getAppointmentStatsToday GETs /appointments/stats/today" time="0.015">
+    <testcase classname="getAppointmentStatsToday GETs /appointments/stats/today" name="getAppointmentStatsToday GETs /appointments/stats/today" time="0.002">
     </testcase>
-    <testcase classname="getVetSchedule GETs /appointments/vet/:id/schedule with date param" name="getVetSchedule GETs /appointments/vet/:id/schedule with date param" time="0.002">
+    <testcase classname="getVetSchedule GETs /appointments/vet/:id/schedule with date param" name="getVetSchedule GETs /appointments/vet/:id/schedule with date param" time="0.004">
     </testcase>
-    <testcase classname="getAppointment GETs /appointments/:id" name="getAppointment GETs /appointments/:id" time="0.001">
+    <testcase classname="getAppointment GETs /appointments/:id" name="getAppointment GETs /appointments/:id" time="0.002">
     </testcase>
     <testcase classname="updateAppointment PUTs to /appointments/:id" name="updateAppointment PUTs to /appointments/:id" time="0.002">
     </testcase>
@@ -85,45 +75,179 @@
     </testcase>
     <testcase classname="confirmAppointment PATCHes /appointments/:id/confirm" name="confirmAppointment PATCHes /appointments/:id/confirm" time="0.003">
     </testcase>
-    <testcase classname="completeAppointment PATCHes /appointments/:id/complete" name="completeAppointment PATCHes /appointments/:id/complete" time="0.002">
+    <testcase classname="completeAppointment PATCHes /appointments/:id/complete" name="completeAppointment PATCHes /appointments/:id/complete" time="0.003">
     </testcase>
     <testcase classname="deleteAppointment DELETEs /appointments/:id" name="deleteAppointment DELETEs /appointments/:id" time="0.002">
     </testcase>
   </testsuite>
-  <testsuite name="api interceptor" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:28" time="0.125" tests="3">
-    <testcase classname="api interceptor adds Authorization header when token is in localStorage" name="api interceptor adds Authorization header when token is in localStorage" time="0.003">
+  <testsuite name="listAttachments" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.576" tests="6">
+    <testcase classname="listAttachments GETs /pets/:petId/attachments" name="listAttachments GETs /pets/:petId/attachments" time="0.023">
     </testcase>
-    <testcase classname="api interceptor does not add Authorization header when no token" name="api interceptor does not add Authorization header when no token" time="0.001">
+    <testcase classname="uploadAttachment POSTs to /pets/:petId/attachments without clinicalNoteId" name="uploadAttachment POSTs to /pets/:petId/attachments without clinicalNoteId" time="0.014">
     </testcase>
-    <testcase classname="api interceptor uses NEXT_PUBLIC_API_URL as baseURL when set" name="api interceptor uses NEXT_PUBLIC_API_URL as baseURL when set" time="0.002">
+    <testcase classname="uploadAttachment POSTs to /pets/:petId/attachments?clinicalNoteId=... when provided" name="uploadAttachment POSTs to /pets/:petId/attachments?clinicalNoteId=... when provided" time="0.003">
+    </testcase>
+    <testcase classname="getAttachmentViewUrl GETs /attachments/:id/view and returns url" name="getAttachmentViewUrl GETs /attachments/:id/view and returns url" time="0.002">
+    </testcase>
+    <testcase classname="reanalyzeAttachment POSTs to /attachments/:id/analyze" name="reanalyzeAttachment POSTs to /attachments/:id/analyze" time="0.003">
+    </testcase>
+    <testcase classname="deleteAttachment DELETEs /attachments/:id" name="deleteAttachment DELETEs /attachments/:id" time="0.003">
     </testcase>
   </testsuite>
-  <testsuite name="searchCatalog" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.51" tests="8">
-    <testcase classname="searchCatalog returns empty array without making a request when q is empty string" name="searchCatalog returns empty array without making a request when q is empty string" time="0.011">
+  <testsuite name="listProtocols" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.733" tests="5">
+    <testcase classname="listProtocols GETs /vaccination-protocols" name="listProtocols GETs /vaccination-protocols" time="0.026">
+    </testcase>
+    <testcase classname="getProtocol GETs /vaccination-protocols/:id" name="getProtocol GETs /vaccination-protocols/:id" time="0.002">
+    </testcase>
+    <testcase classname="createProtocol POSTs to /vaccination-protocols" name="createProtocol POSTs to /vaccination-protocols" time="0.004">
+    </testcase>
+    <testcase classname="updateProtocol PUTs to /vaccination-protocols/:id" name="updateProtocol PUTs to /vaccination-protocols/:id" time="0.002">
+    </testcase>
+    <testcase classname="deleteProtocol DELETEs /vaccination-protocols/:id" name="deleteProtocol DELETEs /vaccination-protocols/:id" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="superAdminLogin" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.663" tests="8">
+    <testcase classname="superAdminLogin POSTs to /superadmin/login and returns the token" name="superAdminLogin POSTs to /superadmin/login and returns the token" time="0.025">
+    </testcase>
+    <testcase classname="fetchTenants GETs /superadmin/tenants" name="fetchTenants GETs /superadmin/tenants" time="0.004">
+    </testcase>
+    <testcase classname="updateTenant PATCHes /superadmin/tenants/:id" name="updateTenant PATCHes /superadmin/tenants/:id" time="0.003">
+    </testcase>
+    <testcase classname="fetchTenantUsers GETs /superadmin/tenants/:id/users" name="fetchTenantUsers GETs /superadmin/tenants/:id/users" time="0.006">
+    </testcase>
+    <testcase classname="fetchStats GETs /superadmin/stats" name="fetchStats GETs /superadmin/stats" time="0.004">
+    </testcase>
+    <testcase classname="changeSuperAdminPassword PATCHes /superadmin/me/password" name="changeSuperAdminPassword PATCHes /superadmin/me/password" time="0.004">
+    </testcase>
+    <testcase classname="superAdminApi interceptor adds Authorization header from superadmin_token" name="superAdminApi interceptor adds Authorization header from superadmin_token" time="0.003">
+    </testcase>
+    <testcase classname="superAdminApi interceptor does not add Authorization header when no superadmin_token" name="superAdminApi interceptor does not add Authorization header when no superadmin_token" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="COLOMBIA_DEPARTMENTS" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:14" time="0.441" tests="13">
+    <testcase classname="COLOMBIA_DEPARTMENTS es un arreglo no vacío" name="COLOMBIA_DEPARTMENTS es un arreglo no vacío" time="0.002">
+    </testcase>
+    <testcase classname="COLOMBIA_DEPARTMENTS contiene los 32 departamentos más Bogotá D.C. (33 entidades)" name="COLOMBIA_DEPARTMENTS contiene los 32 departamentos más Bogotá D.C. (33 entidades)" time="0">
+    </testcase>
+    <testcase classname="COLOMBIA_DEPARTMENTS cada departamento tiene name (string) y cities (string[])" name="COLOMBIA_DEPARTMENTS cada departamento tiene name (string) y cities (string[])" time="0.025">
+    </testcase>
+    <testcase classname="COLOMBIA_DEPARTMENTS cada ciudad es un string no vacío" name="COLOMBIA_DEPARTMENTS cada ciudad es un string no vacío" time="0.283">
+    </testcase>
+    <testcase classname="COLOMBIA_DEPARTMENTS contiene departamentos clave del territorio colombiano" name="COLOMBIA_DEPARTMENTS contiene departamentos clave del territorio colombiano" time="0.001">
+    </testcase>
+    <testcase classname="COLOMBIA_DEPARTMENTS incluye ciudades capitales en sus departamentos correspondientes" name="COLOMBIA_DEPARTMENTS incluye ciudades capitales en sus departamentos correspondientes" time="0.004">
+    </testcase>
+    <testcase classname="COLOMBIA_DEPARTMENTS no tiene nombres de departamentos duplicados" name="COLOMBIA_DEPARTMENTS no tiene nombres de departamentos duplicados" time="0.001">
+    </testcase>
+    <testcase classname="getCitiesByDepartment retorna el arreglo de ciudades para un departamento existente" name="getCitiesByDepartment retorna el arreglo de ciudades para un departamento existente" time="0.001">
+    </testcase>
+    <testcase classname="getCitiesByDepartment retorna arreglo vacío para un departamento inexistente" name="getCitiesByDepartment retorna arreglo vacío para un departamento inexistente" time="0">
+    </testcase>
+    <testcase classname="getCitiesByDepartment es case-sensitive (no coincide con casing diferente)" name="getCitiesByDepartment es case-sensitive (no coincide con casing diferente)" time="0.002">
+    </testcase>
+    <testcase classname="getCitiesByDepartment retorna ciudades para Bogotá D.C." name="getCitiesByDepartment retorna ciudades para Bogotá D.C." time="0.001">
+    </testcase>
+    <testcase classname="getCitiesByDepartment retorna ciudades para Santander" name="getCitiesByDepartment retorna ciudades para Santander" time="0.001">
+    </testcase>
+    <testcase classname="getCitiesByDepartment retorna ciudades para un departamento con pocas ciudades (Vaupés)" name="getCitiesByDepartment retorna ciudades para un departamento con pocas ciudades (Vaupés)" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="searchCatalog" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.65" tests="8">
+    <testcase classname="searchCatalog returns empty array without making a request when q is empty string" name="searchCatalog returns empty array without making a request when q is empty string" time="0.029">
     </testcase>
     <testcase classname="searchCatalog returns empty array without making a request when q is only whitespace" name="searchCatalog returns empty array without making a request when q is only whitespace" time="0.002">
     </testcase>
-    <testcase classname="searchCatalog GETs /services/search-catalog with q param" name="searchCatalog GETs /services/search-catalog with q param" time="0.011">
+    <testcase classname="searchCatalog GETs /services/search-catalog with q param" name="searchCatalog GETs /services/search-catalog with q param" time="0.008">
     </testcase>
-    <testcase classname="getServices GETs /services without search param" name="getServices GETs /services without search param" time="0.007">
+    <testcase classname="getServices GETs /services without search param" name="getServices GETs /services without search param" time="0.002">
     </testcase>
-    <testcase classname="getServices GETs /services with search param" name="getServices GETs /services with search param" time="0.003">
+    <testcase classname="getServices GETs /services with search param" name="getServices GETs /services with search param" time="0.004">
     </testcase>
     <testcase classname="createService POSTs to /services" name="createService POSTs to /services" time="0.003">
     </testcase>
-    <testcase classname="updateService PUTs to /services/:id" name="updateService PUTs to /services/:id" time="0.002">
+    <testcase classname="updateService PUTs to /services/:id" name="updateService PUTs to /services/:id" time="0.003">
     </testcase>
-    <testcase classname="deleteService DELETEs /services/:id" name="deleteService DELETEs /services/:id" time="0.001">
+    <testcase classname="deleteService DELETEs /services/:id" name="deleteService DELETEs /services/:id" time="0.002">
     </testcase>
   </testsuite>
-  <testsuite name="getProducts" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.485" tests="13">
-    <testcase classname="getProducts GETs /inventory/products without filters" name="getProducts GETs /inventory/products without filters" time="0.03">
+  <testsuite name="createClinicalNote" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.72" tests="11">
+    <testcase classname="createClinicalNote POSTs to /clinical-notes" name="createClinicalNote POSTs to /clinical-notes" time="0.035">
     </testcase>
-    <testcase classname="getProducts appends category filter" name="getProducts appends category filter" time="0.005">
+    <testcase classname="generateClinicalNote POSTs to /clinical-notes/:id/generate" name="generateClinicalNote POSTs to /clinical-notes/:id/generate" time="0.003">
     </testcase>
-    <testcase classname="getProducts appends lowStock filter" name="getProducts appends lowStock filter" time="0.006">
+    <testcase classname="reviewClinicalNote PATCHes /clinical-notes/:id/review with APPROVED status" name="reviewClinicalNote PATCHes /clinical-notes/:id/review with APPROVED status" time="0.003">
     </testcase>
-    <testcase classname="getProducts appends active filter" name="getProducts appends active filter" time="0.002">
+    <testcase classname="listClinicalNotes GETs /clinical-notes" name="listClinicalNotes GETs /clinical-notes" time="0.003">
+    </testcase>
+    <testcase classname="getClinicalNotesByPet GETs /clinical-notes/pet/:petId" name="getClinicalNotesByPet GETs /clinical-notes/pet/:petId" time="0.002">
+    </testcase>
+    <testcase classname="getClinicalNoteById GETs /clinical-notes/:id" name="getClinicalNoteById GETs /clinical-notes/:id" time="0.002">
+    </testcase>
+    <testcase classname="deleteClinicalNote DELETEs /clinical-notes/:id" name="deleteClinicalNote DELETEs /clinical-notes/:id" time="0.002">
+    </testcase>
+    <testcase classname="streamClinicalNote calls onToken and onComplete for valid SSE events" name="streamClinicalNote calls onToken and onComplete for valid SSE events" time="0.005">
+    </testcase>
+    <testcase classname="streamClinicalNote calls onError for error SSE event" name="streamClinicalNote calls onError for error SSE event" time="0.002">
+    </testcase>
+    <testcase classname="streamClinicalNote calls onError when response is not ok" name="streamClinicalNote calls onError when response is not ok" time="0.008">
+    </testcase>
+    <testcase classname="streamClinicalNote sends Authorization header with token from localStorage" name="streamClinicalNote sends Authorization header with token from localStorage" time="0.012">
+    </testcase>
+  </testsuite>
+  <testsuite name="validateInviteToken" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:15" time="0.437" tests="22">
+    <testcase classname="validateInviteToken GETs /portal/auth/validate-invite/:token y retorna el email asociado" name="validateInviteToken GETs /portal/auth/validate-invite/:token y retorna el email asociado" time="0.004">
+    </testcase>
+    <testcase classname="validateInviteToken propaga error si el token es inválido o expirado" name="validateInviteToken propaga error si el token es inválido o expirado" time="0.216">
+    </testcase>
+    <testcase classname="acceptInvite POSTea /portal/auth/accept-invite con los datos del dueño" name="acceptInvite POSTea /portal/auth/accept-invite con los datos del dueño" time="0.005">
+    </testcase>
+    <testcase classname="ownerLogin POSTea /portal/auth/login y retorna token + owner" name="ownerLogin POSTea /portal/auth/login y retorna token + owner" time="0.01">
+    </testcase>
+    <testcase classname="ownerLogin propaga error si las credenciales son incorrectas" name="ownerLogin propaga error si las credenciales son incorrectas" time="0.008">
+    </testcase>
+    <testcase classname="ownerGoogleAuth POSTea /portal/auth/google con el idToken de Google" name="ownerGoogleAuth POSTea /portal/auth/google con el idToken de Google" time="0.01">
+    </testcase>
+    <testcase classname="getOwnerPets GETs /portal/pets y retorna el listado de mascotas del dueño" name="getOwnerPets GETs /portal/pets y retorna el listado de mascotas del dueño" time="0.006">
+    </testcase>
+    <testcase classname="getOwnerPets retorna arreglo vacío si el dueño no tiene mascotas" name="getOwnerPets retorna arreglo vacío si el dueño no tiene mascotas" time="0.006">
+    </testcase>
+    <testcase classname="getPetEvents GETs /portal/pets/:id/events y retorna los eventos clínicos" name="getPetEvents GETs /portal/pets/:id/events y retorna los eventos clínicos" time="0.01">
+    </testcase>
+    <testcase classname="getPetNotes GETs /portal/pets/:id/notes y retorna las historias clínicas aprobadas" name="getPetNotes GETs /portal/pets/:id/notes y retorna las historias clínicas aprobadas" time="0.002">
+    </testcase>
+    <testcase classname="getPetReminders GETs /portal/pets/:id/reminders y retorna los recordatorios pendientes" name="getPetReminders GETs /portal/pets/:id/reminders y retorna los recordatorios pendientes" time="0.002">
+    </testcase>
+    <testcase classname="saveOwnerToken / getOwnerToken / clearOwnerToken guarda y recupera el token del localStorage" name="saveOwnerToken / getOwnerToken / clearOwnerToken guarda y recupera el token del localStorage" time="0.002">
+    </testcase>
+    <testcase classname="saveOwnerToken / getOwnerToken / clearOwnerToken retorna null si no hay token guardado" name="saveOwnerToken / getOwnerToken / clearOwnerToken retorna null si no hay token guardado" time="0.001">
+    </testcase>
+    <testcase classname="saveOwnerToken / getOwnerToken / clearOwnerToken clearOwnerToken elimina el token del localStorage" name="saveOwnerToken / getOwnerToken / clearOwnerToken clearOwnerToken elimina el token del localStorage" time="0.001">
+    </testcase>
+    <testcase classname="inviteClientToPortal POSTea al endpoint de invitación usando el api veterinario" name="inviteClientToPortal POSTea al endpoint de invitación usando el api veterinario" time="0.005">
+    </testcase>
+    <testcase classname="inviteClientToPortal propaga el error si el cliente no existe" name="inviteClientToPortal propaga el error si el cliente no existe" time="0.001">
+    </testcase>
+    <testcase classname="translateEventType traduce VACCINE a &apos;Vacunación&apos;" name="translateEventType traduce VACCINE a &apos;Vacunación&apos;" time="0.001">
+    </testcase>
+    <testcase classname="translateEventType traduce DEWORMING a &apos;Desparasitación&apos;" name="translateEventType traduce DEWORMING a &apos;Desparasitación&apos;" time="0">
+    </testcase>
+    <testcase classname="translateEventType traduce ANTIPARASITIC a &apos;Antiparasitario&apos;" name="translateEventType traduce ANTIPARASITIC a &apos;Antiparasitario&apos;" time="0.001">
+    </testcase>
+    <testcase classname="translateEventType traduce CHECKUP a &apos;Control&apos;" name="translateEventType traduce CHECKUP a &apos;Control&apos;" time="0.002">
+    </testcase>
+    <testcase classname="translateEventType traduce OTHER a &apos;Atención veterinaria&apos;" name="translateEventType traduce OTHER a &apos;Atención veterinaria&apos;" time="0">
+    </testcase>
+    <testcase classname="translateEventType retorna el valor original para tipos desconocidos" name="translateEventType retorna el valor original para tipos desconocidos" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="getProducts" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.788" tests="13">
+    <testcase classname="getProducts GETs /inventory/products without filters" name="getProducts GETs /inventory/products without filters" time="0.04">
+    </testcase>
+    <testcase classname="getProducts appends category filter" name="getProducts appends category filter" time="0.003">
+    </testcase>
+    <testcase classname="getProducts appends lowStock filter" name="getProducts appends lowStock filter" time="0.004">
+    </testcase>
+    <testcase classname="getProducts appends active filter" name="getProducts appends active filter" time="0.003">
     </testcase>
     <testcase classname="getInventoryStats GETs /inventory/products/stats" name="getInventoryStats GETs /inventory/products/stats" time="0.002">
     </testcase>
@@ -133,91 +257,97 @@
     </testcase>
     <testcase classname="createProduct POSTs to /inventory/products" name="createProduct POSTs to /inventory/products" time="0.002">
     </testcase>
-    <testcase classname="updateProduct PUTs to /inventory/products/:id" name="updateProduct PUTs to /inventory/products/:id" time="0.003">
+    <testcase classname="updateProduct PUTs to /inventory/products/:id" name="updateProduct PUTs to /inventory/products/:id" time="0.004">
     </testcase>
-    <testcase classname="deleteProduct DELETEs /inventory/products/:id" name="deleteProduct DELETEs /inventory/products/:id" time="0.003">
+    <testcase classname="deleteProduct DELETEs /inventory/products/:id" name="deleteProduct DELETEs /inventory/products/:id" time="0.002">
     </testcase>
-    <testcase classname="addMovement POSTs to /inventory/movements" name="addMovement POSTs to /inventory/movements" time="0.004">
+    <testcase classname="addMovement POSTs to /inventory/movements" name="addMovement POSTs to /inventory/movements" time="0.002">
     </testcase>
-    <testcase classname="getMovements GETs /inventory/movements without productId" name="getMovements GETs /inventory/movements without productId" time="0.001">
+    <testcase classname="getMovements GETs /inventory/movements without productId" name="getMovements GETs /inventory/movements without productId" time="0.002">
     </testcase>
-    <testcase classname="getMovements GETs /inventory/movements?productId=prod1 when productId provided" name="getMovements GETs /inventory/movements?productId=prod1 when productId provided" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="getInvoices" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.494" tests="8">
-    <testcase classname="getInvoices GETs /invoices? without filters" name="getInvoices GETs /invoices? without filters" time="0.02">
-    </testcase>
-    <testcase classname="getInvoices appends status filter to query string" name="getInvoices appends status filter to query string" time="0.013">
-    </testcase>
-    <testcase classname="getInvoices appends clientId filter to query string" name="getInvoices appends clientId filter to query string" time="0.003">
-    </testcase>
-    <testcase classname="getInvoiceStats GETs /invoices/stats" name="getInvoiceStats GETs /invoices/stats" time="0.002">
-    </testcase>
-    <testcase classname="getInvoiceById GETs /invoices/:id" name="getInvoiceById GETs /invoices/:id" time="0.002">
-    </testcase>
-    <testcase classname="createInvoice POSTs to /invoices" name="createInvoice POSTs to /invoices" time="0.003">
-    </testcase>
-    <testcase classname="updateInvoice PUTs to /invoices/:id" name="updateInvoice PUTs to /invoices/:id" time="0.002">
-    </testcase>
-    <testcase classname="deleteInvoice DELETEs /invoices/:id" name="deleteInvoice DELETEs /invoices/:id" time="0.002">
+    <testcase classname="getMovements GETs /inventory/movements?productId=prod1 when productId provided" name="getMovements GETs /inventory/movements?productId=prod1 when productId provided" time="0.002">
     </testcase>
   </testsuite>
-  <testsuite name="listAttachments" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.503" tests="6">
-    <testcase classname="listAttachments GETs /pets/:petId/attachments" name="listAttachments GETs /pets/:petId/attachments" time="0.015">
+  <testsuite name="cn" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:15" time="0.157" tests="5">
+    <testcase classname="cn returns a single class" name="cn returns a single class" time="0.017">
     </testcase>
-    <testcase classname="uploadAttachment POSTs to /pets/:petId/attachments without clinicalNoteId" name="uploadAttachment POSTs to /pets/:petId/attachments without clinicalNoteId" time="0.005">
+    <testcase classname="cn merges multiple classes" name="cn merges multiple classes" time="0.001">
     </testcase>
-    <testcase classname="uploadAttachment POSTs to /pets/:petId/attachments?clinicalNoteId=... when provided" name="uploadAttachment POSTs to /pets/:petId/attachments?clinicalNoteId=... when provided" time="0.004">
+    <testcase classname="cn filters out falsy values" name="cn filters out falsy values" time="0.001">
     </testcase>
-    <testcase classname="getAttachmentViewUrl GETs /attachments/:id/view and returns url" name="getAttachmentViewUrl GETs /attachments/:id/view and returns url" time="0.005">
+    <testcase classname="cn resolves tailwind conflicts (last wins)" name="cn resolves tailwind conflicts (last wins)" time="0.002">
     </testcase>
-    <testcase classname="reanalyzeAttachment POSTs to /attachments/:id/analyze" name="reanalyzeAttachment POSTs to /attachments/:id/analyze" time="0.003">
-    </testcase>
-    <testcase classname="deleteAttachment DELETEs /attachments/:id" name="deleteAttachment DELETEs /attachments/:id" time="0.003">
+    <testcase classname="cn handles conditional object syntax" name="cn handles conditional object syntax" time="0.001">
     </testcase>
   </testsuite>
-  <testsuite name="createReminder" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.629" tests="10">
-    <testcase classname="createReminder POSTs to /reminders" name="createReminder POSTs to /reminders" time="0.017">
+  <testsuite name="getBranding" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:15" time="0.342" tests="8">
+    <testcase classname="getBranding GETs /tenants/me/branding y retorna la configuración" name="getBranding GETs /tenants/me/branding y retorna la configuración" time="0.003">
     </testcase>
-    <testcase classname="listReminders GETs /reminders without params when no status" name="listReminders GETs /reminders without params when no status" time="0.002">
+    <testcase classname="getBranding propaga el error si la petición falla" name="getBranding propaga el error si la petición falla" time="0.144">
     </testcase>
-    <testcase classname="listReminders GETs /reminders with status param" name="listReminders GETs /reminders with status param" time="0.002">
+    <testcase classname="updateBranding PATCHes /tenants/me/branding con los datos actualizados" name="updateBranding PATCHes /tenants/me/branding con los datos actualizados" time="0.003">
     </testcase>
-    <testcase classname="getReminderStats GETs /reminders/stats" name="getReminderStats GETs /reminders/stats" time="0.002">
+    <testcase classname="updateBranding actualiza parcialmente solo los campos enviados" name="updateBranding actualiza parcialmente solo los campos enviados" time="0.002">
     </testcase>
-    <testcase classname="getUpcomingReminders GETs /reminders/upcoming with default days=7" name="getUpcomingReminders GETs /reminders/upcoming with default days=7" time="0.002">
+    <testcase classname="uploadBrandingAsset POSTea logo al endpoint correcto y retorna la key" name="uploadBrandingAsset POSTea logo al endpoint correcto y retorna la key" time="0.004">
     </testcase>
-    <testcase classname="getUpcomingReminders GETs /reminders/upcoming with custom days" name="getUpcomingReminders GETs /reminders/upcoming with custom days" time="0.009">
+    <testcase classname="uploadBrandingAsset POSTea firma (signature) al endpoint correcto" name="uploadBrandingAsset POSTea firma (signature) al endpoint correcto" time="0.002">
     </testcase>
-    <testcase classname="getOverdueReminders GETs /reminders/overdue" name="getOverdueReminders GETs /reminders/overdue" time="0.002">
+    <testcase classname="uploadBrandingAsset POSTea watermark al endpoint correcto" name="uploadBrandingAsset POSTea watermark al endpoint correcto" time="0.002">
     </testcase>
-    <testcase classname="getReminderById GETs /reminders/:id" name="getReminderById GETs /reminders/:id" time="0.002">
-    </testcase>
-    <testcase classname="updateReminder PUTs to /reminders/:id" name="updateReminder PUTs to /reminders/:id" time="0.002">
-    </testcase>
-    <testcase classname="getAllNotifications GETs /reminders/notifications/all" name="getAllNotifications GETs /reminders/notifications/all" time="0.002">
+    <testcase classname="uploadBrandingAsset envía el archivo como multipart/form-data" name="uploadBrandingAsset envía el archivo como multipart/form-data" time="0.003">
     </testcase>
   </testsuite>
-  <testsuite name="login" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.662" tests="2">
-    <testcase classname="login posts credentials to /auth/login and returns response data" name="login posts credentials to /auth/login and returns response data" time="0.023">
+  <testsuite name="login" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:13" time="1.846" tests="2">
+    <testcase classname="login posts credentials to /auth/login and returns response data" name="login posts credentials to /auth/login and returns response data" time="0.018">
     </testcase>
-    <testcase classname="login propagates errors from the API" name="login propagates errors from the API" time="0.097">
+    <testcase classname="login propagates errors from the API" name="login propagates errors from the API" time="0.106">
     </testcase>
   </testsuite>
-  <testsuite name="getDashboardStats" errors="0" failures="0" skipped="0" timestamp="2026-05-01T15:25:26" time="1.551" tests="7">
-    <testcase classname="getDashboardStats GETs /reports/dashboard with default period=month" name="getDashboardStats GETs /reports/dashboard with default period=month" time="0.023">
+  <testsuite name="getMyProfile" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:15" time="0.367" tests="9">
+    <testcase classname="getMyProfile GETs /users/me y retorna el perfil del usuario autenticado" name="getMyProfile GETs /users/me y retorna el perfil del usuario autenticado" time="0.004">
     </testcase>
-    <testcase classname="getDashboardStats GETs /reports/dashboard with explicit period" name="getDashboardStats GETs /reports/dashboard with explicit period" time="0.001">
+    <testcase classname="getMyProfile propaga el error si el token es inválido" name="getMyProfile propaga el error si el token es inválido" time="0.184">
     </testcase>
-    <testcase classname="getAppointmentsReport GETs /reports/appointments with from and to params" name="getAppointmentsReport GETs /reports/appointments with from and to params" time="0.003">
+    <testcase classname="updateMyProfile PATCHes /users/me/profile con el número de licencia" name="updateMyProfile PATCHes /users/me/profile con el número de licencia" time="0.002">
     </testcase>
-    <testcase classname="getClientsReport GETs /reports/clients" name="getClientsReport GETs /reports/clients" time="0.002">
+    <testcase classname="updateMyProfile permite actualizar sin campos (objeto vacío)" name="updateMyProfile permite actualizar sin campos (objeto vacío)" time="0.002">
     </testcase>
-    <testcase classname="getFinancialReport GETs /reports/financial with from and to params" name="getFinancialReport GETs /reports/financial with from and to params" time="0.002">
+    <testcase classname="setMyPassword PATCHes /users/me/password con nueva contraseña" name="setMyPassword PATCHes /users/me/password con nueva contraseña" time="0.003">
     </testcase>
-    <testcase classname="getInventoryReport GETs /reports/inventory" name="getInventoryReport GETs /reports/inventory" time="0.001">
+    <testcase classname="setMyPassword permite establecer contraseña sin currentPassword (primer acceso con OAuth)" name="setMyPassword permite establecer contraseña sin currentPassword (primer acceso con OAuth)" time="0.002">
     </testcase>
-    <testcase classname="getRemindersReport GETs /reports/reminders with from and to params" name="getRemindersReport GETs /reports/reminders with from and to params" time="0.002">
+    <testcase classname="setMyPassword propaga el error si la contraseña actual es incorrecta" name="setMyPassword propaga el error si la contraseña actual es incorrecta" time="0.003">
+    </testcase>
+    <testcase classname="uploadMySignature POSTea la firma a /users/me/signature y retorna la key" name="uploadMySignature POSTea la firma a /users/me/signature y retorna la key" time="0.003">
+    </testcase>
+    <testcase classname="uploadMySignature envía el archivo como multipart/form-data con el campo &apos;file&apos;" name="uploadMySignature envía el archivo como multipart/form-data con el campo &apos;file&apos;" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="api interceptor" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:15" time="0.147" tests="3">
+    <testcase classname="api interceptor adds Authorization header when token is in localStorage" name="api interceptor adds Authorization header when token is in localStorage" time="0.002">
+    </testcase>
+    <testcase classname="api interceptor does not add Authorization header when no token" name="api interceptor does not add Authorization header when no token" time="0.001">
+    </testcase>
+    <testcase classname="api interceptor uses NEXT_PUBLIC_API_URL as baseURL when set" name="api interceptor uses NEXT_PUBLIC_API_URL as baseURL when set" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="listPrescriptions" errors="0" failures="0" skipped="0" timestamp="2026-05-07T21:03:15" time="0.141" tests="8">
+    <testcase classname="listPrescriptions calls GET /prescriptions without filters" name="listPrescriptions calls GET /prescriptions without filters" time="0.004">
+    </testcase>
+    <testcase classname="listPrescriptions passes query string filters" name="listPrescriptions passes query string filters" time="0.003">
+    </testcase>
+    <testcase classname="getPrescription calls GET /prescriptions/:id" name="getPrescription calls GET /prescriptions/:id" time="0.001">
+    </testcase>
+    <testcase classname="createPrescription calls POST /prescriptions with body" name="createPrescription calls POST /prescriptions with body" time="0.001">
+    </testcase>
+    <testcase classname="updatePrescription calls PATCH /prescriptions/:id" name="updatePrescription calls PATCH /prescriptions/:id" time="0.002">
+    </testcase>
+    <testcase classname="deletePrescription calls DELETE /prescriptions/:id" name="deletePrescription calls DELETE /prescriptions/:id" time="0.002">
+    </testcase>
+    <testcase classname="generatePdf calls POST /prescriptions/:id/pdf" name="generatePdf calls POST /prescriptions/:id/pdf" time="0.001">
+    </testcase>
+    <testcase classname="sendPrescription calls POST /prescriptions/:id/send" name="sendPrescription calls POST /prescriptions/:id/send" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>
