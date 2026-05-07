@@ -52,6 +52,9 @@ export default function PrescriptionPrintPage() {
       <style>{`
         @media print {
           .no-print { display: none !important; }
+          aside { display: none !important; }
+          main { margin-left: 0 !important; padding: 0 !important; width: 100% !important; }
+          .print-content { padding-top: 0 !important; }
           body { margin: 0; }
           @page { margin: 1.5cm 1.8cm; size: A4; }
         }
@@ -82,7 +85,7 @@ export default function PrescriptionPrintPage() {
       </div>
 
       {/* Contenido imprimible */}
-      <div className="pt-16 no-print-padding">
+      <div className="pt-16 print-content">
         <div
           className="max-w-[794px] mx-auto bg-white p-10 min-h-[1122px]"
           style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
