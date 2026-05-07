@@ -42,6 +42,8 @@ export default function SuperAdminDashboard() {
       const [t, s] = await Promise.all([fetchTenants(), fetchStats()]);
       setTenants(t);
       setStats(s);
+    } catch {
+      // 401 → interceptor redirects to login automatically
     } finally {
       setLoading(false);
     }

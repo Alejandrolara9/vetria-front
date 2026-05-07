@@ -12,6 +12,17 @@ superAdminApi.interceptors.request.use((config) => {
   return config;
 });
 
+superAdminApi.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("superadmin_token");
+      window.location.href = "/superadmin/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface TenantSummary {
   id: string;
   name: string;
