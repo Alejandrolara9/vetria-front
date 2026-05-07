@@ -127,7 +127,7 @@ export async function streamClinicalNote(
   id: string,
   callbacks: {
     onToken: (text: string) => void;
-    onComplete: (note: ClinicalNote) => void;
+    onComplete: (note: ClinicalNote, source: "ai" | "fallback") => void;
     onError: (msg: string) => void;
   }
 ): Promise<void> {
@@ -166,7 +166,7 @@ export async function streamClinicalNote(
         if (event.type === "token") {
           callbacks.onToken(event.text);
         } else if (event.type === "complete") {
-          callbacks.onComplete(event.note);
+          callbacks.onComplete(event.note, event.source ?? "fallback");
         } else if (event.type === "error") {
           callbacks.onError(event.message);
         }

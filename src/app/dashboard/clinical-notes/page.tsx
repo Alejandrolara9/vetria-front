@@ -173,6 +173,7 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
   const [phase, setPhase] = useState<"form" | "streaming" | "done">("form");
   const [streamedText, setStreamedText] = useState("");
   const [finalNote, setFinalNote] = useState<ClinicalNote | null>(null);
+  const [noteSource, setNoteSource] = useState<"ai" | "fallback" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const streamBoxRef = useRef<HTMLDivElement>(null);
   const { listening, supported: voiceSupported, start: startVoice, stop: stopVoice } = useVoiceInput(
@@ -214,8 +215,9 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
       await streamClinicalNote(draft.id, {
         onToken: (text) => setStreamedText((prev) => prev + text),
-        onComplete: (note) => {
+        onComplete: (note, source) => {
           setFinalNote(note);
+          setNoteSource(source);
           setPhase("done");
           onCreated(note);
         },
@@ -246,9 +248,14 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
                 IA escribiendo...
               </span>
             )}
-            {phase === "done" && (
+            {phase === "done" && noteSource === "ai" && (
               <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                Generada
+                ✓ Generada por IA
+              </span>
+            )}
+            {phase === "done" && noteSource === "fallback" && (
+              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                ⚠ Plantilla base (IA no disponible)
               </span>
             )}
           </div>
@@ -385,11 +392,16 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
             {selectedPetId && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Archivos médicos (opcional)
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Sube radiografías o resultados de laboratorio. La IA los analizará e incluirá el contexto al generar la historia clínica.
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Archivos médicos (opcional)
+                  </label>
+                  <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full font-medium">
+                    Los análisis se incluyen en la nota IA
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 mb-2">
+                  Radiografías o resultados de laboratorio — la IA leerá su análisis antes de generar la historia.
                 </p>
                 <AttachmentsPanel petId={selectedPetId} />
               </div>
