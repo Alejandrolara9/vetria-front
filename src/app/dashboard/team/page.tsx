@@ -55,8 +55,9 @@ export default function TeamPage() {
       setForm({ name: "", email: "", password: "", role: "VET" });
       setShowForm(false);
       loadTeam();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Error al crear usuario");
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al crear usuario");
     } finally {
       setSubmitting(false);
     }
@@ -81,8 +82,9 @@ export default function TeamPage() {
       await api.patch(`/users/${editingMember.id}`, payload);
       setEditingMember(null);
       loadTeam();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Error al actualizar usuario");
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al actualizar usuario");
     } finally {
       setSubmitting(false);
     }
@@ -93,8 +95,9 @@ export default function TeamPage() {
     try {
       await api.delete(`/users/${id}`);
       loadTeam();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Error al eliminar");
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al eliminar");
     }
   }
 

@@ -35,8 +35,9 @@ function ResetPasswordForm() {
       await api.post("/auth/reset-password", { token, password });
       setDone(true);
       setTimeout(() => router.push("/login"), 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error al restablecer la contraseña");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? "Error al restablecer la contraseña");
     } finally {
       setLoading(false);
     }

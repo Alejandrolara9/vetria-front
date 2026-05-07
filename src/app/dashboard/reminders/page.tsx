@@ -135,8 +135,9 @@ function ReminderCard({ reminder, showOverdueBadge, onResent }: ReminderCardProp
       const res = await api.post(`/reminders/${reminder.id}/resend`, {});
       alert(res.data?.message || "Correo enviado correctamente.");
       onResent();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "No se pudo reenviar el recordatorio.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "No se pudo reenviar el recordatorio.");
     } finally {
       setResending(false);
     }

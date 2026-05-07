@@ -25,13 +25,13 @@ export default function LoginPage() {
       }
       localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
-    } catch (err: any) {
-      const msg = err.response?.data?.message;
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       if (msg === "CLINIC_NAME_REQUIRED") {
         router.push("/register");
         return;
       }
-      setError(msg || "Error al iniciar sesión con Google");
+      setError(msg ?? "Error al iniciar sesión con Google");
     } finally {
       setLoading(false);
     }
@@ -45,8 +45,9 @@ export default function LoginPage() {
       const response = await api.post("/auth/login", { email, password });
       localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Correo o contraseña incorrectos");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? "Correo o contraseña incorrectos");
     } finally {
       setLoading(false);
     }

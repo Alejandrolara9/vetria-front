@@ -98,8 +98,9 @@ function ServiceModal({
       }
       onSaved();
       onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error al guardar el servicio");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? "Error al guardar el servicio");
     } finally {
       setSaving(false);
     }
@@ -252,8 +253,9 @@ export default function ServicesPage() {
     try {
       await deleteService(svc.id);
       loadServices();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Error al eliminar el servicio");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al eliminar el servicio");
     }
   }
 

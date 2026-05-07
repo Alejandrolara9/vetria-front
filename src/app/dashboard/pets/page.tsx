@@ -102,8 +102,9 @@ export default function PetsPage() {
       setShowForm(false);
       setEditingId(null);
       loadData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Error al guardar");
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al guardar");
     }
   }
 
@@ -112,8 +113,9 @@ export default function PetsPage() {
     try {
       await api.delete(`/pets/${id}`);
       loadData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Error al eliminar");
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al eliminar");
     }
   }
 
