@@ -950,21 +950,21 @@ export default function AppointmentsPage() {
   return (
     <div>
       {/* Encabezado */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-2xl font-bold">Agenda</h1>
-          <p className="text-muted-foreground text-sm mt-1">Gestion de citas veterinarias</p>
+          <h1 className="text-xl md:text-2xl font-bold">Agenda</h1>
+          <p className="text-muted-foreground text-sm mt-0.5 hidden sm:block">Gestión de citas veterinarias</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
+          className="px-3 py-2 md:px-4 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
         >
           + Nueva Cita
         </button>
       </div>
 
       {/* Stats del dia */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {loadingStats ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-card-bg rounded-xl border border-border p-4 animate-pulse">
@@ -983,7 +983,7 @@ export default function AppointmentsPage() {
       </div>
 
       {/* Leyenda de tipos */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="hidden sm:flex flex-wrap gap-2 mb-4">
         {(Object.keys(TYPE_LABELS) as AppointmentType[]).map((t) => (
           <span
             key={t}
@@ -995,89 +995,93 @@ export default function AppointmentsPage() {
       </div>
 
       {/* Navegacion de semana */}
-      <div className="flex items-center gap-3 mb-4">
-        <button
-          onClick={prevWeek}
-          className="p-2 border border-border rounded-lg hover:bg-gray-50 text-sm"
-          aria-label="Semana anterior"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <button
-          onClick={goToToday}
-          className="px-3 py-1.5 border border-border rounded-lg text-sm hover:bg-gray-50"
-        >
-          Hoy
-        </button>
-        <button
-          onClick={nextWeek}
-          className="p-2 border border-border rounded-lg hover:bg-gray-50 text-sm"
-          aria-label="Semana siguiente"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={prevWeek}
+            className="p-2 border border-border rounded-lg hover:bg-gray-50 text-sm"
+            aria-label="Semana anterior"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={goToToday}
+            className="px-3 py-1.5 border border-border rounded-lg text-sm hover:bg-gray-50"
+          >
+            Hoy
+          </button>
+          <button
+            onClick={nextWeek}
+            className="p-2 border border-border rounded-lg hover:bg-gray-50 text-sm"
+            aria-label="Semana siguiente"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
         <span className="text-sm font-medium text-muted-foreground">{weekLabel}</span>
         {loadingCalendar && (
           <span className="text-xs text-muted-foreground animate-pulse">Cargando...</span>
         )}
       </div>
 
-      {/* Calendario semanal — CSS Grid */}
-      <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
-        {/* Header de dias */}
-        <div className="grid grid-cols-7 border-b border-border">
-          {weekDays.map((day) => {
-            const dayStr = toDateStr(day);
-            const isToday = dayStr === todayStr;
-            const count = (appointmentsByDay[dayStr] ?? []).length;
-            return (
-              <div
-                key={dayStr}
-                className={`p-3 text-center border-r last:border-r-0 border-border ${isToday ? "bg-blue-50" : "bg-gray-50"}`}
-              >
-                <p className={`text-xs uppercase font-medium ${isToday ? "text-blue-700" : "text-muted-foreground"}`}>
-                  {formatDateLong(day)}
-                </p>
-                {count > 0 && (
-                  <span className="inline-block mt-1 text-xs bg-primary text-white rounded-full w-5 h-5 leading-5 text-center">
-                    {count}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
+      {/* Calendario semanal — horizontally scrollable on mobile */}
+      <div className="overflow-x-auto rounded-xl border border-border">
+        <div className="min-w-[640px] bg-card-bg">
+          {/* Header de dias */}
+          <div className="grid grid-cols-7 border-b border-border">
+            {weekDays.map((day) => {
+              const dayStr = toDateStr(day);
+              const isToday = dayStr === todayStr;
+              const count = (appointmentsByDay[dayStr] ?? []).length;
+              return (
+                <div
+                  key={dayStr}
+                  className={`p-2 text-center border-r last:border-r-0 border-border ${isToday ? "bg-blue-50" : "bg-gray-50"}`}
+                >
+                  <p className={`text-xs uppercase font-medium leading-tight ${isToday ? "text-blue-700" : "text-muted-foreground"}`}>
+                    {formatDateLong(day)}
+                  </p>
+                  {count > 0 && (
+                    <span className="inline-block mt-1 text-xs bg-primary text-white rounded-full w-5 h-5 leading-5 text-center">
+                      {count}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-        {/* Cuerpo del calendario */}
-        <div className="grid grid-cols-7 min-h-64">
-          {weekDays.map((day) => {
-            const dayStr = toDateStr(day);
-            const isToday = dayStr === todayStr;
-            const dayAppts = appointmentsByDay[dayStr] ?? [];
+          {/* Cuerpo del calendario */}
+          <div className="grid grid-cols-7 min-h-48">
+            {weekDays.map((day) => {
+              const dayStr = toDateStr(day);
+              const isToday = dayStr === todayStr;
+              const dayAppts = appointmentsByDay[dayStr] ?? [];
 
-            return (
-              <div
-                key={dayStr}
-                className={`p-2 border-r last:border-r-0 border-border min-h-32 ${isToday ? "bg-blue-50/30" : ""}`}
-              >
-                {dayAppts.length === 0 ? (
-                  <p className="text-xs text-muted-foreground/50 text-center mt-4">—</p>
-                ) : (
-                  dayAppts.map((appt) => (
-                    <AppointmentBlock
-                      key={appt.id}
-                      appointment={appt}
-                      onClick={setSelectedAppointment}
-                    />
-                  ))
-                )}
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={dayStr}
+                  className={`p-1.5 border-r last:border-r-0 border-border min-h-32 ${isToday ? "bg-blue-50/30" : ""}`}
+                >
+                  {dayAppts.length === 0 ? (
+                    <p className="text-xs text-muted-foreground/50 text-center mt-4">—</p>
+                  ) : (
+                    dayAppts.map((appt) => (
+                      <AppointmentBlock
+                        key={appt.id}
+                        appointment={appt}
+                        onClick={setSelectedAppointment}
+                      />
+                    ))
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -1087,8 +1091,8 @@ export default function AppointmentsPage() {
           <h2 className="text-base font-semibold mb-3">
             Citas esta semana ({weekAppointments.length})
           </h2>
-          <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full text-sm min-w-[560px] bg-card-bg">
               <thead className="bg-gray-50 border-b border-border">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>

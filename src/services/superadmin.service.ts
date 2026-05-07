@@ -12,6 +12,17 @@ superAdminApi.interceptors.request.use((config) => {
   return config;
 });
 
+superAdminApi.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("superadmin_token");
+      window.location.href = "/superadmin/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface TenantSummary {
   id: string;
   name: string;
@@ -21,6 +32,7 @@ export interface TenantSummary {
   createdAt: string;
   clinicDepartment: string | null;
   clinicCity: string | null;
+  creditBalance: number | null;
   _count: { users: number; pets: number; appointments: number };
 }
 
@@ -70,4 +82,40 @@ export async function fetchStats(): Promise<PlatformStats> {
 
 export async function changeSuperAdminPassword(newPassword: string): Promise<void> {
   await superAdminApi.patch("/superadmin/me/password", { newPassword });
+}
+
+export interface CreditRequest {
+  id: string;
+  tenantId: string;
+  credits: number;
+  paidAmountCOP: number;
+  createdAt: string;
+  tenant: {
+    id: string;
+    name: string;
+    plan: string;
+    creditBalance: number;
+  };
+}
+
+export async function fetchCreditRequests(): Promise<CreditRequest[]> {
+  const res = await superAdminApi.get("/superadmin/credit-requests");
+  return res.data;
+}
+
+export async function confirmCreditRequest(reqId: string): Promise<{ creditBalance: number }> {
+  const res = await superAdminApi.post(`/superadmin/credit-requests/${reqId}/confirm`);
+  return res.data;
+}
+
+export async function addCreditsAdmin(
+  tenantId: string,
+  credits: number,
+  reason?: string
+): Promise<{ creditBalance: number }> {
+  const res = await superAdminApi.post(`/superadmin/tenants/${tenantId}/credits`, {
+    credits,
+    reason,
+  });
+  return res.data;
 }

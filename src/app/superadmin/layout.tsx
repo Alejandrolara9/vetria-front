@@ -50,7 +50,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b px-6 py-4 flex items-center justify-between">
-        <span className="font-bold text-lg text-primary">OKVet SuperAdmin</span>
+        <span className="font-bold text-lg text-primary">Vetria SuperAdmin</span>
         <button
           onClick={handleLogout}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"

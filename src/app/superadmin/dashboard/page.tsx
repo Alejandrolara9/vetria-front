@@ -6,9 +6,13 @@ import {
   fetchStats,
   updateTenant,
   fetchTenantUsers,
+  fetchCreditRequests,
+  confirmCreditRequest,
+  addCreditsAdmin,
   TenantSummary,
   TenantUser,
   PlatformStats,
+  CreditRequest,
 } from "@/services/superadmin.service";
 import { COLOMBIA_DEPARTMENTS } from "@/lib/colombia-locations";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -22,6 +26,7 @@ const PLAN_COLORS: Record<string, string> = {
 export default function SuperAdminDashboard() {
   const [tenants, setTenants] = useState<TenantSummary[]>([]);
   const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [creditRequests, setCreditRequests] = useState<CreditRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterPlan, setFilterPlan] = useState<"" | "FREE" | "BASIC" | "PRO">("");
@@ -32,16 +37,22 @@ export default function SuperAdminDashboard() {
   const [editUsers, setEditUsers] = useState<TenantUser[]>([]);
   const [editPlan, setEditPlan] = useState<"FREE" | "BASIC" | "PRO">("BASIC");
   const [editActive, setEditActive] = useState(true);
+  const [editCredits, setEditCredits] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
+
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   useEffect(() => { loadAll(); }, []);
 
   async function loadAll() {
     try {
-      const [t, s] = await Promise.all([fetchTenants(), fetchStats()]);
+      const [t, s, cr] = await Promise.all([fetchTenants(), fetchStats(), fetchCreditRequests()]);
       setTenants(t);
       setStats(s);
+      setCreditRequests(cr);
+    } catch {
+      // 401 → interceptor redirects to login automatically
     } finally {
       setLoading(false);
     }
@@ -51,6 +62,7 @@ export default function SuperAdminDashboard() {
     setEditTarget(tenant);
     setEditPlan(tenant.plan);
     setEditActive(tenant.active);
+    setEditCredits("");
     setEditError("");
     setEditUsers([]);
     const users = await fetchTenantUsers(tenant.id);
@@ -61,6 +73,7 @@ export default function SuperAdminDashboard() {
     setEditTarget(null);
     setEditUsers([]);
     setEditError("");
+    setEditCredits("");
   }
 
   async function handleEditSubmit(e: React.FormEvent) {
@@ -70,6 +83,9 @@ export default function SuperAdminDashboard() {
     setEditError("");
     try {
       await updateTenant(editTarget.id, { plan: editPlan, active: editActive });
+      if (editCredits && parseInt(editCredits) > 0) {
+        await addCreditsAdmin(editTarget.id, parseInt(editCredits), "Ajuste manual superadmin");
+      }
       closeEdit();
       loadAll();
     } catch (err: unknown) {
@@ -77,6 +93,21 @@ export default function SuperAdminDashboard() {
       setEditError(axiosErr.response?.data?.message || "Error al actualizar");
     } finally {
       setEditSubmitting(false);
+    }
+  }
+
+  async function handleConfirmRequest(req: CreditRequest) {
+    setConfirmingId(req.id);
+    try {
+      await confirmCreditRequest(req.id);
+      setCreditRequests((prev) => prev.filter((r) => r.id !== req.id));
+      // refresh tenant list to show updated balance
+      const updated = await fetchTenants();
+      setTenants(updated);
+    } catch {
+      alert("Error al confirmar la solicitud");
+    } finally {
+      setConfirmingId(null);
     }
   }
 
@@ -100,7 +131,7 @@ export default function SuperAdminDashboard() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Panel de plataforma</h1>
-        <p className="text-sm text-muted-foreground mt-1">Resumen de clínicas registradas en OKVet</p>
+        <p className="text-sm text-muted-foreground mt-1">Resumen de clínicas registradas en Vetria</p>
       </div>
 
       {stats && (
@@ -116,6 +147,54 @@ export default function SuperAdminDashboard() {
               <p className="text-3xl font-bold mt-1">{card.value}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pending credit requests */}
+      {creditRequests.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <h2 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Solicitudes de recarga pendientes ({creditRequests.length})
+          </h2>
+          <div className="space-y-2">
+            {creditRequests.map((req) => (
+              <div
+                key={req.id}
+                className="bg-white rounded-lg border border-amber-100 flex items-center justify-between px-4 py-3 text-sm"
+              >
+                <div>
+                  <span className="font-medium text-gray-900">{req.tenant.name}</span>
+                  <span className="text-muted-foreground ml-2">
+                    Plan {req.tenant.plan} · {req.tenant.creditBalance} créditos actuales
+                  </span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="font-semibold text-blue-700">+{req.credits} créditos</p>
+                    <p className="text-xs text-muted-foreground">
+                      ${req.paidAmountCOP.toLocaleString("es-CO")} COP
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(req.createdAt).toLocaleDateString("es-CO", {
+                      day: "2-digit",
+                      month: "short",
+                    })}
+                  </p>
+                  <button
+                    onClick={() => handleConfirmRequest(req)}
+                    disabled={confirmingId === req.id}
+                    className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {confirmingId === req.id ? "Confirmando..." : "Confirmar pago"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -164,6 +243,7 @@ export default function SuperAdminDashboard() {
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Ubicación</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Plan</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Créditos IA</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Usuarios</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Mascotas</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Citas</th>
@@ -194,6 +274,17 @@ export default function SuperAdminDashboard() {
                     t.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                   }`}>
                     {t.active ? "Activa" : "Inactiva"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <span className={`font-medium ${
+                    (t.creditBalance ?? 0) >= 50
+                      ? "text-green-600"
+                      : (t.creditBalance ?? 0) >= 10
+                      ? "text-amber-600"
+                      : "text-red-600"
+                  }`}>
+                    {t.creditBalance ?? 0}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">{t._count.users}</td>
@@ -262,6 +353,23 @@ export default function SuperAdminDashboard() {
                   <option value="BASIC">BASIC</option>
                   <option value="PRO">PRO</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Agregar créditos IA
+                  <span className="text-muted-foreground font-normal ml-1">
+                    (balance actual: {editTarget.creditBalance ?? 0})
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={10000}
+                  placeholder="Ej: 100"
+                  value={editCredits}
+                  onChange={(e) => setEditCredits(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
               </div>
               <div className="flex items-center gap-3">
                 <input
