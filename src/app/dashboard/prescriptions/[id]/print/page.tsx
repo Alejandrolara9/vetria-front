@@ -69,10 +69,10 @@ export default function PrescriptionPrintPage() {
         </p>
         <div className="flex gap-2">
           <button
-            onClick={() => window.history.back()}
+            onClick={() => window.close()}
             className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50"
           >
-            ← Volver
+            ← Cerrar
           </button>
           <button
             onClick={() => window.print()}
