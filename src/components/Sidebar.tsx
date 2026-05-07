@@ -294,6 +294,7 @@ function CreditModal({
 function CreditWidget() {
   const [credits, setCredits] = useState<TenantCredits | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [now] = useState(() => Date.now());
 
   const load = useCallback(async () => {
     try {
@@ -306,13 +307,15 @@ function CreditWidget() {
 
   useEffect(() => { load(); }, [load]);
 
+  const trialEndsAt = credits?.trialEndsAt ?? null;
+  const trialDaysLeft = trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - now) / (1000 * 60 * 60 * 24)))
+    : 0;
+
   if (!credits) return null;
 
   const balance = credits.creditBalance;
-  const isInTrial = credits.trialEndsAt && new Date(credits.trialEndsAt) > new Date();
-  const trialDaysLeft = isInTrial
-    ? Math.ceil((new Date(credits.trialEndsAt!).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : 0;
+  const isInTrial = trialEndsAt && new Date(trialEndsAt).getTime() > now;
 
   const balanceColor =
     balance >= 50
