@@ -39,7 +39,7 @@ const CATEGORY_COLORS: Record<ProductCategory, string> = {
   OTHER: "bg-gray-100 text-gray-500",
 };
 
-const _MOVEMENT_LABELS: Record<MovementType, string> = {
+export const MOVEMENT_LABELS: Record<MovementType, string> = {
   IN: "Entrada",
   OUT: "Salida",
   ADJUSTMENT: "Ajuste",

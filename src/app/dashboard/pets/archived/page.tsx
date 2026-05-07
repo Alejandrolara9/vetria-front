@@ -38,8 +38,9 @@ export default function ArchivedPetsPage() {
     try {
       await api.post(`/pets/${id}/restore`, {});
       await loadData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Error al restaurar");
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al restaurar");
     } finally {
       setRestoring(null);
     }

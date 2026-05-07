@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import Link from "next/link";
+import SearchableSelect from "@/components/SearchableSelect";
 
 const BREEDS: Record<string, string[]> = {
   Canino: [
@@ -101,8 +102,9 @@ export default function PetsPage() {
       setShowForm(false);
       setEditingId(null);
       loadData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Error al guardar");
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al guardar");
     }
   }
 
@@ -111,8 +113,9 @@ export default function PetsPage() {
     try {
       await api.delete(`/pets/${id}`);
       loadData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Error al eliminar");
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al eliminar");
     }
   }
 
@@ -178,16 +181,12 @@ export default function PetsPage() {
               <option value="Otro">Otro</option>
             </select>
             {BREEDS[form.species] ? (
-              <select
-                className="px-4 py-2 border border-border rounded-lg text-sm"
+              <SearchableSelect
+                options={BREEDS[form.species]}
                 value={form.breed}
-                onChange={(e) => setForm({ ...form, breed: e.target.value })}
-              >
-                <option value="">Seleccionar raza</option>
-                {BREEDS[form.species].map((b) => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
-              </select>
+                onChange={(v) => setForm({ ...form, breed: v })}
+                placeholder="Seleccionar raza"
+              />
             ) : (
               <input
                 type="text" placeholder="Raza (opcional)"
@@ -195,15 +194,12 @@ export default function PetsPage() {
                 value={form.breed} onChange={(e) => setForm({ ...form, breed: e.target.value })}
               />
             )}
-            <select
-              required className="px-4 py-2 border border-border rounded-lg text-sm"
-              value={form.clientId} onChange={(e) => setForm({ ...form, clientId: e.target.value })}
-            >
-              <option value="">Seleccionar tutor</option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <SearchableSelect
+              labeledOptions={clients.map((c) => ({ value: c.id, label: c.name }))}
+              value={form.clientId}
+              onChange={(id) => setForm({ ...form, clientId: id })}
+              placeholder="Seleccionar tutor"
+            />
             <input
               type="date" placeholder="Fecha de nacimiento"
               className="px-4 py-2 border border-border rounded-lg text-sm"

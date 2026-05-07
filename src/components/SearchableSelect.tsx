@@ -2,8 +2,11 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 
+interface LabeledOption { value: string; label: string; }
+
 interface Props {
-  options: string[];
+  options?: string[];
+  labeledOptions?: LabeledOption[];
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -14,6 +17,7 @@ interface Props {
 
 export default function SearchableSelect({
   options,
+  labeledOptions,
   value,
   onChange,
   placeholder = "Selecciona...",
@@ -28,9 +32,12 @@ export default function SearchableSelect({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
+  const items: LabeledOption[] = labeledOptions ?? (options ?? []).map((o) => ({ value: o, label: o }));
+  const displayLabel = items.find((i) => i.value === value)?.label ?? value;
+
   const filtered = query.trim()
-    ? options.filter((o) => o.toLowerCase().includes(query.toLowerCase()))
-    : options;
+    ? items.filter((i) => i.label.toLowerCase().includes(query.toLowerCase()))
+    : items;
 
   // Close when clicking outside
   useEffect(() => {
@@ -52,8 +59,8 @@ export default function SearchableSelect({
   }, [highlighted]);
 
   const select = useCallback(
-    (option: string) => {
-      onChange(option);
+    (item: LabeledOption) => {
+      onChange(item.value);
       setOpen(false);
       setQuery("");
       setHighlighted(0);
@@ -119,8 +126,8 @@ export default function SearchableSelect({
           type="text"
           className={`${inputBase} ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
           style={isDark ? { backgroundColor: "rgba(255,255,255,0.05)" } : {}}
-          value={open ? query : value}
-          placeholder={value ? value : placeholder}
+          value={open ? query : displayLabel}
+          placeholder={displayLabel || placeholder}
           disabled={disabled}
           readOnly={!open}
           autoComplete="off"
@@ -132,7 +139,8 @@ export default function SearchableSelect({
             if (!disabled) {
               setOpen(true);
               setQuery("");
-              setHighlighted(value ? Math.max(0, options.indexOf(value)) : 0);
+              const idx = items.findIndex((i) => i.value === value);
+              setHighlighted(idx >= 0 ? idx : 0);
             }
           }}
           onKeyDown={handleKeyDown}
@@ -173,20 +181,20 @@ export default function SearchableSelect({
               Sin resultados para &quot;{query}&quot;
             </li>
           ) : (
-            filtered.map((option, idx) => (
-              <li key={option}>
+            filtered.map((item, idx) => (
+              <li key={item.value}>
                 <button
                   type="button"
-                  onMouseDown={() => select(option)}
+                  onMouseDown={() => select(item)}
                   className={`${optionBase} ${
                     idx === highlighted
                       ? optionHighlighted
-                      : option === value
+                      : item.value === value
                       ? optionSelected
                       : optionNormal
                   }`}
                 >
-                  {option}
+                  {item.label}
                 </button>
               </li>
             ))

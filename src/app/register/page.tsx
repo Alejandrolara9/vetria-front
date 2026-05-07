@@ -45,8 +45,9 @@ export default function RegisterPage() {
       });
       localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error al registrarse con Google");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? "Error al registrarse con Google");
       setPendingCredential(null);
     } finally {
       setLoading(false);
@@ -68,8 +69,9 @@ export default function RegisterPage() {
       });
       localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error al crear la cuenta");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? "Error al crear la cuenta");
     } finally {
       setLoading(false);
     }

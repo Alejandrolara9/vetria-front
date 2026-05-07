@@ -375,8 +375,9 @@ function CreateInvoiceModal({
       });
       onCreated();
       onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error al crear la factura");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? "Error al crear la factura");
     } finally {
       setSaving(false);
     }
@@ -663,8 +664,9 @@ function InvoiceDetailModal({
       await updateInvoice(invoice.id, { status: newStatus });
       onUpdated();
       onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error al actualizar");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? "Error al actualizar");
     } finally {
       setLoading(false);
     }
@@ -677,8 +679,9 @@ function InvoiceDetailModal({
       await deleteInvoice(invoice.id);
       onUpdated();
       onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error al eliminar");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? "Error al eliminar");
     } finally {
       setLoading(false);
     }
@@ -911,8 +914,9 @@ export default function InvoicesPage() {
     try {
       await updateInvoice(invoice.id, { status: "PAID" });
       loadData();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Error al actualizar");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al actualizar");
     }
   }
 
@@ -921,8 +925,9 @@ export default function InvoicesPage() {
     try {
       await deleteInvoice(invoice.id);
       loadData();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Error al eliminar");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al eliminar");
     }
   }
 
