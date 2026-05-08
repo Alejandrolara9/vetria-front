@@ -194,7 +194,7 @@ function CreditModal({ onClose }: { onClose: () => void }) {
     setError("");
     try {
       const { checkoutUrl } = await initiateCreditsCheckout(selected);
-      globalThis.window.location.href = checkoutUrl;
+      globalThis.window.location.assign(checkoutUrl);
     } catch {
       setError("No se pudo iniciar el pago. Intenta de nuevo.");
       setSubmitting(false);
