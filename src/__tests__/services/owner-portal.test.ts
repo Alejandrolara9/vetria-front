@@ -74,14 +74,15 @@ afterAll(() => mock.restore());
 // ─── Auth ──────────────────────────────────────────────────────────────────────
 
 describe("validateInviteToken", () => {
-  it("GETs /portal/auth/validate-invite/:token y retorna el email asociado", async () => {
-    mock.onGet("/portal/auth/validate-invite/token123").reply(200, { email: "dueño@email.co" });
+  it("POSTea /portal/auth/validate-invite con el token en el body y retorna el email asociado", async () => {
+    mock.onPost("/portal/auth/validate-invite").reply(200, { email: "dueño@email.co" });
     const result = await validateInviteToken("token123");
     expect(result.email).toBe("dueño@email.co");
+    expect(JSON.parse(mock.history.post[0].data)).toEqual({ token: "token123" });
   });
 
   it("propaga error si el token es inválido o expirado", async () => {
-    mock.onGet("/portal/auth/validate-invite/expired").reply(404, { message: "Token expirado" });
+    mock.onPost("/portal/auth/validate-invite").reply(404, { message: "Token expirado" });
     await expect(validateInviteToken("expired")).rejects.toThrow();
   });
 });

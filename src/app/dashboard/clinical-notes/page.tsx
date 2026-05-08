@@ -121,7 +121,7 @@ type SpeechRecConstructor = new () => SpeechRec;
 
 function getSpeechRecognition(): SpeechRecConstructor | null {
   if (typeof window === "undefined") return null;
-  const w = window as unknown as { SpeechRecognition?: SpeechRecConstructor; webkitSpeechRecognition?: SpeechRecConstructor };
+  const w = window as unknown as { SpeechRecognition?: SpeechRecConstructor; webkitSpeechRecognition?: SpeechRecConstructor }; // NOSONAR S3740 — required to access non-standard browser Speech API properties
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 

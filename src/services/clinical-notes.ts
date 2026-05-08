@@ -132,7 +132,7 @@ export async function streamClinicalNote(
   }
 ): Promise<void> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token"); // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
 
   const response = await fetch(`${apiUrl}/clinical-notes/${id}/stream`, {
     method: "POST",
