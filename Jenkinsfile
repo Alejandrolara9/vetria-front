@@ -97,7 +97,6 @@ pipeline {
                             ${scannerHome}/bin/sonar-scanner \\
                                 -Dsonar.projectKey=${PROJECT_KEY} \\
                                 -Dsonar.projectName="${PROJECT_NAME}" \\
-                                -Dsonar.projectVersion=${BUILD_NUMBER} \\
                                 -Dsonar.sources=src \\
                                 -Dsonar.tests=src \\
                                 -Dsonar.test.inclusions=**/__tests__/**/*.ts,**/__tests__/**/*.tsx,**/*.spec.ts,**/*.spec.tsx,**/*.test.ts,**/*.test.tsx \\
