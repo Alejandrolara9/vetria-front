@@ -26,6 +26,7 @@ const config = {
     "src/lib/**/*.ts",
     "!src/**/*.d.ts",
   ],
+  coverageProvider: "v8",
   coverageReporters: ["lcov", "text", "text-summary"],
   coverageDirectory: "coverage",
   reporters: [

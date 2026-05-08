@@ -108,6 +108,10 @@ export async function confirmCreditRequest(reqId: string): Promise<{ creditBalan
   return res.data;
 }
 
+export async function rejectCreditRequest(reqId: string): Promise<void> {
+  await superAdminApi.delete(`/superadmin/credit-requests/${reqId}`);
+}
+
 export async function addCreditsAdmin(
   tenantId: string,
   credits: number,

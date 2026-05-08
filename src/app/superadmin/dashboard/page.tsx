@@ -8,6 +8,7 @@ import {
   fetchTenantUsers,
   fetchCreditRequests,
   confirmCreditRequest,
+  rejectCreditRequest,
   addCreditsAdmin,
   TenantSummary,
   TenantUser,
@@ -42,6 +43,9 @@ export default function SuperAdminDashboard() {
   const [editError, setEditError] = useState("");
 
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [pendingRejectId, setPendingRejectId] = useState<string | null>(null);
+  const [creditRequestError, setCreditRequestError] = useState<string | null>(null);
 
   useEffect(() => { loadAll(); }, []);
 
@@ -96,16 +100,29 @@ export default function SuperAdminDashboard() {
     }
   }
 
+  async function handleRejectRequest(reqId: string) {
+    setRejectingId(reqId);
+    setPendingRejectId(null);
+    setCreditRequestError(null);
+    try {
+      await rejectCreditRequest(reqId);
+      setCreditRequests((prev) => prev.filter((r) => r.id !== reqId));
+    } catch {
+      setCreditRequestError("Error al rechazar la solicitud");
+      setRejectingId(null);
+    }
+  }
+
   async function handleConfirmRequest(req: CreditRequest) {
     setConfirmingId(req.id);
+    setCreditRequestError(null);
     try {
       await confirmCreditRequest(req.id);
       setCreditRequests((prev) => prev.filter((r) => r.id !== req.id));
-      // refresh tenant list to show updated balance
       const updated = await fetchTenants();
       setTenants(updated);
     } catch {
-      alert("Error al confirmar la solicitud");
+      setCreditRequestError("Error al confirmar la solicitud");
     } finally {
       setConfirmingId(null);
     }
@@ -150,6 +167,12 @@ export default function SuperAdminDashboard() {
         </div>
       )}
 
+      {creditRequestError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+          {creditRequestError}
+        </div>
+      )}
+
       {/* Pending credit requests */}
       {creditRequests.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
@@ -184,9 +207,34 @@ export default function SuperAdminDashboard() {
                       month: "short",
                     })}
                   </p>
+                  {pendingRejectId === req.id ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-red-700 font-medium">¿Rechazar?</span>
+                      <button
+                        onClick={() => handleRejectRequest(req.id)}
+                        className="px-2 py-1 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700"
+                      >
+                        Sí
+                      </button>
+                      <button
+                        onClick={() => setPendingRejectId(null)}
+                        className="px-2 py-1 border rounded text-xs hover:bg-gray-50"
+                      >
+                        No
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setPendingRejectId(req.id)}
+                      disabled={rejectingId === req.id || confirmingId === req.id}
+                      className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200 disabled:opacity-50"
+                    >
+                      {rejectingId === req.id ? "Rechazando..." : "Rechazar"}
+                    </button>
+                  )}
                   <button
                     onClick={() => handleConfirmRequest(req)}
-                    disabled={confirmingId === req.id}
+                    disabled={confirmingId === req.id || rejectingId === req.id}
                     className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 disabled:opacity-50"
                   >
                     {confirmingId === req.id ? "Confirmando..." : "Confirmar pago"}
