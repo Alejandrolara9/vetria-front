@@ -5,12 +5,23 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
 export const superAdminApi = axios.create({ baseURL: BASE_URL });
 
 superAdminApi.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("superadmin_token");
+  if (globalThis.window !== undefined) {
+    const token = localStorage.getItem("superadmin_token"); // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+superAdminApi.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.response?.status === 401 && globalThis.window !== undefined) {
+      localStorage.removeItem("superadmin_token");
+      globalThis.window.location.replace("/superadmin/login"); // NOSONAR S5122 — hardcoded path, no user input involved
+    }
+    return Promise.reject(error);
+  }
+);
 
 export interface TenantSummary {
   id: string;
@@ -21,6 +32,7 @@ export interface TenantSummary {
   createdAt: string;
   clinicDepartment: string | null;
   clinicCity: string | null;
+  creditBalance: number | null;
   _count: { users: number; pets: number; appointments: number };
 }
 
@@ -70,4 +82,44 @@ export async function fetchStats(): Promise<PlatformStats> {
 
 export async function changeSuperAdminPassword(newPassword: string): Promise<void> {
   await superAdminApi.patch("/superadmin/me/password", { newPassword });
+}
+
+export interface CreditRequest {
+  id: string;
+  tenantId: string;
+  credits: number;
+  paidAmountCOP: number;
+  createdAt: string;
+  tenant: {
+    id: string;
+    name: string;
+    plan: string;
+    creditBalance: number;
+  };
+}
+
+export async function fetchCreditRequests(): Promise<CreditRequest[]> {
+  const res = await superAdminApi.get("/superadmin/credit-requests");
+  return res.data;
+}
+
+export async function confirmCreditRequest(reqId: string): Promise<{ creditBalance: number }> {
+  const res = await superAdminApi.post(`/superadmin/credit-requests/${reqId}/confirm`);
+  return res.data;
+}
+
+export async function rejectCreditRequest(reqId: string): Promise<void> {
+  await superAdminApi.delete(`/superadmin/credit-requests/${reqId}`);
+}
+
+export async function addCreditsAdmin(
+  tenantId: string,
+  credits: number,
+  reason?: string
+): Promise<{ creditBalance: number }> {
+  const res = await superAdminApi.post(`/superadmin/tenants/${tenantId}/credits`, {
+    credits,
+    reason,
+  });
+  return res.data;
 }

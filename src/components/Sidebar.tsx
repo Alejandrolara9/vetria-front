@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  fetchMyCredits,
+  requestCreditTopUp,
+  CREDIT_PACKS,
+  type TenantCredits,
+} from "@/services/credits";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -169,13 +175,227 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
   },
 ];
 
+// ─── Credit request modal ─────────────────────────────────────────────────────
+
+function CreditModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleRequest() {
+    if (selected === null) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      await requestCreditTopUp(selected);
+      setDone(true);
+      onSuccess();
+    } catch {
+      setError("No se pudo enviar la solicitud. Intenta de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100]">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-gray-900">Recargar créditos IA</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {done ? (
+          <div className="text-center py-4">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="font-medium text-gray-900 mb-1">¡Solicitud enviada!</p>
+            <p className="text-sm text-gray-500 mb-4">
+              Nuestro equipo procesará tu recarga en menos de 24 horas hábiles y recibirás confirmación.
+            </p>
+            <button
+              onClick={onClose}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+            >
+              Entendido
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500 mb-4">
+              Selecciona el paquete que necesitas. Te contactaremos para coordinar el pago y activar los créditos.
+            </p>
+            <div className="space-y-2 mb-4">
+              {CREDIT_PACKS.map((pack, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelected(idx)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-colors text-sm ${
+                    selected === idx
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <span className="font-medium text-gray-900">
+                    {pack.credits} créditos IA
+                  </span>
+                  <span className="text-gray-600">
+                    ${pack.priceCOP.toLocaleString("es-CO")} COP
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mb-4">
+              1 crédito = 1 historia clínica IA. Los créditos no vencen.
+            </p>
+            {error && (
+              <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-3">
+                {error}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleRequest}
+                disabled={selected === null || submitting}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                {submitting ? "Enviando..." : "Solicitar recarga"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Credit widget ────────────────────────────────────────────────────────────
+
+function CreditWidget() {
+  const [credits, setCredits] = useState<TenantCredits | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [now] = useState(() => Date.now());
+
+  const load = useCallback(async () => {
+    try {
+      const data = await fetchMyCredits();
+      setCredits(data);
+    } catch {
+      // silently fail — not critical for navigation
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const trialEndsAt = credits?.trialEndsAt ?? null;
+  const trialDaysLeft = trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - now) / (1000 * 60 * 60 * 24)))
+    : 0;
+
+  if (!credits) return null;
+
+  const balance = credits.creditBalance;
+  const isInTrial = trialEndsAt && new Date(trialEndsAt).getTime() > now;
+
+  const balanceColor =
+    balance >= 50
+      ? "text-green-400"
+      : balance >= 10
+      ? "text-amber-400"
+      : "text-red-400";
+
+  const barPercent = Math.min(100, Math.round((balance / 100) * 100));
+  const barColor =
+    balance >= 50 ? "bg-green-500" : balance >= 10 ? "bg-amber-500" : "bg-red-500";
+
+  return (
+    <>
+      <div className="mx-2 mb-2 bg-white/5 rounded-lg px-3 py-2.5">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
+            Créditos IA
+          </span>
+          <span className={`text-sm font-bold ${balanceColor}`}>{balance}</span>
+        </div>
+        <div className="h-1 rounded-full bg-white/10 mb-2">
+          <div
+            className={`h-full rounded-full transition-all ${barColor}`}
+            style={{ width: `${barPercent}%` }}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-white/30">
+            Plan {credits.plan}
+            {isInTrial && (
+              <span className="ml-1 text-amber-400">· Trial {trialDaysLeft}d</span>
+            )}
+          </span>
+          <button
+            onClick={() => setShowModal(true)}
+            className="text-[10px] text-blue-400 hover:text-blue-300 font-medium transition-colors"
+          >
+            + Recargar
+          </button>
+        </div>
+        {balance < 10 && (
+          <p className="text-[10px] text-red-400 mt-1.5">
+            Créditos bajos — la IA puede no estar disponible.
+          </p>
+        )}
+      </div>
+
+      {showModal && (
+        <CreditModal
+          onClose={() => setShowModal(false)}
+          onSuccess={() => setShowModal(false)}
+        />
+      )}
+    </>
+  );
+}
+
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function Sidebar() {
+export default function Sidebar({
+  isOpen = true,
+  onClose,
+}: {
+  isOpen?: boolean;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
+  const prevPathname = useRef(pathname);
+
+  // Close on navigation (mobile)
+  useEffect(() => {
+    if (pathname !== prevPathname.current) {
+      prevPathname.current = pathname;
+      onClose?.();
+    }
+  }, [pathname, onClose]);
 
   useEffect(() => {
     try {
@@ -203,19 +423,31 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-60 bg-sidebar-bg text-sidebar-text flex flex-col z-50">
+    <aside className={`fixed left-0 top-0 h-screen w-60 bg-sidebar-bg text-sidebar-text flex flex-col z-50 transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/10">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-white leading-none">Vetria</h1>
+              <p className="text-[10px] text-white/40 mt-0.5">Sistema Veterinario IA</p>
+            </div>
+          </div>
+          {/* Close button — mobile only */}
+          <button
+            onClick={onClose}
+            className="md:hidden text-white/40 hover:text-white p-1 flex-shrink-0"
+            aria-label="Cerrar menú"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </div>
-          <div>
-            <h1 className="text-base font-bold text-white leading-none">Vetria</h1>
-            <p className="text-[10px] text-white/40 mt-0.5">Sistema Veterinario IA</p>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -254,6 +486,9 @@ export default function Sidebar() {
         );
         })}
       </nav>
+
+      {/* Credit widget */}
+      <CreditWidget />
 
       {/* Footer — usuario */}
       <div className="px-3 py-3 border-t border-white/10">

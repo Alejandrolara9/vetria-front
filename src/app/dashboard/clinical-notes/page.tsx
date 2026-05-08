@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import type { MutableRefObject } from "react";
 import ReactMarkdown from "react-markdown";
 import { api } from "@/services/api";
 import { AttachmentsPanel } from "@/components/AttachmentsPanel";
@@ -106,6 +107,61 @@ interface CreateModalProps {
   onCreated: (note: ClinicalNote) => void;
 }
 
+// Minimal type for Web Speech API (not fully typed in all TS versions)
+type SpeechRec = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((e: { results: { [i: number]: { [i: number]: { transcript: string } }; length: number } }) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+};
+type SpeechRecConstructor = new () => SpeechRec;
+
+function getSpeechRecognition(): SpeechRecConstructor | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as { SpeechRecognition?: SpeechRecConstructor; webkitSpeechRecognition?: SpeechRecConstructor }; // NOSONAR S3740 — required to access non-standard browser Speech API properties
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+function useVoiceInput(onTranscript: (text: string) => void) {
+  const [listening, setListening] = useState(false);
+  const [supported, setSupported] = useState(false);
+  const recognitionRef = useRef<SpeechRec | null>(null) as MutableRefObject<SpeechRec | null>;
+
+  useEffect(() => {
+    setSupported(getSpeechRecognition() !== null);
+  }, []);
+
+  function start() {
+    const SR = getSpeechRecognition();
+    if (!SR) return;
+
+    const recognition = new SR();
+    recognition.lang = "es-CO";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (e) => {
+      const transcript = Array.from({ length: e.results.length }, (_, i) => e.results[i][0].transcript).join(" ");
+      onTranscript(transcript);
+    };
+
+    recognition.onend = () => setListening(false);
+    recognition.start();
+    recognitionRef.current = recognition;
+    setListening(true);
+  }
+
+  function stop() {
+    recognitionRef.current?.stop();
+    setListening(false);
+  }
+
+  return { listening, supported, start, stop };
+}
+
 function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
   const [petSearch, setPetSearch] = useState("");
   const [showPetResults, setShowPetResults] = useState(false);
@@ -117,8 +173,12 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
   const [phase, setPhase] = useState<"form" | "streaming" | "done">("form");
   const [streamedText, setStreamedText] = useState("");
   const [finalNote, setFinalNote] = useState<ClinicalNote | null>(null);
+  const [noteSource, setNoteSource] = useState<"ai" | "fallback" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const streamBoxRef = useRef<HTMLDivElement>(null);
+  const { listening, supported: voiceSupported, start: startVoice, stop: stopVoice } = useVoiceInput(
+    (transcript) => setRawInput(transcript)
+  );
 
   const filteredPets = petSearch.trim()
     ? pets.filter(
@@ -155,8 +215,9 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
       await streamClinicalNote(draft.id, {
         onToken: (text) => setStreamedText((prev) => prev + text),
-        onComplete: (note) => {
+        onComplete: (note, source) => {
           setFinalNote(note);
+          setNoteSource(source);
           setPhase("done");
           onCreated(note);
         },
@@ -187,9 +248,14 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
                 IA escribiendo...
               </span>
             )}
-            {phase === "done" && (
+            {phase === "done" && noteSource === "ai" && (
               <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                Generada
+                ✓ Generada por IA
+              </span>
+            )}
+            {phase === "done" && noteSource === "fallback" && (
+              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                ⚠ Plantilla base (IA no disponible)
               </span>
             )}
           </div>
@@ -256,15 +322,38 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
             {/* Nota */}
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Nota del veterinario <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium">
+                  Nota del veterinario <span className="text-red-500">*</span>
+                </label>
+                {voiceSupported && (
+                  <button
+                    type="button"
+                    onClick={listening ? stopVoice : startVoice}
+                    title={listening ? "Detener grabación" : "Dictar nota por voz"}
+                    className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                      listening
+                        ? "bg-red-50 border-red-300 text-red-600 animate-pulse"
+                        : "bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600"
+                    }`}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V6zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                    {listening ? "Grabando..." : "Dictar"}
+                  </button>
+                )}
+              </div>
               <textarea rows={5} required
                 placeholder="Ej: perro 3 años, vomitando 2 días, come poco, temperatura 39.5, heces blandas, activo pero decaído..."
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
+                className={`w-full px-3 py-2 border rounded-lg text-sm resize-none transition-colors ${
+                  listening ? "border-red-300 bg-red-50/30" : "border-gray-200"
+                }`}
                 value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
               <p className="text-xs text-gray-400 mt-1">
-                La IA expandirá esta nota en una historia clínica completa y profesional.
+                {listening
+                  ? "Hablando... el texto aparece en tiempo real. Presiona Detener cuando termines."
+                  : "Escribe o dicta tu nota. La IA la expandirá en una historia clínica completa."}
               </p>
             </div>
 
@@ -303,11 +392,16 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
             {selectedPetId && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Archivos médicos (opcional)
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Sube radiografías o resultados de laboratorio. La IA los analizará e incluirá el contexto al generar la historia clínica.
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Archivos médicos (opcional)
+                  </label>
+                  <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full font-medium">
+                    Los análisis se incluyen en la nota IA
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 mb-2">
+                  Radiografías o resultados de laboratorio — la IA leerá su análisis antes de generar la historia.
                 </p>
                 <AttachmentsPanel petId={selectedPetId} />
               </div>

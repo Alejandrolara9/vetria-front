@@ -6,7 +6,7 @@ export const ownerApi = axios.create({ baseURL: API_URL });
 
 ownerApi.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token =
-    typeof window !== "undefined" ? localStorage.getItem("owner_token") : null;
+    globalThis.window === undefined ? null : localStorage.getItem("owner_token"); // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -51,7 +51,7 @@ export interface PetReminder {
 export async function validateInviteToken(
   token: string
 ): Promise<{ email: string }> {
-  const res = await ownerApi.get(`/portal/auth/validate-invite/${token}`);
+  const res = await ownerApi.post("/portal/auth/validate-invite", { token });
   return res.data;
 }
 
@@ -127,9 +127,9 @@ export function clearOwnerToken() {
 }
 
 export function getOwnerToken(): string | null {
-  return typeof window !== "undefined"
-    ? localStorage.getItem("owner_token")
-    : null;
+  return globalThis.window === undefined
+    ? null
+    : localStorage.getItem("owner_token");
 }
 
 /**

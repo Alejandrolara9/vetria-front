@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+// ─── Datos ───────────────────────────────────────────────────────────────────
+
 const TYPING_TEXTS = [
   "Perro 3 años, vomitando 2 días, temperatura 39.5°C",
   "Gata castrada, pérdida de peso progresiva, polidipsia",
@@ -14,58 +16,84 @@ const FEATURES = [
   {
     icon: "✨",
     title: "Historia clínica con IA",
-    desc: "Escribe dos frases. La IA genera la historia completa con terminología clínica precisa en menos de 5 segundos.",
-    color: "bg-purple-50 text-purple-600 border-purple-100",
-    badge: "Exclusivo",
+    desc: "Escribe dos frases o dicta en voz. La IA genera la historia completa con terminología clínica precisa en menos de 5 segundos.",
+    gradient: "from-purple-500 to-indigo-600",
+    bg: "bg-purple-50",
+    badge: "IA",
     badgeColor: "bg-purple-100 text-purple-700",
+  },
+  {
+    icon: "🎙️",
+    title: "Dictado por voz",
+    desc: "Dicta la nota del paciente con tu voz directamente en la app. Sin costo adicional — usa el micrófono del navegador.",
+    gradient: "from-rose-500 to-pink-600",
+    bg: "bg-rose-50",
+    badge: "Nuevo",
+    badgeColor: "bg-rose-100 text-rose-700",
   },
   {
     icon: "📅",
     title: "Agenda inteligente",
-    desc: "Gestiona citas, detecta conflictos de horario y confirma disponibilidad por veterinario en tiempo real.",
-    color: "bg-blue-50 text-blue-600 border-blue-100",
+    desc: "Gestión de citas por veterinario, detección de conflictos y confirmación automática. Invitaciones al calendario de Google, Outlook y Apple.",
+    gradient: "from-blue-500 to-cyan-600",
+    bg: "bg-blue-50",
     badge: null,
     badgeColor: "",
   },
   {
     icon: "🔔",
     title: "Recordatorios automáticos",
-    desc: "El sistema calcula cuándo vence cada vacuna y envía el recordatorio en el canal y momento exactos.",
-    color: "bg-amber-50 text-amber-600 border-amber-100",
+    desc: "El sistema calcula cuándo vence cada vacuna o desparasitación y envía el recordatorio en el canal exacto al cliente.",
+    gradient: "from-amber-500 to-orange-600",
+    bg: "bg-amber-50",
     badge: "IA",
     badgeColor: "bg-amber-100 text-amber-700",
   },
   {
+    icon: "🔬",
+    title: "Análisis de imágenes y labs",
+    desc: "Adjunta radiografías, ecografías o resultados de laboratorio. La IA los analiza e incluye los hallazgos en la historia clínica automáticamente.",
+    gradient: "from-teal-500 to-emerald-600",
+    bg: "bg-teal-50",
+    badge: "IA",
+    badgeColor: "bg-teal-100 text-teal-700",
+  },
+  {
     icon: "🐾",
     title: "Expediente digital completo",
-    desc: "Todo el historial de cada paciente: citas, vacunas, eventos clínicos, historias y recordatorios en un solo lugar.",
-    color: "bg-green-50 text-green-600 border-green-100",
-    badge: null,
-    badgeColor: "",
-  },
-  {
-    icon: "📊",
-    title: "Reportes en tiempo real",
-    desc: "Métricas actualizadas al instante: ingresos, pacientes atendidos, adherencia a protocolos de vacunación.",
-    color: "bg-rose-50 text-rose-600 border-rose-100",
-    badge: null,
-    badgeColor: "",
-  },
-  {
-    icon: "🔒",
-    title: "Multi-tenant seguro",
-    desc: "Cada clínica en su propio espacio completamente aislado. Tus datos nunca se mezclan con los de otras clínicas.",
-    color: "bg-slate-50 text-slate-600 border-slate-100",
+    desc: "Todo el historial del paciente: citas, vacunas, eventos clínicos, historias, adjuntos y recordatorios en un solo lugar.",
+    gradient: "from-green-500 to-emerald-600",
+    bg: "bg-green-50",
     badge: null,
     badgeColor: "",
   },
 ];
 
-const STATS = [
-  { value: "< 5s", label: "Generación de historia IA" },
-  { value: "100%", label: "Multi-tenant aislado" },
-  { value: "4+", label: "Módulos integrados" },
-  { value: "24/7", label: "Disponibilidad del sistema" },
+const STEPS = [
+  {
+    num: "01",
+    title: "Registra tu clínica",
+    desc: "Configura tu clínica en menos de 5 minutos. Agrega tu equipo, protocolos y datos de la veterinaria.",
+    color: "text-blue-600",
+    border: "border-blue-200",
+    bg: "bg-blue-50",
+  },
+  {
+    num: "02",
+    title: "Dicta o escribe en segundos",
+    desc: "El veterinario dicta con voz o escribe una nota breve durante la consulta. Nada más.",
+    color: "text-purple-600",
+    border: "border-purple-200",
+    bg: "bg-purple-50",
+  },
+  {
+    num: "03",
+    title: "La IA hace el resto",
+    desc: "Historia clínica lista en 4 segundos, recordatorios programados automáticamente, agenda sin conflictos y reportes en tiempo real.",
+    color: "text-emerald-600",
+    border: "border-emerald-200",
+    bg: "bg-emerald-50",
+  },
 ];
 
 const TESTIMONIALS = [
@@ -84,33 +112,49 @@ const TESTIMONIALS = [
     color: "bg-green-500",
   },
   {
-    quote: "La seguridad multi-tenant nos dio tranquilidad total. Somos tres sedes y los datos de cada una están perfectamente separados.",
+    quote: "La invitación de calendario que llega al email del cliente cuando agenda una cita es un detalle que marca la diferencia. Parece un software de primera categoría.",
     name: "Dra. Luisa Vargas",
-    role: "Propietaria · Red de clínicas",
+    role: "Propietaria · Cali",
     avatar: "LV",
     color: "bg-purple-500",
   },
 ];
 
-const PLAN_FREE = [
-  "Hasta 50 pacientes activos",
-  "Historia clínica con IA (10/mes)",
-  "Agenda básica",
-  "Recordatorios automáticos",
-  "Expediente digital",
+const PLAN_TRIAL = [
+  "60 días gratis · sin tarjeta",
+  "100 créditos IA incluidos",
+  "Todas las funciones del plan BASIC",
+  "Hasta 8 usuarios",
+  "Hasta 1.000 mascotas",
+  "Historia clínica con IA",
+  "Dictado por voz",
+  "Agenda con invitación de calendario",
   "Soporte por email",
 ];
 
-const PLAN_PRO = [
-  "Pacientes ilimitados",
-  "Historia clínica con IA ilimitada",
-  "Agenda multi-veterinario",
-  "Recordatorios con canal óptimo por cliente",
-  "Reportes avanzados",
-  "Inventario y facturación",
-  "Soporte prioritario 24/7",
-  "API para integraciones",
+const PLAN_BASIC = [
+  "100 créditos IA / mes",
+  "Hasta 8 usuarios",
+  "Hasta 1.000 mascotas",
+  "Historia clínica con IA",
+  "Dictado por voz",
+  "Análisis de imágenes y labs con IA",
+  "Agenda + invitaciones al calendario",
+  "Recordatorios automáticos",
+  "Portal del dueño de mascota",
 ];
+
+const PLAN_PRO = [
+  "400 créditos IA / mes",
+  "Hasta 25 usuarios",
+  "Hasta 10.000 mascotas",
+  "Todo lo del plan BASIC",
+  "Recordatorios WhatsApp (próx.)",
+  "Reportes avanzados de gestión",
+  "Soporte prioritario 24/7",
+];
+
+// ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   const [typingIndex, setTypingIndex] = useState(0);
@@ -136,10 +180,7 @@ export default function LandingPage() {
           setCharIndex((c) => c + 1);
         } else {
           setShowGenerated(true);
-          setTimeout(() => {
-            setIsDeleting(true);
-            setShowGenerated(false);
-          }, 3000);
+          setTimeout(() => { setIsDeleting(true); setShowGenerated(false); }, 3200);
         }
       } else {
         if (charIndex > 0) {
@@ -157,108 +198,97 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-geist-sans, system-ui, sans-serif)" }}>
 
-      {/* ──────────────── NAVBAR ──────────────── */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      {/* ── NAVBAR ── */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
+        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-600/40">
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </div>
             <span className={`font-bold text-xl tracking-tight transition-colors ${scrolled ? "text-gray-900" : "text-white"}`}>Vetria</span>
+            <span className={`hidden sm:inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${scrolled ? "bg-blue-100 text-blue-600" : "bg-blue-500/30 text-blue-200"}`}>Colombia</span>
           </div>
-          <div className="hidden md:flex items-center gap-8">
-            {["#funciones", "#ia", "#precios"].map((href, i) => (
-              <a key={href} href={href}
-                className={`text-sm font-medium transition-colors hover:text-blue-400 ${scrolled ? "text-gray-600" : "text-white/80"}`}>
-                {["Funciones", "IA", "Precios"][i]}
-              </a>
+          <div className="hidden md:flex items-center gap-7">
+            {[["#funciones","Funciones"],["#como-funciona","Cómo funciona"],["#ia","IA"],["#precios","Precios"]].map(([href, label]) => (
+              <a key={href} href={href} className={`text-sm font-medium transition-colors hover:text-blue-400 ${scrolled ? "text-gray-600" : "text-white/80"}`}>{label}</a>
             ))}
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className={`text-sm font-medium transition-colors hidden sm:block ${scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"}`}>
               Iniciar sesión
             </Link>
-            <Link href="/register"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-all shadow-md shadow-blue-600/30">
-              Prueba gratis
+            <Link href="/register" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-all shadow-md shadow-blue-600/30">
+              Prueba gratis →
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* ──────────────── HERO ──────────────── */}
+      {/* ── HERO ── */}
       <section className="relative min-h-screen flex items-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 overflow-hidden">
-        {/* Blobs decorativos */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-600/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] bg-blue-800/10 rounded-full blur-3xl" />
-          {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-[0.03]"
-            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+          <div className="absolute top-20 left-10 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] bg-blue-800/8 rounded-full blur-3xl" />
+          <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Copy */}
+        <div className="relative max-w-6xl mx-auto px-5 pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/15 border border-blue-400/25 rounded-full text-blue-300 text-xs font-semibold mb-6 backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" style={{ animation: "pulse 2s infinite" }} />
-              Inteligencia Artificial integrada de forma nativa
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/15 border border-blue-400/25 rounded-full text-blue-300 text-xs font-semibold backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                Inteligencia Artificial nativa
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-500/15 border border-green-400/20 rounded-full text-green-300 text-xs font-medium">
+                🇨🇴 Hecho para Colombia
+              </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl xl:text-[3.75rem] font-extrabold text-white leading-[1.1] tracking-tight mb-6">
-              El software que
-              <br />
+            <h1 className="text-4xl sm:text-5xl xl:text-[3.5rem] font-extrabold text-white leading-[1.1] tracking-tight mb-5">
+              El veterinario que<br />
               <span style={{ background: "linear-gradient(90deg, #60a5fa, #38bdf8, #34d399)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                trabaja contigo,
-              </span>
-              <br />
-              no al revés.
+                usa IA trabaja 10×
+              </span><br />
+              más rápido.
             </h1>
 
             <p className="text-lg text-slate-300 mb-8 leading-relaxed max-w-lg">
-              Historias clínicas que se generan en segundos. Recordatorios que salen solos. Agenda sin conflictos.
-              Todo lo que tu clínica necesita — potenciado con IA.
+              Historia clínica completa en 4 segundos. Recordatorios que salen solos. Agenda sin conflictos.
+              Diseñado para clínicas veterinarias colombianas.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
-              <Link href="/register"
-                className="px-7 py-4 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl transition-all text-center shadow-xl shadow-blue-500/30 text-sm">
-                Empieza gratis ahora →
+              <Link href="/register" className="px-7 py-4 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl transition-all text-center shadow-xl shadow-blue-500/30 text-sm">
+                Empieza gratis — 60 días →
               </Link>
-              <a href="#ia"
-                className="px-7 py-4 border border-white/15 text-white rounded-xl hover:bg-white/10 transition-all text-center font-medium text-sm">
+              <a href="#ia" className="px-7 py-4 border border-white/15 text-white rounded-xl hover:bg-white/8 transition-all text-center font-medium text-sm">
                 Ver la IA en acción
               </a>
             </div>
 
-            <div className="flex items-center gap-4 text-sm text-slate-400">
-              <span className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Sin tarjeta de crédito
-              </span>
-              <span className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                30 días de prueba gratis
-              </span>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400">
+              {["Sin tarjeta de crédito", "60 días gratis", "Configura en 5 min"].map((t) => (
+                <span key={t} className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {t}
+                </span>
+              ))}
             </div>
           </div>
 
-          {/* Mockup de IA */}
+          {/* Mockup */}
           <div className="relative">
-            <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-xl scale-95" />
+            <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-xl scale-95 pointer-events-none" />
             <div className="relative bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-2xl overflow-hidden shadow-2xl">
-              {/* Barra de ventana */}
               <div className="flex items-center gap-2 px-4 py-3 bg-slate-950/80 border-b border-slate-700/60">
-                <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+                <div className="w-3 h-3 rounded-full bg-green-500/70" />
                 <div className="flex items-center gap-1.5 ml-3">
                   <div className="w-4 h-4 bg-blue-600 rounded flex items-center justify-center">
                     <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -270,41 +300,45 @@ export default function LandingPage() {
               </div>
 
               <div className="p-5 space-y-4">
-                {/* Input del vet */}
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-5 h-5 bg-slate-600 rounded-full flex items-center justify-center">
                       <span className="text-[9px] text-slate-300 font-bold">Dr</span>
                     </div>
                     <p className="text-xs text-slate-400 font-medium">Nota del veterinario</p>
+                    <span className="ml-auto flex items-center gap-1 text-[10px] text-rose-400">
+                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse" />
+                      Dictando...
+                    </span>
                   </div>
                   <div className="bg-slate-800 rounded-xl px-4 py-3 border border-slate-700/60 min-h-[52px]">
                     <span className="text-sm text-slate-200 font-mono">{displayText}</span>
-                    <span className="text-blue-400 font-mono" style={{ animation: "pulse 1s infinite" }}>|</span>
+                    <span className="text-blue-400 font-mono animate-pulse">|</span>
                   </div>
                 </div>
 
-                {/* Historia generada */}
                 <div className={`transition-all duration-700 ${showGenerated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"}`}>
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
                       <span className="text-[9px] text-white font-bold">IA</span>
                     </div>
-                    <p className="text-xs text-purple-400 font-semibold">Historia generada · 3.4s</p>
-                    <span className="ml-auto text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium">Listo para revisar</span>
+                    <p className="text-xs text-purple-400 font-semibold">Historia generada · 3.8s</p>
+                    <span className="ml-auto text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium border border-green-500/20">
+                      Lista para revisar
+                    </span>
                   </div>
                   <div className="bg-slate-800 rounded-xl p-4 border border-purple-500/20 space-y-2.5 text-xs text-slate-300 leading-relaxed">
                     <div>
                       <span className="text-blue-400 font-semibold">Anamnesis: </span>
-                      Paciente canino de 3 años de edad que consulta por cuadro emético de 48 horas de evolución con hiporexia marcada. Propietaria refiere 4-5 episodios de vómito diarios...
+                      Paciente canino de 3 años que consulta por cuadro emético de 48 horas de evolución con hiporexia marcada. Propietaria refiere 4-5 episodios de vómito diarios...
                     </div>
                     <div>
                       <span className="text-blue-400 font-semibold">Examen físico: </span>
-                      T°: 39.5°C (febricular leve). Mucosas rosadas, TLC 2s. Hidratación: 5% deshidratación estimada. Abdomen tenso a la palpación profunda...
+                      T°: 39.5°C (febricular leve). Mucosas rosadas, TLC 2s. Hidratación: 5% deshidratación estimada...
                     </div>
                     <div>
-                      <span className="text-blue-400 font-semibold">Plan terapéutico: </span>
-                      Fluidoterapia IV: Lactato de Ringer 50 mL/kg/día. Metronidazol 25 mg/kg BID IV. Ayuno 12h, luego dieta blanda...
+                      <span className="text-blue-400 font-semibold">Plan: </span>
+                      Fluidoterapia IV LR 50 mL/kg/día. Metronidazol 25 mg/kg BID IV. Ayuno 12h, dieta blanda...
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
@@ -319,33 +353,32 @@ export default function LandingPage() {
 
                 {!showGenerated && (
                   <div className="space-y-2 opacity-40">
-                    <div className="h-2.5 bg-slate-700 rounded-full w-full" style={{ animation: "pulse 2s infinite" }} />
-                    <div className="h-2.5 bg-slate-700 rounded-full w-4/5" style={{ animation: "pulse 2s infinite 0.2s" }} />
-                    <div className="h-2.5 bg-slate-700 rounded-full w-2/3" style={{ animation: "pulse 2s infinite 0.4s" }} />
+                    <div className="h-2.5 bg-slate-700 rounded-full w-full animate-pulse" />
+                    <div className="h-2.5 bg-slate-700 rounded-full w-4/5 animate-pulse [animation-delay:200ms]" />
+                    <div className="h-2.5 bg-slate-700 rounded-full w-2/3 animate-pulse [animation-delay:400ms]" />
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Floating chips */}
-            <div className="absolute -top-5 -right-5 bg-white rounded-2xl shadow-xl px-3.5 py-2.5 flex items-center gap-2.5 border border-gray-100">
+            {/* Floating chips — hidden on small screens */}
+            <div className="absolute -top-4 -right-4 hidden sm:flex bg-white rounded-2xl shadow-xl px-3.5 py-2.5 items-center gap-2.5 border border-gray-100">
               <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-lg">⚡</div>
               <div>
-                <p className="text-xs font-bold text-gray-900 leading-none">3.4 segundos</p>
+                <p className="text-xs font-bold text-gray-900 leading-none">3.8 segundos</p>
                 <p className="text-[10px] text-gray-400 mt-0.5">Historia completa</p>
               </div>
             </div>
-            <div className="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl px-3.5 py-2.5 flex items-center gap-2.5 border border-gray-100">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-lg">✅</div>
+            <div className="absolute -bottom-4 -left-4 hidden sm:flex bg-white rounded-2xl shadow-xl px-3.5 py-2.5 items-center gap-2.5 border border-gray-100">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-lg">🎙️</div>
               <div>
-                <p className="text-xs font-bold text-gray-900 leading-none">Sin digitación</p>
-                <p className="text-[10px] text-gray-400 mt-0.5">El vet solo revisa</p>
+                <p className="text-xs font-bold text-gray-900 leading-none">Dictado por voz</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Sin costo adicional</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-slate-500">
           <span className="text-xs">Descubre más</span>
           <svg className="w-5 h-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -354,11 +387,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ──────────────── STATS ──────────────── */}
-      <section className="bg-blue-600 py-10">
-        <div className="max-w-7xl mx-auto px-6">
+      {/* ── STATS ── */}
+      <section className="bg-gradient-to-r from-blue-700 to-blue-600 py-10">
+        <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            {STATS.map((s) => (
+            {[
+              { value: "< 5s", label: "Historia clínica IA" },
+              { value: "60 días", label: "Prueba gratuita" },
+              { value: "10+", label: "Módulos integrados" },
+              { value: "100%", label: "Multi-tenant seguro" },
+            ].map((s) => (
               <div key={s.label}>
                 <p className="text-3xl font-extrabold text-white">{s.value}</p>
                 <p className="text-sm text-blue-200 mt-1">{s.label}</p>
@@ -368,24 +406,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ──────────────── FEATURES ──────────────── */}
+      {/* ── FEATURES ── */}
       <section id="funciones" className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
+        <div className="max-w-6xl mx-auto px-5">
+          <div className="text-center mb-14">
             <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
               Todo lo que necesitas
             </span>
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Una plataforma. Todo resuelto.</h2>
             <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
-              Desde la primera consulta hasta el seguimiento post-vacuna. Vetria cubre cada paso del flujo de tu clínica veterinaria.
+              Desde la primera consulta hasta el seguimiento post-vacuna. Vetria cubre cada paso del flujo de tu clínica.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((f) => (
-              <div key={f.title}
-                className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+              <div key={f.title} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl border ${f.color}`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${f.bg} border border-gray-100`}>
                     {f.icon}
                   </div>
                   {f.badge && (
@@ -402,14 +439,39 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ──────────────── IA SECTION ──────────────── */}
-      <section id="ia" className="py-24 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
+      {/* ── CÓMO FUNCIONA ── */}
+      <section id="como-funciona" className="py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-5">
+          <div className="text-center mb-14">
+            <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+              Simple de usar
+            </span>
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">En marcha en 5 minutos.</h2>
+            <p className="text-gray-500 text-lg max-w-xl mx-auto">Sin instalaciones. Sin capacitaciones largas. Solo abres el navegador y empiezas.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            {/* Connecting line desktop */}
+            <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-px bg-gradient-to-r from-blue-200 via-purple-200 to-emerald-200" />
+            {STEPS.map((s) => (
+              <div key={s.num} className="relative text-center">
+                <div className={`w-20 h-20 mx-auto rounded-2xl ${s.bg} border-2 ${s.border} flex items-center justify-center mb-6 relative z-10`}>
+                  <span className={`text-3xl font-black ${s.color}`}>{s.num}</span>
+                </div>
+                <h3 className="font-bold text-gray-900 text-lg mb-2">{s.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── IA SECTION ── */}
+      <section id="ia" className="py-24 bg-gray-50 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Text */}
             <div>
               <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
-                IA generativa
+                IA Generativa
               </span>
               <h2 className="text-4xl font-extrabold text-gray-900 mb-6 leading-tight">
                 De nota breve a historia{" "}
@@ -418,14 +480,15 @@ export default function LandingPage() {
                 </span>
               </h2>
               <p className="text-gray-500 text-lg mb-8 leading-relaxed">
-                El veterinario escribe una nota rápida de 10 palabras. La IA de Vetria genera en segundos una historia clínica estructurada con anamnesis, examen físico, diagnóstico diferencial y plan terapéutico — con terminología clínica precisa lista para firmar.
+                El veterinario dicta o escribe una nota rápida. Vetria genera en segundos una historia clínica estructurada
+                con anamnesis, examen físico, diagnóstico diferencial y plan terapéutico — con terminología clínica precisa lista para aprobar.
               </p>
               <div className="space-y-4 mb-8">
                 {[
-                  { icon: "⚡", text: "Primer token en menos de 2 segundos — ves el texto aparecer en tiempo real" },
-                  { icon: "🔬", text: "Terminología clínica veterinaria correcta según especie, raza y edad del paciente" },
-                  { icon: "✏️", text: "El veterinario revisa y ajusta antes de aprobar — la IA es un asistente, no un reemplazo" },
-                  { icon: "📁", text: "Historia aprobada queda vinculada automáticamente al expediente de la mascota" },
+                  { icon: "⚡", text: "Streaming en tiempo real — ves el texto aparecer en menos de 2 segundos" },
+                  { icon: "🎙️", text: "Dictado por voz con el micrófono del navegador, sin costo extra" },
+                  { icon: "🔬", text: "Adjunta labs y radiografías: la IA los analiza e integra a la historia" },
+                  { icon: "✏️", text: "El veterinario revisa y ajusta antes de aprobar — la IA es asistente, no reemplazo" },
                 ].map((item) => (
                   <div key={item.text} className="flex items-start gap-3">
                     <span className="text-xl flex-shrink-0 mt-0.5">{item.icon}</span>
@@ -435,29 +498,28 @@ export default function LandingPage() {
               </div>
               <Link href="/register"
                 className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-purple-500/25 text-sm">
-                Prueba la IA gratis
+                Prueba la IA gratis — 60 días
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </Link>
             </div>
 
-            {/* Visual comparison */}
             <div className="space-y-4">
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-2 h-2 bg-gray-400 rounded-full" />
                   <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Sin Vetria — digitación manual</span>
                 </div>
                 <div className="space-y-2">
-                  {["Anamnesis (4 min)...", "Examen físico (3 min)...", "Diagnóstico diferencial (3 min)...", "Plan terapéutico (5 min)..."].map((t) => (
+                  {["Anamnesis · 4 min", "Examen físico · 3 min", "Diagnóstico diferencial · 3 min", "Plan terapéutico · 5 min"].map((t) => (
                     <div key={t} className="flex items-center gap-2 text-sm text-gray-400">
-                      <div className="h-4 bg-gray-200 rounded flex-1" />
-                      <span className="text-xs text-gray-400 w-16 flex-shrink-0">{t.split("(")[1]?.replace(")", "") ?? ""}</span>
+                      <div className="h-4 bg-gray-100 rounded flex-1" />
+                      <span className="text-xs text-gray-400 w-24 flex-shrink-0 text-right">{t.split(" · ")[1]}</span>
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between">
+                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
                   <span className="text-xs text-gray-500">Tiempo total promedio</span>
                   <span className="text-sm font-bold text-red-500">~15 minutos</span>
                 </div>
@@ -465,15 +527,15 @@ export default function LandingPage() {
 
               <div className="bg-gradient-to-br from-blue-950 to-purple-950 border border-blue-700/40 rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full" style={{ animation: "pulse 2s infinite" }} />
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                   <span className="text-xs font-semibold text-blue-300 uppercase tracking-wide">Con Vetria IA</span>
                 </div>
                 <div className="space-y-2">
                   {[
-                    { label: "Nota breve del vet", time: "30s", color: "bg-blue-700/50" },
-                    { label: "Generación IA (streaming)", time: "4s", color: "bg-purple-700/50" },
+                    { label: "Nota breve / dictado", time: "30s", color: "bg-blue-700/50" },
+                    { label: "Generación IA (streaming)", time: "4s", color: "bg-purple-700/60" },
                     { label: "Revisión y ajuste", time: "1 min", color: "bg-blue-700/50" },
-                    { label: "Firma y archivo automático", time: "2s", color: "bg-green-700/50" },
+                    { label: "Firma y archivo", time: "2s", color: "bg-green-700/50" },
                   ].map((t) => (
                     <div key={t.label} className="flex items-center gap-2">
                       <div className={`h-4 ${t.color} rounded flex-1 flex items-center px-2`}>
@@ -493,16 +555,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ──────────────── TESTIMONIALS ──────────────── */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
+      {/* ── TESTIMONIALS ── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-5">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-extrabold text-gray-900 mb-3">Lo que dicen los veterinarios</h2>
             <p className="text-gray-500">Clínicas que ya transformaron su forma de trabajar</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+              <div key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
                 <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, i) => (
                     <svg key={i} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
@@ -512,7 +574,7 @@ export default function LandingPage() {
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">&ldquo;{t.quote}&rdquo;</p>
                 <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full ${t.color} flex items-center justify-center`}>
+                  <div className={`w-9 h-9 rounded-full ${t.color} flex items-center justify-center flex-shrink-0`}>
                     <span className="text-white text-xs font-bold">{t.avatar}</span>
                   </div>
                   <div>
@@ -526,111 +588,150 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ──────────────── PRICING ──────────────── */}
-      <section id="precios" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
+      {/* ── PRICING ── */}
+      <section id="precios" className="py-24 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-5">
           <div className="text-center mb-14">
             <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
-              Precios
+              Precios en COP
             </span>
-            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">30 días gratis. Luego crece sin límites.</h2>
-            <p className="text-gray-500 text-lg">Sin sorpresas. Cancela cuando quieras.</p>
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">60 días gratis. Luego crece sin límites.</h2>
+            <p className="text-gray-500 text-lg">Sin contratos anuales. Cancela cuando quieras.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free trial */}
-            <div className="border-2 border-gray-200 rounded-2xl p-8 hover:border-gray-300 transition-colors">
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Prueba gratuita</h3>
-                <p className="text-gray-500 text-sm mb-4">30 días para explorar todo sin límites</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+
+            {/* Trial */}
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-7 hover:border-gray-300 transition-colors flex flex-col">
+              <div className="mb-5">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Prueba gratuita</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">60 días gratis</h3>
                 <div className="flex items-end gap-1">
                   <span className="text-5xl font-extrabold text-gray-900">$0</span>
-                  <span className="text-gray-400 mb-2">/ 30 días</span>
+                  <span className="text-gray-400 mb-2 text-sm">COP</span>
                 </div>
+                <p className="text-xs text-gray-400 mt-1">Sin tarjeta de crédito · Sin compromisos</p>
               </div>
-              <ul className="space-y-3 mb-8">
-                {PLAN_FREE.map((item) => (
-                  <li key={item} className="flex items-center gap-2.5 text-sm text-gray-600">
-                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <ul className="space-y-2.5 mb-8 flex-1">
+                {PLAN_TRIAL.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
                   </li>
                 ))}
               </ul>
-              <Link href="/register"
-                className="block text-center py-3.5 border-2 border-gray-900 text-gray-900 font-bold rounded-xl hover:bg-gray-900 hover:text-white transition-all text-sm">
+              <Link href="/register" className="block text-center py-3.5 border-2 border-gray-900 text-gray-900 font-bold rounded-xl hover:bg-gray-900 hover:text-white transition-all text-sm">
                 Empezar prueba gratis
               </Link>
             </div>
 
-            {/* Pro */}
-            <div className="relative border-2 border-blue-600 rounded-2xl p-8 bg-gradient-to-br from-blue-600 to-blue-700 shadow-2xl shadow-blue-500/30 overflow-hidden">
-              <div className="absolute top-5 right-5 bg-amber-400 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Más popular
-              </div>
-              <div className="absolute inset-0 opacity-10"
-                style={{ backgroundImage: "radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
-              <div className="relative mb-6">
-                <h3 className="text-xl font-bold text-white mb-1">Pro</h3>
-                <p className="text-blue-200 text-sm mb-4">Para clínicas que quieren crecer sin límites</p>
+            {/* Basic */}
+            <div className="bg-white border-2 border-blue-100 rounded-2xl p-7 hover:border-blue-200 transition-colors flex flex-col shadow-sm">
+              <div className="mb-5">
+                <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Plan BASIC</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Para clínicas que crecen</h3>
                 <div className="flex items-end gap-1">
-                  <span className="text-5xl font-extrabold text-white">$49</span>
-                  <span className="text-blue-200 mb-2">/mes</span>
+                  <span className="text-5xl font-extrabold text-gray-900">$100k</span>
+                  <span className="text-gray-400 mb-2 text-sm">/mes COP</span>
                 </div>
+                <p className="text-xs text-gray-400 mt-1">≈ $25 USD · facturación mensual</p>
               </div>
-              <ul className="relative space-y-3 mb-8">
-                {PLAN_PRO.map((item) => (
-                  <li key={item} className="flex items-center gap-2.5 text-sm text-white">
-                    <svg className="w-4 h-4 text-blue-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <ul className="space-y-2.5 mb-8 flex-1">
+                {PLAN_BASIC.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
                   </li>
                 ))}
               </ul>
-              <Link href="/register"
-                className="relative block text-center py-3.5 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-all text-sm shadow-lg">
-                Empezar con Pro →
+              <Link href="/register" className="block text-center py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-all text-sm shadow-md shadow-blue-600/20">
+                Empezar con BASIC →
               </Link>
+            </div>
+
+            {/* Pro */}
+            <div className="relative border-2 border-blue-600 rounded-2xl p-7 bg-gradient-to-br from-slate-900 to-blue-950 shadow-2xl shadow-blue-900/30 overflow-hidden flex flex-col">
+              <div className="absolute top-5 right-5 bg-amber-400 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
+                Más popular
+              </div>
+              <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+              <div className="relative mb-5">
+                <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Plan PRO</p>
+                <h3 className="text-xl font-bold text-white mb-3">Para crecer sin límites</h3>
+                <div className="flex items-end gap-1">
+                  <span className="text-5xl font-extrabold text-white">$250k</span>
+                  <span className="text-blue-300 mb-2 text-sm">/mes COP</span>
+                </div>
+                <p className="text-xs text-blue-400 mt-1">≈ $62 USD · facturación mensual</p>
+              </div>
+              <ul className="relative space-y-2.5 mb-8 flex-1">
+                {PLAN_PRO.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-blue-100">
+                    <svg className="w-4 h-4 text-blue-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/register" className="relative block text-center py-3.5 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-all text-sm shadow-lg">
+                Empezar con PRO →
+              </Link>
+            </div>
+          </div>
+
+          {/* Credits explainer */}
+          <div className="mt-8 max-w-5xl mx-auto">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">IA</div>
+              <div>
+                <p className="text-sm font-semibold text-blue-900 mb-0.5">¿Qué son los créditos IA?</p>
+                <p className="text-xs text-blue-700 leading-relaxed">
+                  1 crédito = 1 historia clínica generada por IA. Tu plan incluye créditos mensuales que se renuevan automáticamente.
+                  ¿Necesitas más? Recarga desde <strong>$20.000 COP</strong> (50 créditos) directamente desde el panel.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ──────────────── CTA FINAL ──────────────── */}
+      {/* ── CTA FINAL ── */}
       <section className="py-24 bg-gradient-to-br from-slate-900 to-blue-950 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         </div>
-        <div className="relative max-w-3xl mx-auto px-6 text-center">
+        <div className="relative max-w-3xl mx-auto px-5 text-center">
           <div className="text-5xl mb-6">🐾</div>
           <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6 leading-tight">
-            Tu clínica merece tecnología<br />
+            Tu clínica merece la mejor<br />
             <span style={{ background: "linear-gradient(90deg, #60a5fa, #34d399)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              de nivel enterprise.
+              tecnología veterinaria.
             </span>
           </h2>
           <p className="text-slate-300 text-lg mb-10 leading-relaxed">
-            Únete a las clínicas veterinarias que ya están ahorrando horas cada día con IA. Configura tu clínica en menos de 15 minutos.
+            Únete a las clínicas colombianas que ya están ahorrando horas cada semana con IA.
+            60 días gratis — sin tarjeta, sin compromiso.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register"
-              className="px-8 py-4 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl transition-all shadow-xl shadow-blue-500/30 text-sm">
-              Crear cuenta gratis — sin tarjeta
+            <Link href="/register" className="px-8 py-4 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl transition-all shadow-xl shadow-blue-500/30 text-sm">
+              Crear cuenta gratis — 60 días
             </Link>
-            <Link href="/login"
-              className="px-8 py-4 border border-white/20 text-white rounded-xl hover:bg-white/10 transition-all font-medium text-sm">
+            <Link href="/login" className="px-8 py-4 border border-white/20 text-white rounded-xl hover:bg-white/8 transition-all font-medium text-sm">
               Ya tengo cuenta →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ──────────────── FOOTER ──────────────── */}
+      {/* ── FOOTER ── */}
       <footer className="bg-slate-950 py-12">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
@@ -640,15 +741,17 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <span className="font-bold text-white text-lg">Vetria</span>
+                <span className="text-[10px] bg-blue-900 text-blue-300 px-1.5 py-0.5 rounded font-medium">vetria.cloud</span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
-                El software veterinario con IA más avanzado de Latinoamérica. Construido para que el veterinario se concentre en lo que importa: los pacientes.
+              <p className="text-slate-400 text-sm leading-relaxed max-w-xs mb-4">
+                Software veterinario con IA para clínicas colombianas. Construido para que el veterinario se concentre en lo que importa: los pacientes.
               </p>
+              <p className="text-slate-500 text-xs">🇨🇴 Hecho en Colombia para Latinoamérica</p>
             </div>
             <div>
               <p className="text-white font-semibold text-sm mb-4">Producto</p>
               <ul className="space-y-2.5">
-                {["Funciones", "Precios", "Seguridad", "Actualizaciones"].map((l) => (
+                {["Funciones","Precios","Seguridad","Changelog"].map((l) => (
                   <li key={l}><a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">{l}</a></li>
                 ))}
               </ul>
@@ -656,18 +759,31 @@ export default function LandingPage() {
             <div>
               <p className="text-white font-semibold text-sm mb-4">Empresa</p>
               <ul className="space-y-2.5">
-                {["Acerca de", "Blog", "Contacto", "Términos"].map((l) => (
+                {["Acerca de","Contacto","Términos de uso","Privacidad"].map((l) => (
                   <li key={l}><a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">{l}</a></li>
                 ))}
               </ul>
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-slate-500 text-xs">© 2026 Vetria. Todos los derechos reservados.</p>
+            <p className="text-slate-500 text-xs">© 2026 Vetria · vetria.cloud — Todos los derechos reservados.</p>
             <p className="text-slate-600 text-xs">Hecho con ❤️ para los veterinarios de Latinoamérica</p>
           </div>
         </div>
       </footer>
+
+      {/* ── WhatsApp flotante ── */}
+      <a
+        href="https://wa.me/573000000000?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20Vetria"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-400 rounded-full flex items-center justify-center shadow-xl shadow-green-500/40 transition-all hover:scale-110"
+        aria-label="Contactar por WhatsApp"
+      >
+        <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+      </a>
     </div>
   );
 }

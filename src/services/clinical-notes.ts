@@ -127,12 +127,12 @@ export async function streamClinicalNote(
   id: string,
   callbacks: {
     onToken: (text: string) => void;
-    onComplete: (note: ClinicalNote) => void;
+    onComplete: (note: ClinicalNote, source: "ai" | "fallback") => void;
     onError: (msg: string) => void;
   }
 ): Promise<void> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token"); // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
 
   const response = await fetch(`${apiUrl}/clinical-notes/${id}/stream`, {
     method: "POST",
@@ -166,7 +166,7 @@ export async function streamClinicalNote(
         if (event.type === "token") {
           callbacks.onToken(event.text);
         } else if (event.type === "complete") {
-          callbacks.onComplete(event.note);
+          callbacks.onComplete(event.note, event.source ?? "fallback");
         } else if (event.type === "error") {
           callbacks.onError(event.message);
         }

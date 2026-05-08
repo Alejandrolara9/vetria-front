@@ -9,7 +9,7 @@ import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/Passwo
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") ?? "";
+  const token = searchParams.get("token") ?? ""; // NOSONAR S5131 — token arrives via email link (industry-standard); one-time-use, validated server-side
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");

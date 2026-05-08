@@ -4,42 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import Link from "next/link";
 import SearchableSelect from "@/components/SearchableSelect";
-
-const BREEDS: Record<string, string[]> = {
-  Canino: [
-    "Mestizo","Labrador Retriever","Golden Retriever","Pastor Alemán","Bulldog Francés",
-    "Bulldog Inglés","Beagle","Poodle Toy","Poodle Miniatura","Poodle Estándar",
-    "Chihuahua","Yorkshire Terrier","Shih Tzu","Maltés","Schnauzer Miniatura",
-    "Schnauzer Estándar","Boxer","Rottweiler","Doberman","Gran Danés",
-    "Dálmata","Cocker Spaniel","Springer Spaniel","Border Collie","Collie",
-    "Shetland Sheepdog","Husky Siberiano","Malamute de Alaska","Samoyedo","Chow Chow",
-    "Akita","Shiba Inu","Pomerania","Spitz Alemán","Dachshund",
-    "Basset Hound","Bloodhound","Greyhound","Whippet","Galgo Español",
-    "Weimaraner","Vizsla","Setter Irlandés","Pointer","Braco Alemán",
-    "Bichón Frisé","Bichón Maltés","Havanese","Lhasa Apso","Pekinés",
-    "Pug","Carlino","Boston Terrier","Bulldog Americano","Pitbull",
-    "Staffordshire Bull Terrier","American Staffordshire","Bull Terrier","Fox Terrier","Jack Russell",
-    "West Highland White Terrier","Scottish Terrier","Cairn Terrier","Airedale Terrier","Bedlington Terrier",
-    "Cavalier King Charles","King Charles Spaniel","Papillón","Affenpinscher","Pinscher Miniatura",
-    "Doberman Pinscher","Mastín Napolitano","Mastín Español","Mastín del Pirineo","Mastín Tibetano",
-    "Shar Pei","Basenji","Rhodesian Ridgeback","Boerboel","Cane Corso",
-    "Dogo Argentino","Dogo de Burdeos","San Bernardo","Terranova","Leonberger",
-    "Montaña de los Pirineos","Pastor Belga Malinois","Pastor Belga Groenendael","Pastor Suizo","Australian Shepherd",
-    "Australian Cattle Dog","Kelpie Australiano","Pastor de Beauce","Bouvier de Flandes","Caniche",
-    "Teckel","Otro",
-  ],
-  Felino: [
-    "Mestizo","Doméstico de pelo corto","Doméstico de pelo largo","Persa","Angora Turco",
-    "Maine Coon","Ragdoll","Siamés","Birmano","Burmés",
-    "Bengalí","Abisinio","Somalí","Ruso Azul","Británico de pelo corto",
-    "Británico de pelo largo","Escocés de orejas plegadas (Scottish Fold)","Escocés recto (Scottish Straight)","Exótico de pelo corto","Himalayo",
-    "Sphynx","Devon Rex","Cornish Rex","Selkirk Rex","American Curl",
-    "Balinés","Javanese","Tonkinés","Singapura","Ocicato",
-    "Egyptian Mau","Chartreux","Manx","Bobtail Japonés","Bobtail Americano",
-    "Norwegian Forest Cat","Siberiano","Turco Van","Korat","Havana Brown",
-    "LaPerm","Pixie-bob","Ragamuffin","Savannah","Chausie","Otro",
-  ],
-};
+import { BREEDS } from "@/lib/breeds";
 
 interface Pet {
   id: string;
