@@ -10,6 +10,7 @@ import {
   confirmCreditRequest,
   rejectCreditRequest,
   addCreditsAdmin,
+  setGracePeriod,
   TenantSummary,
   TenantUser,
   PlatformStats,
@@ -42,6 +43,9 @@ export default function SuperAdminDashboard() {
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
 
+  const [editGraceDays, setEditGraceDays] = useState("");
+  const [graceSubmitting, setGraceSubmitting] = useState(false);
+
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [pendingRejectId, setPendingRejectId] = useState<string | null>(null);
@@ -73,11 +77,28 @@ export default function SuperAdminDashboard() {
     setEditUsers(users);
   }
 
+  async function handleGracePeriod() {
+    if (!editTarget || !editGraceDays) return;
+    const days = parseInt(editGraceDays);
+    if (isNaN(days) || days < 1) return;
+    setGraceSubmitting(true);
+    try {
+      await setGracePeriod(editTarget.id, days);
+      setEditGraceDays("");
+      loadAll();
+    } catch {
+      setEditError("Error al otorgar período de gracia");
+    } finally {
+      setGraceSubmitting(false);
+    }
+  }
+
   function closeEdit() {
     setEditTarget(null);
     setEditUsers([]);
     setEditError("");
     setEditCredits("");
+    setEditGraceDays("");
   }
 
   async function handleEditSubmit(e: React.FormEvent) {
@@ -87,7 +108,7 @@ export default function SuperAdminDashboard() {
     setEditError("");
     try {
       await updateTenant(editTarget.id, { plan: editPlan, active: editActive });
-      if (editCredits && parseInt(editCredits) > 0) {
+      if (editCredits && parseInt(editCredits) !== 0) {
         await addCreditsAdmin(editTarget.id, parseInt(editCredits), "Ajuste manual superadmin");
       }
       closeEdit();
@@ -404,20 +425,68 @@ export default function SuperAdminDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Agregar créditos IA
-                  <span className="text-muted-foreground font-normal ml-1">
-                    (balance actual: {editTarget.creditBalance ?? 0})
-                  </span>
+                  Ajustar créditos IA
                 </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={10000}
-                  placeholder="Ej: 100"
-                  value={editCredits}
-                  onChange={(e) => setEditCredits(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm text-muted-foreground">Balance actual:</span>
+                  <span className={`text-sm font-semibold ${
+                    (editTarget.creditBalance ?? 0) >= 50 ? "text-green-600"
+                    : (editTarget.creditBalance ?? 0) >= 10 ? "text-amber-600"
+                    : "text-red-600"
+                  }`}>
+                    {editTarget.creditBalance ?? 0} créditos
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    min={-10000}
+                    max={10000}
+                    placeholder="Ej: +100 o -50"
+                    value={editCredits}
+                    onChange={(e) => setEditCredits(e.target.value)}
+                    className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  {editCredits && parseInt(editCredits) !== 0 && (
+                    <span className={`self-center text-xs font-medium px-2 py-1 rounded-full ${
+                      parseInt(editCredits) > 0
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}>
+                      {parseInt(editCredits) > 0 ? "+" : ""}{editCredits} → {(editTarget.creditBalance ?? 0) + parseInt(editCredits)}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Usa valores negativos para restar (ej: -50)</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Período de gracia
+                  {editTarget.gracePeriodEndsAt && (
+                    <span className="text-xs text-amber-600 font-normal ml-2">
+                      activo hasta {new Date(editTarget.gracePeriodEndsAt).toLocaleDateString("es-CO")}
+                    </span>
+                  )}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    max={365}
+                    placeholder="Días (ej: 30)"
+                    value={editGraceDays}
+                    onChange={(e) => setEditGraceDays(e.target.value)}
+                    className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGracePeriod}
+                    disabled={graceSubmitting || !editGraceDays}
+                    className="px-3 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50"
+                  >
+                    {graceSubmitting ? "..." : "Otorgar"}
+                  </button>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <input

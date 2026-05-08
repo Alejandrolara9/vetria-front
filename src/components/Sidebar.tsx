@@ -3,12 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
-import {
-  fetchMyCredits,
-  requestCreditTopUp,
-  CREDIT_PACKS,
-  type TenantCredits,
-} from "@/services/credits";
+import { fetchMyCredits, type TenantCredits } from "@/services/credits";
+import { initiateCreditsCheckout, CREDIT_PACKS, type CreditPackIndex } from "@/services/wompi";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -152,6 +148,16 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
     label: "Configuración",
     items: [
       {
+        href: "/dashboard/billing",
+        label: "Planes y pago",
+        roles: ["ADMIN"],
+        icon: (
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+          </svg>
+        ),
+      },
+      {
         href: "/dashboard/settings/branding",
         label: "Marca de la clínica",
         roles: ["ADMIN"],
@@ -177,29 +183,20 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
 
 // ─── Credit request modal ─────────────────────────────────────────────────────
 
-function CreditModal({
-  onClose,
-  onSuccess,
-}: {
-  onClose: () => void;
-  onSuccess: () => void;
-}) {
-  const [selected, setSelected] = useState<number | null>(null);
+function CreditModal({ onClose }: { onClose: () => void }) {
+  const [selected, setSelected] = useState<CreditPackIndex | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleRequest() {
+  async function handleCheckout() {
     if (selected === null) return;
     setSubmitting(true);
     setError("");
     try {
-      await requestCreditTopUp(selected);
-      setDone(true);
-      onSuccess();
+      const { checkoutUrl } = await initiateCreditsCheckout(selected);
+      globalThis.window.location.assign(checkoutUrl);
     } catch {
-      setError("No se pudo enviar la solicitud. Intenta de nuevo.");
-    } finally {
+      setError("No se pudo iniciar el pago. Intenta de nuevo.");
       setSubmitting(false);
     }
   }
@@ -216,74 +213,48 @@ function CreditModal({
           </button>
         </div>
 
-        {done ? (
-          <div className="text-center py-4">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <p className="font-medium text-gray-900 mb-1">¡Solicitud enviada!</p>
-            <p className="text-sm text-gray-500 mb-4">
-              Nuestro equipo procesará tu recarga en menos de 24 horas hábiles y recibirás confirmación.
-            </p>
+        <p className="text-sm text-gray-500 mb-4">
+          Selecciona el paquete. Serás redirigido a Wompi para pagar de forma segura.
+        </p>
+        <div className="space-y-2 mb-4">
+          {CREDIT_PACKS.map((pack, idx) => (
             <button
-              onClick={onClose}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+              key={pack.credits}
+              onClick={() => setSelected(idx as CreditPackIndex)}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-colors text-sm ${
+                selected === idx
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
             >
-              Entendido
+              <span className="font-medium text-gray-900">{pack.credits} créditos IA</span>
+              <span className="text-gray-600">${pack.priceCOP.toLocaleString("es-CO")} COP</span>
             </button>
-          </div>
-        ) : (
-          <>
-            <p className="text-sm text-gray-500 mb-4">
-              Selecciona el paquete que necesitas. Te contactaremos para coordinar el pago y activar los créditos.
-            </p>
-            <div className="space-y-2 mb-4">
-              {CREDIT_PACKS.map((pack, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelected(idx)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-colors text-sm ${
-                    selected === idx
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <span className="font-medium text-gray-900">
-                    {pack.credits} créditos IA
-                  </span>
-                  <span className="text-gray-600">
-                    ${pack.priceCOP.toLocaleString("es-CO")} COP
-                  </span>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400 mb-4">
-              1 crédito = 1 historia clínica IA. Los créditos no vencen.
-            </p>
-            {error && (
-              <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-3">
-                {error}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                onClick={onClose}
-                className="flex-1 px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleRequest}
-                disabled={selected === null || submitting}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-              >
-                {submitting ? "Enviando..." : "Solicitar recarga"}
-              </button>
-            </div>
-          </>
+          ))}
+        </div>
+        <p className="text-xs text-gray-400 mb-4">
+          Los créditos se añaden automáticamente al confirmar el pago.
+        </p>
+        {error && (
+          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-3">
+            {error}
+          </p>
         )}
+        <div className="flex gap-2">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleCheckout}
+            disabled={selected === null || submitting}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {submitting ? "Redirigiendo..." : "Pagar con Wompi"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -365,10 +336,7 @@ function CreditWidget() {
       </div>
 
       {showModal && (
-        <CreditModal
-          onClose={() => setShowModal(false)}
-          onSuccess={() => setShowModal(false)}
-        />
+        <CreditModal onClose={() => setShowModal(false)} />
       )}
     </>
   );
