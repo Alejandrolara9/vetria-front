@@ -10,6 +10,8 @@ import {
   type CreateProtocolDto,
 } from "@/services/protocols";
 import { listReminders, type Reminder } from "@/services/reminders";
+import SearchableSelect from "@/components/SearchableSelect";
+import { BREEDS } from "@/lib/breeds";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -230,7 +232,11 @@ function ProtocolModal({
   ) {
     const target = e.target as HTMLInputElement;
     const value = target.type === "checkbox" ? target.checked : target.value;
-    setForm((prev) => ({ ...prev, [target.name]: value }));
+    if (target.name === "species") {
+      setForm((prev) => ({ ...prev, species: value as string, breed: "" }));
+    } else {
+      setForm((prev) => ({ ...prev, [target.name]: value }));
+    }
   }
 
   // Convierte el string del formulario a número opcional para el DTO
@@ -397,14 +403,23 @@ function ProtocolModal({
               <label className="block text-sm font-medium mb-1">
                 Raza <span className="text-muted-foreground text-xs">(opcional)</span>
               </label>
-              <input
-                name="breed"
-                type="text"
-                placeholder="Todas las razas"
-                className="w-full px-4 py-2 border border-border rounded-lg text-sm"
-                value={form.breed}
-                onChange={handleChange}
-              />
+              {BREEDS[form.species] ? (
+                <SearchableSelect
+                  options={BREEDS[form.species]}
+                  value={form.breed}
+                  onChange={(v) => setForm((prev) => ({ ...prev, breed: v }))}
+                  placeholder="Todas las razas"
+                />
+              ) : (
+                <input
+                  name="breed"
+                  type="text"
+                  placeholder="Todas las razas"
+                  className="w-full px-4 py-2 border border-border rounded-lg text-sm"
+                  value={form.breed}
+                  onChange={handleChange}
+                />
+              )}
             </div>
           </div>
 
@@ -752,6 +767,8 @@ export default function ProtocolsPage() {
   const [pageError, setPageError] = useState("");
   const [allReminders, setAllReminders] = useState<Reminder[]>([]);
   const [activeTab, setActiveTab] = useState<"protocols" | "alerts">("protocols");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function loadProtocols() {
     try {
@@ -775,20 +792,15 @@ export default function ProtocolsPage() {
     loadProtocols();
   }, []);
 
-  async function handleDelete(protocol: VaccinationProtocol) {
-    if (protocol.tenantId === null) {
-      alert("Los protocolos globales del sistema no pueden eliminarse.");
-      return;
-    }
-    if (!confirm(`Eliminar el protocolo "${protocol.name}"? Esta accion no se puede deshacer.`)) {
-      return;
-    }
+  async function handleDelete(protocolId: string) {
+    setConfirmDeleteId(null);
+    setDeleteError(null);
     try {
-      await deleteProtocol(protocol.id);
+      await deleteProtocol(protocolId);
       loadProtocols();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      alert(axiosErr.response?.data?.message || "Error al eliminar el protocolo");
+      setDeleteError(axiosErr.response?.data?.message || "Error al eliminar el protocolo");
     }
   }
 
@@ -858,6 +870,12 @@ export default function ProtocolsPage() {
         </button>
       </div>
 
+      {deleteError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm mb-4">
+          {deleteError}
+        </div>
+      )}
+
       {/* Error de carga */}
       {pageError && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm mb-4">
@@ -922,7 +940,24 @@ export default function ProtocolsPage() {
                         <td className="px-4 py-4 text-right">
                           <button onClick={() => openEdit(protocol)} className="text-primary hover:underline mr-4">Editar</button>
                           {protocol.tenantId !== null ? (
-                            <button onClick={() => handleDelete(protocol)} className="text-danger hover:underline">Eliminar</button>
+                            confirmDeleteId === protocol.id ? (
+                              <span className="inline-flex items-center gap-1">
+                                <span className="text-xs text-red-700 font-medium">¿Eliminar?</span>
+                                <button
+                                  onClick={() => handleDelete(protocol.id)}
+                                  className="text-xs px-2 py-0.5 bg-red-600 text-white rounded hover:bg-red-700"
+                                >Sí</button>
+                                <button
+                                  onClick={() => setConfirmDeleteId(null)}
+                                  className="text-xs px-2 py-0.5 border rounded hover:bg-gray-50"
+                                >No</button>
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => { setConfirmDeleteId(protocol.id); setDeleteError(null); }}
+                                className="text-danger hover:underline"
+                              >Eliminar</button>
+                            )
                           ) : (
                             <span className="text-muted-foreground text-xs italic">Solo lectura</span>
                           )}
