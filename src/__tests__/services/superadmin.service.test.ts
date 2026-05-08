@@ -9,6 +9,7 @@ import {
   changeSuperAdminPassword,
   fetchCreditRequests,
   confirmCreditRequest,
+  rejectCreditRequest,
   addCreditsAdmin,
 } from "../../services/superadmin.service";
 
@@ -124,6 +125,23 @@ describe("confirmCreditRequest", () => {
   it("lanza error si la solicitud no existe", async () => {
     mock.onPost("/superadmin/credit-requests/inexistente/confirm").reply(404);
     await expect(confirmCreditRequest("inexistente")).rejects.toThrow();
+  });
+});
+
+describe("rejectCreditRequest", () => {
+  it("DELETEa /superadmin/credit-requests/:reqId", async () => {
+    mock.onDelete("/superadmin/credit-requests/req-001").reply(204);
+    await expect(rejectCreditRequest("req-001")).resolves.toBeUndefined();
+  });
+
+  it("lanza error si la solicitud no existe", async () => {
+    mock.onDelete("/superadmin/credit-requests/inexistente").reply(404);
+    await expect(rejectCreditRequest("inexistente")).rejects.toThrow();
+  });
+
+  it("lanza error si la solicitud ya fue confirmada", async () => {
+    mock.onDelete("/superadmin/credit-requests/ya-confirmada").reply(409);
+    await expect(rejectCreditRequest("ya-confirmada")).rejects.toThrow();
   });
 });
 

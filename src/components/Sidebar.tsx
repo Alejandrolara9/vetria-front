@@ -182,7 +182,7 @@ function CreditModal({
   onSuccess,
 }: {
   onClose: () => void;
-  onSuccess: (added: number) => void;
+  onSuccess: () => void;
 }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -196,7 +196,7 @@ function CreditModal({
     try {
       await requestCreditTopUp(selected);
       setDone(true);
-      onSuccess(CREDIT_PACKS[selected].credits);
+      onSuccess();
     } catch {
       setError("No se pudo enviar la solicitud. Intenta de nuevo.");
     } finally {
@@ -367,12 +367,7 @@ function CreditWidget() {
       {showModal && (
         <CreditModal
           onClose={() => setShowModal(false)}
-          onSuccess={(added) => {
-            setCredits((prev) =>
-              prev ? { ...prev, creditBalance: prev.creditBalance + added } : prev
-            );
-            setShowModal(false);
-          }}
+          onSuccess={() => setShowModal(false)}
         />
       )}
     </>
