@@ -10,19 +10,19 @@ type TxStatus = "APPROVED" | "DECLINED" | "VOIDED" | "ERROR" | "PENDING" | "load
 export default function PaymentReturnPage() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<TxStatus>("loading");
-  const [plan, setPlan] = useState("");
+  const [plan, setPlan] = useState<string | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
 
   useEffect(() => {
     const id = searchParams.get("id");
     if (!id) { setStatus("ERROR"); return; }
 
-    // Wompi redirects with ?id=wompi_tx_id — we look up by reference stored in URL or query
-    // The reference is stored in our own DB; fall back to checking by wompi tx id via the param
     const reference = searchParams.get("reference") ?? id;
     getTransactionStatus(reference)
       .then((tx) => {
         setStatus(tx.status as TxStatus);
         setPlan(tx.plan);
+        setCredits(tx.credits);
       })
       .catch(() => setStatus("ERROR"));
   }, [searchParams]);
@@ -36,6 +36,22 @@ export default function PaymentReturnPage() {
   }
 
   const isSuccess = status === "APPROVED";
+
+  function successMessage() {
+    if (credits !== null) {
+      return (
+        <p className="text-muted-foreground">
+          Se han añadido <span className="font-semibold text-primary">{credits} créditos IA</span> a tu cuenta. ¡Ya puedes usarlos!
+        </p>
+      );
+    }
+    return (
+      <p className="text-muted-foreground">
+        Tu plan ha sido actualizado a <span className="font-semibold text-primary">{plan}</span>.
+        Ya puedes disfrutar de todas las funciones.
+      </p>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -58,12 +74,7 @@ export default function PaymentReturnPage() {
           {isSuccess ? "¡Pago exitoso!" : "Pago no completado"}
         </h1>
 
-        {isSuccess ? (
-          <p className="text-muted-foreground">
-            Tu plan ha sido actualizado a <span className="font-semibold text-primary">{plan}</span>.
-            Ya puedes disfrutar de todas las funciones.
-          </p>
-        ) : (
+        {isSuccess ? successMessage() : (
           <p className="text-muted-foreground">
             El pago no fue procesado. Estado: <span className="font-medium">{status}</span>.
             Puedes intentarlo de nuevo desde la sección de planes.
