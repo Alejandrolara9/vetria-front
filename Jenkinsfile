@@ -68,12 +68,6 @@ pipeline {
             }
         }
 
-        stage('Lint') {
-            steps {
-                sh 'npm run lint'
-            }
-        }
-
         stage('Unit Tests') {
             steps {
                 sh 'npm test -- --ci --forceExit --coverage'
@@ -82,6 +76,14 @@ pipeline {
                 always {
                     junit allowEmptyResults: true, testResults: 'reports/junit.xml'
                     archiveArtifacts artifacts: 'coverage/lcov.info', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    sh 'npm run lint'
                 }
             }
         }
