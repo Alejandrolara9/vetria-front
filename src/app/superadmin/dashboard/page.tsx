@@ -108,7 +108,7 @@ export default function SuperAdminDashboard() {
     setEditError("");
     try {
       await updateTenant(editTarget.id, { plan: editPlan, active: editActive });
-      if (editCredits && parseInt(editCredits) > 0) {
+      if (editCredits && parseInt(editCredits) !== 0) {
         await addCreditsAdmin(editTarget.id, parseInt(editCredits), "Ajuste manual superadmin");
       }
       closeEdit();
