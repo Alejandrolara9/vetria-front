@@ -47,7 +47,7 @@ export default function BillingPage() {
     setLoadingPlan(plan);
     try {
       const { checkoutUrl } = await initiateCheckout(plan);
-      globalThis.window.location.href = checkoutUrl;
+      globalThis.window.location.assign(checkoutUrl);
     } catch {
       setError("No se pudo iniciar el pago. Intenta de nuevo.");
       setLoadingPlan(null);
@@ -59,7 +59,7 @@ export default function BillingPage() {
     setLoadingCredits(packIndex);
     try {
       const { checkoutUrl } = await initiateCreditsCheckout(packIndex);
-      globalThis.window.location.href = checkoutUrl;
+      globalThis.window.location.assign(checkoutUrl);
     } catch {
       setError("No se pudo iniciar el pago. Intenta de nuevo.");
       setLoadingCredits(null);
