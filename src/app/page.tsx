@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-// ─── Datos ───────────────────────────────────────────────────────────────────
-
 const TYPING_TEXTS = [
   "Perro 3 años, vomitando 2 días, temperatura 39.5°C",
   "Gata castrada, pérdida de peso progresiva, polidipsia",
@@ -19,6 +17,7 @@ const FEATURES = [
     desc: "Escribe dos frases o dicta en voz. La IA genera la historia completa con terminología clínica precisa en menos de 5 segundos.",
     gradient: "from-purple-500 to-indigo-600",
     bg: "bg-purple-50",
+    border: "border-purple-100",
     badge: "IA",
     badgeColor: "bg-purple-100 text-purple-700",
   },
@@ -28,6 +27,7 @@ const FEATURES = [
     desc: "Dicta la nota del paciente con tu voz directamente en la app. Sin costo adicional — usa el micrófono del navegador.",
     gradient: "from-rose-500 to-pink-600",
     bg: "bg-rose-50",
+    border: "border-rose-100",
     badge: "Nuevo",
     badgeColor: "bg-rose-100 text-rose-700",
   },
@@ -37,6 +37,7 @@ const FEATURES = [
     desc: "Gestión de citas por veterinario, detección de conflictos y confirmación automática. Invitaciones al calendario de Google, Outlook y Apple.",
     gradient: "from-blue-500 to-cyan-600",
     bg: "bg-blue-50",
+    border: "border-blue-100",
     badge: null,
     badgeColor: "",
   },
@@ -46,6 +47,7 @@ const FEATURES = [
     desc: "El sistema calcula cuándo vence cada vacuna o desparasitación y envía el recordatorio en el canal exacto al cliente.",
     gradient: "from-amber-500 to-orange-600",
     bg: "bg-amber-50",
+    border: "border-amber-100",
     badge: "IA",
     badgeColor: "bg-amber-100 text-amber-700",
   },
@@ -55,6 +57,7 @@ const FEATURES = [
     desc: "Adjunta radiografías, ecografías o resultados de laboratorio. La IA los analiza e incluye los hallazgos en la historia clínica automáticamente.",
     gradient: "from-teal-500 to-emerald-600",
     bg: "bg-teal-50",
+    border: "border-teal-100",
     badge: "IA",
     badgeColor: "bg-teal-100 text-teal-700",
   },
@@ -64,6 +67,7 @@ const FEATURES = [
     desc: "Todo el historial del paciente: citas, vacunas, eventos clínicos, historias, adjuntos y recordatorios en un solo lugar.",
     gradient: "from-green-500 to-emerald-600",
     bg: "bg-green-50",
+    border: "border-green-100",
     badge: null,
     badgeColor: "",
   },
@@ -77,6 +81,7 @@ const STEPS = [
     color: "text-blue-600",
     border: "border-blue-200",
     bg: "bg-blue-50",
+    icon: "🏥",
   },
   {
     num: "02",
@@ -85,6 +90,7 @@ const STEPS = [
     color: "text-purple-600",
     border: "border-purple-200",
     bg: "bg-purple-50",
+    icon: "🎙️",
   },
   {
     num: "03",
@@ -93,6 +99,7 @@ const STEPS = [
     color: "text-emerald-600",
     border: "border-emerald-200",
     bg: "bg-emerald-50",
+    icon: "✨",
   },
 ];
 
@@ -102,21 +109,27 @@ const TESTIMONIALS = [
     name: "Dra. Carolina Méndez",
     role: "Médica veterinaria · Bogotá",
     avatar: "CM",
+    emoji: "🐕",
     color: "bg-blue-500",
+    highlight: "15 min → 4 seg",
   },
   {
     quote: "Los recordatorios automáticos de vacunación nos hicieron recuperar clientes que teníamos perdidos. El primer mes aumentamos las consultas un 30%.",
     name: "Dr. Andrés Ospina",
     role: "Director clínica · Medellín",
     avatar: "AO",
+    emoji: "🐈",
     color: "bg-green-500",
+    highlight: "+30% consultas",
   },
   {
     quote: "La invitación de calendario que llega al email del cliente cuando agenda una cita es un detalle que marca la diferencia. Parece un software de primera categoría.",
     name: "Dra. Luisa Vargas",
     role: "Propietaria · Cali",
     avatar: "LV",
+    emoji: "🐇",
     color: "bg-purple-500",
+    highlight: "Clientes felices",
   },
 ];
 
@@ -144,17 +157,32 @@ const PLAN_BASIC = [
   "Portal del dueño de mascota",
 ];
 
-const PLAN_PRO = [
-  "400 créditos IA / mes",
-  "Hasta 25 usuarios",
-  "Hasta 10.000 mascotas",
-  "Todo lo del plan BASIC",
-  "Recordatorios WhatsApp (próx.)",
-  "Reportes avanzados de gestión",
-  "Soporte prioritario 24/7",
+const FAQS = [
+  {
+    q: "¿Necesito instalar algo?",
+    a: "No. Vetria es 100% web. Funciona en cualquier navegador moderno desde computador, tablet o celular. Sin descargas, sin configuraciones.",
+  },
+  {
+    q: "¿Mis datos y los de mis clientes son seguros?",
+    a: "Sí. Todo el tráfico viaja cifrado con HTTPS, los datos se almacenan en AWS con cifrado en reposo y backups automáticos diarios. Tu información nunca se comparte con terceros.",
+  },
+  {
+    q: "¿Qué pasa cuando terminan los 60 días de prueba?",
+    a: "Te avisamos con anticipación. Si decides continuar, activas el plan BASIC. Si no, tus datos se conservan 30 días adicionales para que puedas exportarlos.",
+  },
+  {
+    q: "¿Cuántos usuarios puedo agregar a mi clínica?",
+    a: "Hasta 8 usuarios con el plan BASIC — veterinarios, recepcionistas y asistentes, cada uno con roles y permisos personalizados.",
+  },
+  {
+    q: "¿Los créditos IA no usados se acumulan?",
+    a: "Los créditos del plan se renuevan cada mes y no se acumulan. Sin embargo, los créditos que compras por separado no vencen y puedes usarlos cuando quieras.",
+  },
+  {
+    q: "¿Funciona con cualquier especialidad veterinaria?",
+    a: "Sí. La IA está entrenada para medicina general, exóticos, animales de granja y especialidades. Puedes personalizar los protocolos para tu tipo de clínica.",
+  },
 ];
-
-// ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   const [typingIndex, setTypingIndex] = useState(0);
@@ -163,6 +191,7 @@ export default function LandingPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showGenerated, setShowGenerated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -180,7 +209,10 @@ export default function LandingPage() {
           setCharIndex((c) => c + 1);
         } else {
           setShowGenerated(true);
-          setTimeout(() => { setIsDeleting(true); setShowGenerated(false); }, 3200);
+          setTimeout(() => {
+            setIsDeleting(true);
+            setShowGenerated(false);
+          }, 3200);
         }
       } else {
         if (charIndex > 0) {
@@ -211,7 +243,7 @@ export default function LandingPage() {
             <span className={`hidden sm:inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${scrolled ? "bg-blue-100 text-blue-600" : "bg-blue-500/30 text-blue-200"}`}>Colombia</span>
           </div>
           <div className="hidden md:flex items-center gap-7">
-            {[["#funciones","Funciones"],["#como-funciona","Cómo funciona"],["#ia","IA"],["#precios","Precios"]].map(([href, label]) => (
+            {[["#funciones", "Funciones"], ["#como-funciona", "Cómo funciona"], ["#ia", "IA"], ["#precios", "Precios"]].map(([href, label]) => (
               <a key={href} href={href} className={`text-sm font-medium transition-colors hover:text-blue-400 ${scrolled ? "text-gray-600" : "text-white/80"}`}>{label}</a>
             ))}
           </div>
@@ -330,7 +362,7 @@ export default function LandingPage() {
                   <div className="bg-slate-800 rounded-xl p-4 border border-purple-500/20 space-y-2.5 text-xs text-slate-300 leading-relaxed">
                     <div>
                       <span className="text-blue-400 font-semibold">Anamnesis: </span>
-                      Paciente canino de 3 años que consulta por cuadro emético de 48 horas de evolución con hiporexia marcada. Propietaria refiere 4-5 episodios de vómito diarios...
+                      Paciente canino de 3 años que consulta por cuadro emético de 48 horas de evolución con hiporexia marcada...
                     </div>
                     <div>
                       <span className="text-blue-400 font-semibold">Examen físico: </span>
@@ -361,7 +393,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Floating chips — hidden on small screens */}
             <div className="absolute -top-4 -right-4 hidden sm:flex bg-white rounded-2xl shadow-xl px-3.5 py-2.5 items-center gap-2.5 border border-gray-100">
               <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-lg">⚡</div>
               <div>
@@ -420,9 +451,10 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((f) => (
-              <div key={f.title} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+              <div key={f.title} className={`bg-white rounded-2xl p-6 border ${f.border} hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden`}>
+                <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${f.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${f.bg} border border-gray-100`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${f.bg} border border-gray-100 group-hover:scale-110 transition-transform duration-300`}>
                     {f.icon}
                   </div>
                   {f.badge && (
@@ -450,12 +482,12 @@ export default function LandingPage() {
             <p className="text-gray-500 text-lg max-w-xl mx-auto">Sin instalaciones. Sin capacitaciones largas. Solo abres el navegador y empiezas.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connecting line desktop */}
             <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-px bg-gradient-to-r from-blue-200 via-purple-200 to-emerald-200" />
             {STEPS.map((s) => (
-              <div key={s.num} className="relative text-center">
-                <div className={`w-20 h-20 mx-auto rounded-2xl ${s.bg} border-2 ${s.border} flex items-center justify-center mb-6 relative z-10`}>
-                  <span className={`text-3xl font-black ${s.color}`}>{s.num}</span>
+              <div key={s.num} className="relative text-center group">
+                <div className={`w-20 h-20 mx-auto rounded-2xl ${s.bg} border-2 ${s.border} flex flex-col items-center justify-center mb-6 relative z-10 group-hover:scale-105 transition-transform duration-300`}>
+                  <span className="text-2xl mb-0.5">{s.icon}</span>
+                  <span className={`text-xs font-black ${s.color}`}>{s.num}</span>
                 </div>
                 <h3 className="font-bold text-gray-900 text-lg mb-2">{s.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">{s.desc}</p>
@@ -490,7 +522,7 @@ export default function LandingPage() {
                   { icon: "🔬", text: "Adjunta labs y radiografías: la IA los analiza e integra a la historia" },
                   { icon: "✏️", text: "El veterinario revisa y ajusta antes de aprobar — la IA es asistente, no reemplazo" },
                 ].map((item) => (
-                  <div key={item.text} className="flex items-start gap-3">
+                  <div key={item.text} className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors">
                     <span className="text-xl flex-shrink-0 mt-0.5">{item.icon}</span>
                     <p className="text-gray-600 text-sm leading-relaxed">{item.text}</p>
                   </div>
@@ -559,23 +591,29 @@ export default function LandingPage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-5">
           <div className="text-center mb-12">
+            <span className="inline-block px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+              Historias reales
+            </span>
             <h2 className="text-3xl font-extrabold text-gray-900 mb-3">Lo que dicen los veterinarios</h2>
             <p className="text-gray-500">Clínicas que ya transformaron su forma de trabajar</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex gap-0.5 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
+              <div key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-1 bg-green-100 text-green-700 rounded-full">{t.highlight}</span>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">&ldquo;{t.quote}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full ${t.color} flex items-center justify-center flex-shrink-0`}>
-                    <span className="text-white text-xs font-bold">{t.avatar}</span>
+                <p className="text-gray-600 text-sm leading-relaxed mb-5 italic flex-1">&ldquo;{t.quote}&rdquo;</p>
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                  <div className={`w-10 h-10 rounded-full ${t.color} flex items-center justify-center flex-shrink-0 text-lg`}>
+                    {t.emoji}
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{t.name}</p>
@@ -599,7 +637,7 @@ export default function LandingPage() {
             <p className="text-gray-500 text-lg">Sin contratos anuales. Cancela cuando quieras.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
 
             {/* Trial */}
             <div className="bg-white border-2 border-gray-200 rounded-2xl p-7 hover:border-gray-300 transition-colors flex flex-col">
@@ -627,49 +665,23 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            {/* Basic */}
-            <div className="bg-white border-2 border-blue-100 rounded-2xl p-7 hover:border-blue-200 transition-colors flex flex-col shadow-sm">
-              <div className="mb-5">
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Plan BASIC</p>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Para clínicas que crecen</h3>
-                <div className="flex items-end gap-1">
-                  <span className="text-5xl font-extrabold text-gray-900">$100k</span>
-                  <span className="text-gray-400 mb-2 text-sm">/mes COP</span>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">≈ $25 USD · facturación mensual</p>
-              </div>
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {PLAN_BASIC.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600">
-                    <svg className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/register" className="block text-center py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-all text-sm shadow-md shadow-blue-600/20">
-                Empezar con BASIC →
-              </Link>
-            </div>
-
-            {/* Pro */}
+            {/* Basic — highlighted */}
             <div className="relative border-2 border-blue-600 rounded-2xl p-7 bg-gradient-to-br from-slate-900 to-blue-950 shadow-2xl shadow-blue-900/30 overflow-hidden flex flex-col">
               <div className="absolute top-5 right-5 bg-amber-400 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Más popular
+                Recomendado
               </div>
               <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
               <div className="relative mb-5">
-                <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Plan PRO</p>
-                <h3 className="text-xl font-bold text-white mb-3">Para crecer sin límites</h3>
+                <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Plan BASIC</p>
+                <h3 className="text-xl font-bold text-white mb-3">Para clínicas que crecen</h3>
                 <div className="flex items-end gap-1">
-                  <span className="text-5xl font-extrabold text-white">$250k</span>
+                  <span className="text-5xl font-extrabold text-white">$100k</span>
                   <span className="text-blue-300 mb-2 text-sm">/mes COP</span>
                 </div>
-                <p className="text-xs text-blue-400 mt-1">≈ $62 USD · facturación mensual</p>
+                <p className="text-xs text-blue-400 mt-1">≈ $25 USD · facturación mensual</p>
               </div>
               <ul className="relative space-y-2.5 mb-8 flex-1">
-                {PLAN_PRO.map((item) => (
+                {PLAN_BASIC.map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-blue-100">
                     <svg className="w-4 h-4 text-blue-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -679,13 +691,13 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Link href="/register" className="relative block text-center py-3.5 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-all text-sm shadow-lg">
-                Empezar con PRO →
+                Empezar con BASIC →
               </Link>
             </div>
           </div>
 
           {/* Credits explainer */}
-          <div className="mt-8 max-w-5xl mx-auto">
+          <div className="mt-8 max-w-3xl mx-auto">
             <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">IA</div>
               <div>
@@ -696,6 +708,42 @@ export default function LandingPage() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-5">
+          <div className="text-center mb-12">
+            <span className="inline-block px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+              Preguntas frecuentes
+            </span>
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-3">Todo lo que necesitas saber</h2>
+            <p className="text-gray-500">¿Tienes más dudas? Escríbenos por WhatsApp.</p>
+          </div>
+          <div className="space-y-3">
+            {FAQS.map((faq, i) => (
+              <div key={faq.q} className="border border-gray-200 rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <span className="font-semibold text-gray-900 text-sm pr-4">{faq.q}</span>
+                  <svg
+                    className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-4 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -726,6 +774,7 @@ export default function LandingPage() {
               Ya tengo cuenta →
             </Link>
           </div>
+          <p className="text-slate-500 text-xs mt-6">Sin tarjeta · Sin instalación · Configura en 5 minutos</p>
         </div>
       </section>
 
@@ -751,7 +800,7 @@ export default function LandingPage() {
             <div>
               <p className="text-white font-semibold text-sm mb-4">Producto</p>
               <ul className="space-y-2.5">
-                {["Funciones","Precios","Seguridad","Changelog"].map((l) => (
+                {["Funciones", "Precios", "Seguridad", "Changelog"].map((l) => (
                   <li key={l}><a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">{l}</a></li>
                 ))}
               </ul>
@@ -759,7 +808,7 @@ export default function LandingPage() {
             <div>
               <p className="text-white font-semibold text-sm mb-4">Empresa</p>
               <ul className="space-y-2.5">
-                {["Acerca de","Contacto","Términos de uso","Privacidad"].map((l) => (
+                {["Acerca de", "Contacto", "Términos de uso", "Privacidad"].map((l) => (
                   <li key={l}><a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">{l}</a></li>
                 ))}
               </ul>
