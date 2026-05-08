@@ -24,14 +24,27 @@ export const PLAN_LABELS: Record<PlanTarget, string> = {
   PRO: "Plan Pro",
 };
 
+export const CREDIT_PACKS = [
+  { credits: 50, priceCOP: 20_000, label: "50 créditos" },
+  { credits: 150, priceCOP: 50_000, label: "150 créditos" },
+] as const;
+
+export type CreditPackIndex = 0 | 1;
+
 export async function initiateCheckout(plan: PlanTarget): Promise<{ checkoutUrl: string; reference: string }> {
   const res = await api.post("/wompi/checkout", { plan });
   return res.data;
 }
 
+export async function initiateCreditsCheckout(packIndex: CreditPackIndex): Promise<{ checkoutUrl: string; reference: string }> {
+  const res = await api.post("/wompi/checkout/credits", { packIndex });
+  return res.data;
+}
+
 export async function getTransactionStatus(reference: string): Promise<{
   status: string;
-  plan: string;
+  plan: string | null;
+  credits: number | null;
   confirmedAt: string | null;
 }> {
   const res = await api.get(`/wompi/transaction/${reference}`);
