@@ -1,5 +1,16 @@
 import MockAdapter from "axios-mock-adapter";
-import { superAdminApi, superAdminLogin, fetchTenants, updateTenant, fetchTenantUsers, fetchStats, changeSuperAdminPassword } from "../../services/superadmin.service";
+import {
+  superAdminApi,
+  superAdminLogin,
+  fetchTenants,
+  updateTenant,
+  fetchTenantUsers,
+  fetchStats,
+  changeSuperAdminPassword,
+  fetchCreditRequests,
+  confirmCreditRequest,
+  addCreditsAdmin,
+} from "../../services/superadmin.service";
 
 const mock = new MockAdapter(superAdminApi);
 
@@ -67,6 +78,76 @@ describe("changeSuperAdminPassword", () => {
   });
 });
 
+describe("fetchCreditRequests", () => {
+  const creditRequest = {
+    id: "req-001",
+    tenantId: "t1",
+    credits: 50,
+    paidAmountCOP: 20_000,
+    createdAt: "2026-05-01T00:00:00Z",
+    tenant: { id: "t1", name: "Clinica Demo", plan: "BASIC", creditBalance: 10 },
+  };
+
+  it("GETs /superadmin/credit-requests y retorna la lista", async () => {
+    mock.onGet("/superadmin/credit-requests").reply(200, [creditRequest]);
+    const result = await fetchCreditRequests();
+    expect(result).toEqual([creditRequest]);
+  });
+
+  it("retorna array vacío cuando no hay solicitudes pendientes", async () => {
+    mock.onGet("/superadmin/credit-requests").reply(200, []);
+    const result = await fetchCreditRequests();
+    expect(result).toEqual([]);
+  });
+
+  it("retorna datos del tenant anidado en cada solicitud", async () => {
+    mock.onGet("/superadmin/credit-requests").reply(200, [creditRequest]);
+    const result = await fetchCreditRequests();
+    expect(result[0].tenant.name).toBe("Clinica Demo");
+    expect(result[0].tenant.creditBalance).toBe(10);
+  });
+});
+
+describe("confirmCreditRequest", () => {
+  it("POSTea a /superadmin/credit-requests/:reqId/confirm", async () => {
+    mock.onPost("/superadmin/credit-requests/req-001/confirm").reply(200, { creditBalance: 60 });
+    const result = await confirmCreditRequest("req-001");
+    expect(result.creditBalance).toBe(60);
+  });
+
+  it("retorna el nuevo saldo actualizado del tenant", async () => {
+    mock.onPost("/superadmin/credit-requests/req-002/confirm").reply(200, { creditBalance: 200 });
+    const result = await confirmCreditRequest("req-002");
+    expect(result).toEqual({ creditBalance: 200 });
+  });
+
+  it("lanza error si la solicitud no existe", async () => {
+    mock.onPost("/superadmin/credit-requests/inexistente/confirm").reply(404);
+    await expect(confirmCreditRequest("inexistente")).rejects.toThrow();
+  });
+});
+
+describe("addCreditsAdmin", () => {
+  it("POSTea a /superadmin/tenants/:id/credits con credits y reason", async () => {
+    mock.onPost("/superadmin/tenants/t1/credits").reply(200, { creditBalance: 150 });
+    const result = await addCreditsAdmin("t1", 50, "Ajuste manual");
+    expect(result.creditBalance).toBe(150);
+    expect(JSON.parse(mock.history.post[0].data)).toEqual({ credits: 50, reason: "Ajuste manual" });
+  });
+
+  it("envía reason undefined si no se proporciona", async () => {
+    mock.onPost("/superadmin/tenants/t1/credits").reply(200, { creditBalance: 100 });
+    await addCreditsAdmin("t1", 100);
+    const body = JSON.parse(mock.history.post[0].data);
+    expect(body.credits).toBe(100);
+  });
+
+  it("lanza error si el tenant no existe", async () => {
+    mock.onPost("/superadmin/tenants/inexistente/credits").reply(404);
+    await expect(addCreditsAdmin("inexistente", 50)).rejects.toThrow();
+  });
+});
+
 describe("superAdminApi interceptor", () => {
   it("adds Authorization header from superadmin_token", async () => {
     localStorage.setItem("superadmin_token", "sa-jwt");
@@ -79,5 +160,13 @@ describe("superAdminApi interceptor", () => {
     mock.onGet("/superadmin/tenants").reply(200, []);
     await superAdminApi.get("/superadmin/tenants");
     expect(mock.history.get[0].headers?.Authorization).toBeUndefined();
+  });
+
+  it("limpia superadmin_token del localStorage en error 401", async () => {
+    localStorage.setItem("superadmin_token", "expired-token");
+    mock.onGet("/superadmin/tenants").reply(401);
+
+    await expect(superAdminApi.get("/superadmin/tenants")).rejects.toBeDefined();
+    expect(localStorage.getItem("superadmin_token")).toBeNull();
   });
 });
