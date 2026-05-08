@@ -6,7 +6,7 @@ export const ownerApi = axios.create({ baseURL: API_URL });
 
 ownerApi.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token =
-    typeof window !== "undefined" ? localStorage.getItem("owner_token") : null; // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
+    typeof globalThis.window === "undefined" ? null : localStorage.getItem("owner_token"); // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -127,9 +127,9 @@ export function clearOwnerToken() {
 }
 
 export function getOwnerToken(): string | null {
-  return typeof window !== "undefined"
-    ? localStorage.getItem("owner_token")
-    : null;
+  return typeof globalThis.window === "undefined"
+    ? null
+    : localStorage.getItem("owner_token");
 }
 
 /**
