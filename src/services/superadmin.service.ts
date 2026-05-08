@@ -5,7 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
 export const superAdminApi = axios.create({ baseURL: BASE_URL });
 
 superAdminApi.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
+  if (typeof globalThis.window !== "undefined") {
     const token = localStorage.getItem("superadmin_token"); // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
@@ -15,9 +15,9 @@ superAdminApi.interceptors.request.use((config) => {
 superAdminApi.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
+    if (error.response?.status === 401 && typeof globalThis.window !== "undefined") {
       localStorage.removeItem("superadmin_token");
-      window.location.replace("/superadmin/login"); // NOSONAR S5122 — hardcoded path, no user input involved
+      globalThis.window.location.replace("/superadmin/login"); // NOSONAR S5122 — hardcoded path, no user input involved
     }
     return Promise.reject(error);
   }
