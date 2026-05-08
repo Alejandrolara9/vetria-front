@@ -130,8 +130,23 @@ describe("streamClinicalNote", () => {
     await streamClinicalNote("n1", { onToken, onComplete, onError });
 
     expect(onToken).toHaveBeenCalledWith("Hello ");
-    expect(onComplete).toHaveBeenCalledWith(completedNote);
+    expect(onComplete).toHaveBeenCalledWith(completedNote, "fallback");
     expect(onError).not.toHaveBeenCalled();
+  });
+
+  it("passes source='ai' when the SSE event includes source", async () => {
+    const completedNote = { ...note, status: "APPROVED" as const };
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      body: makeBody([
+        `data: {"type":"complete","note":${JSON.stringify(completedNote)},"source":"ai"}\n\n`,
+      ]),
+    });
+
+    const onComplete = jest.fn();
+    await streamClinicalNote("n1", { onToken: jest.fn(), onComplete, onError: jest.fn() });
+
+    expect(onComplete).toHaveBeenCalledWith(completedNote, "ai");
   });
 
   it("calls onError for error SSE event", async () => {
