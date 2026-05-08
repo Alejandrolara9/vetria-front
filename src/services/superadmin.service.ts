@@ -33,6 +33,7 @@ export interface TenantSummary {
   clinicDepartment: string | null;
   clinicCity: string | null;
   creditBalance: number | null;
+  gracePeriodEndsAt: string | null;
   _count: { users: number; pets: number; appointments: number };
 }
 
@@ -121,5 +122,10 @@ export async function addCreditsAdmin(
     credits,
     reason,
   });
+  return res.data;
+}
+
+export async function setGracePeriod(tenantId: string, days: number): Promise<TenantSummary> {
+  const res = await superAdminApi.patch(`/superadmin/tenants/${tenantId}/grace-period`, { days });
   return res.data;
 }
