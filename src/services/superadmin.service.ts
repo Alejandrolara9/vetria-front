@@ -129,3 +129,36 @@ export async function setGracePeriod(tenantId: string, days: number): Promise<Te
   const res = await superAdminApi.patch(`/superadmin/tenants/${tenantId}/grace-period`, { days });
   return res.data;
 }
+
+export interface FeedbackItem {
+  id: string;
+  name: string;
+  email: string | null;
+  message: string;
+  rating: number;
+  createdAt: string;
+}
+
+export async function fetchFeedback(): Promise<FeedbackItem[]> {
+  const res = await superAdminApi.get("/feedback");
+  return res.data;
+}
+
+export async function submitFeedback(data: {
+  name: string;
+  email?: string;
+  message: string;
+  rating: number;
+}): Promise<void> {
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
+  await fetch(`${BASE_URL}/feedback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  }).then(async (res) => {
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err as { message?: string }).message ?? "Error al enviar feedback");
+    }
+  });
+}

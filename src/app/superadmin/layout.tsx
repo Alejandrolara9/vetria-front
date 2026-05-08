@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 
 function isSuperAdminToken(token: string): boolean {
   try {
@@ -50,7 +51,17 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b px-6 py-4 flex items-center justify-between">
-        <span className="font-bold text-lg text-primary">Vetria SuperAdmin</span>
+        <div className="flex items-center gap-6">
+          <span className="font-bold text-lg text-primary">Vetria SuperAdmin</span>
+          <div className="hidden sm:flex items-center gap-4">
+            <Link href="/superadmin/dashboard" className="text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium">
+              Dashboard
+            </Link>
+            <Link href="/superadmin/feedback" className="text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium">
+              Feedback
+            </Link>
+          </div>
+        </div>
         <button
           onClick={handleLogout}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
