@@ -146,3 +146,38 @@ export function translateEventType(type: string): string {
   };
   return map[type] ?? type;
 }
+
+// ─── Clinic access requests ───────────────────────────────────────────────────
+
+export interface ClinicAccessRequest {
+  id: string;
+  status: "PENDING" | "APPROVED" | "REVOKED";
+  createdAt: string;
+  resolvedAt: string | null;
+  requestingTenant: { id: string; name: string };
+}
+
+export async function getAccessRequests(): Promise<ClinicAccessRequest[]> {
+  const res = await ownerApi.get("/portal/access-requests");
+  return res.data;
+}
+
+export async function approveAccessRequest(requestId: string): Promise<ClinicAccessRequest> {
+  const res = await ownerApi.post(`/portal/access-requests/${requestId}/approve`);
+  return res.data;
+}
+
+export async function rejectAccessRequest(requestId: string): Promise<void> {
+  await ownerApi.post(`/portal/access-requests/${requestId}/reject`);
+}
+
+export async function revokeAccessRequest(requestId: string): Promise<ClinicAccessRequest> {
+  const res = await ownerApi.delete(`/portal/access-requests/${requestId}/revoke`);
+  return res.data;
+}
+
+export async function requestExternalAccess(ownerEmail: string): Promise<{ requestId: string }> {
+  const { api } = await import("./api");
+  const res = await api.post("/api/pets/request-access", { ownerEmail });
+  return res.data;
+}
