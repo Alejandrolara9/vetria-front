@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { submitFeedback } from "@/services/superadmin.service";
 
 const TYPING_TEXTS = [
@@ -260,11 +261,7 @@ export default function LandingPage() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-600/40">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </div>
+            <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg shadow-md shadow-blue-600/40" />
             <span className={`font-bold text-xl tracking-tight transition-colors ${scrolled ? "text-gray-900" : "text-white"}`}>Vetria</span>
             <span className={`hidden sm:inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${scrolled ? "bg-blue-100 text-blue-600" : "bg-blue-500/30 text-blue-200"}`}>Colombia</span>
           </div>
@@ -908,11 +905,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </div>
+                <Image src="/logo.png" alt="Vetria" width={28} height={28} className="rounded-lg" />
                 <span className="font-bold text-white text-lg">Vetria</span>
                 <span className="text-[10px] bg-blue-900 text-blue-300 px-1.5 py-0.5 rounded font-medium">vetria.cloud</span>
               </div>
@@ -947,7 +940,7 @@ export default function LandingPage() {
 
       {/* ── WhatsApp flotante ── */}
       <a
-        href="https://wa.me/573000000000?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20Vetria"
+        href="https://wa.me/573102247612?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20Vetria"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-400 rounded-full flex items-center justify-center shadow-xl shadow-green-500/40 transition-all hover:scale-110"
