@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchMyCredits, type TenantCredits } from "@/services/credits";
-import { initiateCreditsCheckout, CREDIT_PACKS, type CreditPackIndex } from "@/services/wompi";
+import { initiateCreditsCheckout, CREDIT_PACKS, type CreditPackIndex } from "@/services/payments";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
