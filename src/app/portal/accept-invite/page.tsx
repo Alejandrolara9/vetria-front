@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { validateInviteToken, acceptInvite, saveOwnerToken } from "@/services/owner-portal";
+import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/PasswordStrengthChecklist";
 
 function AcceptInviteForm() {
   const router = useRouter();
@@ -103,15 +104,15 @@ function AcceptInviteForm() {
                 type="password"
                 placeholder="Mínimo 8 caracteres"
                 required
-                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
               />
+              <PasswordStrengthChecklist password={password} />
             </div>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || !isPasswordStrong(password)}
               className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold rounded-xl transition-all text-sm mt-2"
             >
               {submitting ? "Activando..." : "Activar mi cuenta →"}
