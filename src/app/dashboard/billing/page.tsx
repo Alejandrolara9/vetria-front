@@ -9,7 +9,7 @@ import {
   CREDIT_PACKS,
   PlanTarget,
   CreditPackIndex,
-} from "@/services/wompi";
+} from "@/services/payments";
 
 const PLAN_FEATURES: Record<PlanTarget, string[]> = {
   BASIC: [
@@ -73,7 +73,7 @@ export default function BillingPage() {
       <div>
         <h1 className="text-2xl font-bold">Planes y facturación</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Elige el plan o recarga créditos IA. Los pagos se procesan de forma segura con Wompi.
+          Elige el plan o recarga créditos IA. Los pagos se procesan de forma segura con MercadoPago.
         </p>
       </div>
 
@@ -123,7 +123,7 @@ export default function BillingPage() {
                     : "border border-primary text-primary hover:bg-primary/5"
                 }`}
               >
-                {loadingPlan === plan ? "Redirigiendo a Wompi..." : `Contratar ${PLAN_LABELS[plan]}`}
+                {loadingPlan === plan ? "Redirigiendo a MercadoPago..." : `Contratar ${PLAN_LABELS[plan]}`}
               </button>
             </div>
           ))}
@@ -157,7 +157,7 @@ export default function BillingPage() {
                 disabled={isAnyLoading}
                 className="w-full py-2 rounded-lg text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
-                {loadingCredits === i ? "Redirigiendo a Wompi..." : `Comprar ${pack.label}`}
+                {loadingCredits === i ? "Redirigiendo a MercadoPago..." : `Comprar ${pack.label}`}
               </button>
             </div>
           ))}
@@ -166,7 +166,7 @@ export default function BillingPage() {
 
       <p className="text-xs text-muted-foreground text-center">
         Pagos procesados de forma segura por{" "}
-        <span className="font-medium">Wompi (Bancolombia)</span>. Al contratar aceptas los términos de servicio.
+        <span className="font-medium">MercadoPago</span>. Al contratar aceptas los términos de servicio.
       </p>
     </div>
   );
