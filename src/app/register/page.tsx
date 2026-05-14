@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { GoogleLogin } from "@react-oauth/google";
+import { api } from "@/services/api";
 import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/PasswordStrengthChecklist";
 import SearchableSelect from "@/components/SearchableSelect";
 import { COLOMBIA_DEPARTMENTS, getCitiesByDepartment } from "@/lib/colombia-locations";
@@ -38,7 +38,7 @@ export default function RegisterPage() {
     if (!pendingCredential || !googleClinicName.trim()) return;
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:3333/auth/google", {
+      const response = await api.post("/auth/google", {
         credential: pendingCredential,
         clinicName: googleClinicName.trim(),
         ...(googleDepartment ? { clinicDepartment: googleDepartment } : {}),
@@ -60,7 +60,7 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:3333/auth/register", {
+      const response = await api.post("/auth/register", {
         name,
         email,
         password,
