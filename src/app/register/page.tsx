@@ -60,7 +60,7 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:3333/auth/register", {
+      const response = await api.post("/auth/register", {
         name,
         email,
         password,
