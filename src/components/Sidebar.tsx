@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchMyCredits, type TenantCredits } from "@/services/credits";
@@ -396,11 +397,7 @@ export default function Sidebar({
       <div className="px-5 py-5 border-b border-white/10">
         <div className="flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-            </div>
+            <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg flex-shrink-0" />
             <div>
               <h1 className="text-base font-bold text-white leading-none">Vetria</h1>
               <p className="text-[10px] text-white/40 mt-0.5">Sistema Veterinario IA</p>
