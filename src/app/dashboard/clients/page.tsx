@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
-import { inviteClientToPortal } from "@/services/owner-portal";
+import { inviteClientToPortal, requestExternalAccess } from "@/services/owner-portal";
 
 interface Client {
   id: string;
@@ -21,6 +21,8 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState<string | null>(null);
   const [inviteMsg, setInviteMsg] = useState<Record<string, string>>({});
+  const [requestingAccess, setRequestingAccess] = useState<string | null>(null);
+  const [accessMsg, setAccessMsg] = useState<Record<string, string>>({});
 
   useEffect(() => { loadClients(); }, []);
 
@@ -84,6 +86,22 @@ export default function ClientsPage() {
       setInviting(null);
     }
   };
+
+  async function handleRequestAccess(clientEmail: string, clientId: string) {
+    if (!clientEmail) {
+      setAccessMsg((prev) => ({ ...prev, [clientId]: "Este cliente no tiene email registrado" }));
+      return;
+    }
+    setRequestingAccess(clientId);
+    try {
+      await requestExternalAccess(clientEmail);
+      setAccessMsg((prev) => ({ ...prev, [clientId]: "Solicitud enviada. El tutor debe aprobarla desde su portal." }));
+    } catch {
+      setAccessMsg((prev) => ({ ...prev, [clientId]: "Error al enviar la solicitud" }));
+    } finally {
+      setRequestingAccess(null);
+    }
+  }
 
   const filtered = clients.filter(
     (c) =>
@@ -173,7 +191,7 @@ export default function ClientsPage() {
                   <td className="px-6 py-4 text-right">
                     <button onClick={() => startEdit(client)} className="text-primary hover:underline mr-3">Editar</button>
                     <button onClick={() => handleDelete(client.id)} className="text-danger hover:underline mr-3">Eliminar</button>
-                    <div className="inline-flex flex-col items-end">
+                    <div className="inline-flex flex-col items-end gap-1">
                       <button
                         onClick={() => handleInvite(client.id)}
                         disabled={inviting === client.id}
@@ -183,6 +201,16 @@ export default function ClientsPage() {
                       </button>
                       {inviteMsg[client.id] && (
                         <p className="text-xs text-green-400 mt-0.5">{inviteMsg[client.id]}</p>
+                      )}
+                      <button
+                        onClick={() => handleRequestAccess(client.email, client.id)}
+                        disabled={requestingAccess === client.id}
+                        className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 text-xs rounded-lg transition-all disabled:opacity-50"
+                      >
+                        {requestingAccess === client.id ? "Enviando..." : "Solicitar historial externo"}
+                      </button>
+                      {accessMsg[client.id] && (
+                        <p className="text-xs text-slate-400 mt-1">{accessMsg[client.id]}</p>
                       )}
                     </div>
                   </td>

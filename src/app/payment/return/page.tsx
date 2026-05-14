@@ -1,23 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { getTransactionStatus } from "@/services/wompi";
+import { getTransactionStatus } from "@/services/payments";
 
 type TxStatus = "APPROVED" | "DECLINED" | "VOIDED" | "ERROR" | "PENDING" | "loading";
 
-export default function PaymentReturnPage() {
+function PaymentReturnContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<TxStatus>("loading");
   const [plan, setPlan] = useState<string | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
 
   useEffect(() => {
-    const id = searchParams.get("id");
-    if (!id) { setStatus("ERROR"); return; }
+    // MP redirects with external_reference=tmpRef (the value we stored as reference)
+    const reference = searchParams.get("external_reference");
+    if (!reference) {
+      setStatus("ERROR");
+      return;
+    }
 
-    const reference = searchParams.get("reference") ?? id;
     getTransactionStatus(reference)
       .then((tx) => {
         setStatus(tx.status as TxStatus);
@@ -89,5 +92,19 @@ export default function PaymentReturnPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function PaymentReturnPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <PaymentReturnContent />
+    </Suspense>
   );
 }

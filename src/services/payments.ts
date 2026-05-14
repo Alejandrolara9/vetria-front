@@ -32,12 +32,12 @@ export const CREDIT_PACKS = [
 export type CreditPackIndex = 0 | 1;
 
 export async function initiateCheckout(plan: PlanTarget): Promise<{ checkoutUrl: string; reference: string }> {
-  const res = await api.post("/wompi/checkout", { plan });
+  const res = await api.post("/mp/checkout", { plan });
   return res.data;
 }
 
 export async function initiateCreditsCheckout(packIndex: CreditPackIndex): Promise<{ checkoutUrl: string; reference: string }> {
-  const res = await api.post("/wompi/checkout/credits", { packIndex });
+  const res = await api.post("/mp/checkout/credits", { packIndex });
   return res.data;
 }
 
@@ -47,6 +47,6 @@ export async function getTransactionStatus(reference: string): Promise<{
   credits: number | null;
   confirmedAt: string | null;
 }> {
-  const res = await api.get(`/wompi/transaction/${reference}`);
+  const res = await api.get(`/mp/transaction/${reference}`);
   return res.data;
 }

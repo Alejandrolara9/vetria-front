@@ -1,0 +1,33 @@
+name: vetria-frontend
+
+services:
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://api.vetria.cloud
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: 958305458964-i301ken3ttr4n66oa2ldm56cbkm7td4b.apps.googleusercontent.com
+    container_name: vetria_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      HOSTNAME: "0.0.0.0"
+    restart: unless-stopped
+    networks:
+      - vetria_network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  vetria_network:
+    external: true   # Crear una vez: docker network create vetria_network
