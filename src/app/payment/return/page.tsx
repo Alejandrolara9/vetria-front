@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getTransactionStatus } from "@/services/wompi";
 
 type TxStatus = "APPROVED" | "DECLINED" | "VOIDED" | "ERROR" | "PENDING" | "loading";
 
-export default function PaymentReturnPage() {
+function PaymentReturnContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<TxStatus>("loading");
   const [plan, setPlan] = useState<string | null>(null);
@@ -15,7 +15,10 @@ export default function PaymentReturnPage() {
 
   useEffect(() => {
     const id = searchParams.get("id");
-    if (!id) { setStatus("ERROR"); return; }
+    if (!id) {
+      setStatus("ERROR");
+      return;
+    }
 
     const reference = searchParams.get("reference") ?? id;
     getTransactionStatus(reference)
@@ -89,5 +92,19 @@ export default function PaymentReturnPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function PaymentReturnPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <PaymentReturnContent />
+    </Suspense>
   );
 }
