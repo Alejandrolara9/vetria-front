@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/services/api";
 
 export default function ForgotPasswordPage() {
@@ -28,11 +29,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex flex-col">
       <nav className="flex items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </div>
+          <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg shadow-md" />
           <span className="font-bold text-white text-lg group-hover:text-blue-300 transition-colors">Vetria</span>
         </Link>
         <Link href="/login" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
