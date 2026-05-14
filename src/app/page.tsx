@@ -136,7 +136,7 @@ const TESTIMONIALS = [
 ];
 
 const PLAN_TRIAL = [
-  "60 días gratis · sin tarjeta",
+  "30 días gratis · sin tarjeta",
   "100 créditos IA incluidos",
   "Todas las funciones del plan BASIC",
   "Hasta 8 usuarios",
@@ -169,7 +169,7 @@ const FAQS = [
     a: "Sí. Todo el tráfico viaja cifrado con HTTPS, los datos se almacenan en AWS con cifrado en reposo y backups automáticos diarios. Tu información nunca se comparte con terceros.",
   },
   {
-    q: "¿Qué pasa cuando terminan los 60 días de prueba?",
+    q: "¿Qué pasa cuando terminan los 30 días de prueba?",
     a: "Te avisamos con anticipación. Si decides continuar, activas el plan BASIC. Si no, tus datos se conservan 30 días adicionales para que puedas exportarlos.",
   },
   {
@@ -317,7 +317,7 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
               <Link href="/register" className="px-7 py-4 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl transition-all text-center shadow-xl shadow-blue-500/30 text-sm">
-                Empieza gratis — 60 días →
+                Empieza gratis — 30 días →
               </Link>
               <a href="#ia" className="px-7 py-4 border border-white/15 text-white rounded-xl hover:bg-white/8 transition-all text-center font-medium text-sm">
                 Ver la IA en acción
@@ -325,7 +325,7 @@ export default function LandingPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400">
-              {["Sin tarjeta de crédito", "60 días gratis", "Configura en 5 min"].map((t) => (
+              {["Sin tarjeta de crédito", "30 días gratis", "Configura en 5 min"].map((t) => (
                 <span key={t} className="flex items-center gap-1.5">
                   <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -447,7 +447,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
               { value: "< 5s", label: "Historia clínica IA" },
-              { value: "60 días", label: "Prueba gratuita" },
+              { value: "30 días", label: "Prueba gratuita" },
               { value: "10+", label: "Módulos integrados" },
               { value: "100%", label: "Multi-tenant seguro" },
             ].map((s) => (
@@ -553,7 +553,7 @@ export default function LandingPage() {
               </div>
               <Link href="/register"
                 className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-purple-500/25 text-sm">
-                Prueba la IA gratis — 60 días
+                Prueba la IA gratis — 30 días
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
@@ -754,7 +754,7 @@ export default function LandingPage() {
             <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
               Precios en COP
             </span>
-            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">60 días gratis. Luego crece sin límites.</h2>
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">30 días gratis. Luego crece sin límites.</h2>
             <p className="text-gray-500 text-lg">Sin contratos anuales. Cancela cuando quieras.</p>
           </div>
 
@@ -764,7 +764,7 @@ export default function LandingPage() {
             <div className="bg-white border-2 border-gray-200 rounded-2xl p-7 hover:border-gray-300 transition-colors flex flex-col">
               <div className="mb-5">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Prueba gratuita</p>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">60 días gratis</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">30 días gratis</h3>
                 <div className="flex items-end gap-1">
                   <span className="text-5xl font-extrabold text-gray-900">$0</span>
                   <span className="text-gray-400 mb-2 text-sm">COP</span>
@@ -885,11 +885,11 @@ export default function LandingPage() {
           </h2>
           <p className="text-slate-300 text-lg mb-10 leading-relaxed">
             Únete a las clínicas colombianas que ya están ahorrando horas cada semana con IA.
-            60 días gratis — sin tarjeta, sin compromiso.
+            30 días gratis — sin tarjeta, sin compromiso.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register" className="px-8 py-4 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl transition-all shadow-xl shadow-blue-500/30 text-sm">
-              Crear cuenta gratis — 60 días
+              Crear cuenta gratis — 30 días
             </Link>
             <Link href="/login" className="px-8 py-4 border border-white/20 text-white rounded-xl hover:bg-white/8 transition-all font-medium text-sm">
               Ya tengo cuenta →
