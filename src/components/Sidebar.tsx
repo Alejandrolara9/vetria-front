@@ -214,7 +214,7 @@ function CreditModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <p className="text-sm text-gray-500 mb-4">
-          Selecciona el paquete. Serás redirigido a Wompi para pagar de forma segura.
+          Selecciona el paquete. Serás redirigido a MercadoPago para pagar de forma segura.
         </p>
         <div className="space-y-2 mb-4">
           {CREDIT_PACKS.map((pack, idx) => (
@@ -252,7 +252,7 @@ function CreditModal({ onClose }: { onClose: () => void }) {
             disabled={selected === null || submitting}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
           >
-            {submitting ? "Redirigiendo..." : "Pagar con Wompi"}
+            {submitting ? "Redirigiendo..." : "Pagar con MercadoPago"}
           </button>
         </div>
       </div>
