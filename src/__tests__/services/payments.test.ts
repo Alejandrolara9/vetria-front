@@ -1,6 +1,6 @@
-import { PLAN_PRICES, PLAN_LABELS, CREDIT_PACKS } from "../../services/wompi";
+import { PLAN_PRICES, PLAN_LABELS, CREDIT_PACKS } from "../../services/payments";
 
-describe("wompi service constants", () => {
+describe("payments service constants", () => {
   describe("PLAN_PRICES", () => {
     it("has correct price for BASIC", () => {
       expect(PLAN_PRICES.BASIC).toBe(100_000);
