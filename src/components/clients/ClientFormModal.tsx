@@ -79,7 +79,7 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
               onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })}
             />
             <input
-              type="email" placeholder="Correo electrónico (opcional)"
+              type="email" placeholder="Correo electrónico" required
               className="w-full px-4 py-2 border border-border rounded-lg text-sm"
               value={clientForm.email}
               onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })}
