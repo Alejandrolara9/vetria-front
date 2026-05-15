@@ -9,13 +9,21 @@ import { ownerLogin, ownerGoogleAuth, saveOwnerToken } from "@/services/owner-po
 export default function PortalLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isValidEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!isValidEmail(email)) {
+      setEmailError("Ingresa un correo electrónico válido");
+      return;
+    }
     setLoading(true);
     try {
       const res = await ownerLogin({ email, password });
@@ -73,9 +81,16 @@ export default function PortalLoginPage() {
                 placeholder="tu@email.com"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-teal-500 transition-all"
+                onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
+                onBlur={() => {
+                  if (email && !isValidEmail(email))
+                    setEmailError("Ingresa un correo electrónico válido");
+                }}
+                className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none transition-all ${emailError ? "border-red-500 focus:border-red-500" : "border-white/15 focus:border-teal-500"}`}
               />
+              {emailError && (
+                <p className="mt-1 text-xs text-red-400">{emailError}</p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -92,7 +107,7 @@ export default function PortalLoginPage() {
             </div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isValidEmail(email)}
               className="w-full py-3.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-60 text-white font-bold rounded-xl transition-all text-sm mt-2"
             >
               {loading ? "Ingresando..." : "Iniciar sesión →"}
