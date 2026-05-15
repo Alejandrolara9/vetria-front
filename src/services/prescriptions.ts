@@ -46,6 +46,10 @@ export interface Prescription {
     name: string;
     logoUrl: string | null;
     primaryColor: string | null;
+    defaultSignatureUrl: string | null;
+    watermarkUrl: string | null;
+    watermarkOpacity: number;
+    watermarkEnabled: boolean;
     clinicPhone: string | null;
     clinicAddress: string | null;
     clinicCity: string | null;
