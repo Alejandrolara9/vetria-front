@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchMyCredits, type TenantCredits } from "@/services/credits";
 import { initiateCreditsCheckout, CREDIT_PACKS, type CreditPackIndex } from "@/services/payments";
+import { getBranding } from "@/services/branding";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -341,8 +342,8 @@ export default function Sidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [userName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
+  const [clinicName, setClinicName] = useState<string>("");
   const prevPathname = useRef(pathname);
 
   // Close on navigation (mobile)
@@ -367,6 +368,12 @@ export default function Sidebar({
     } catch { /* ignore */ }
   }, []);
 
+  useEffect(() => {
+    getBranding()
+      .then((b) => { if (b.name) setClinicName(b.name); })
+      .catch(() => {});
+  }, []);
+
   const roleLabel: Record<string, string> = {
     ADMIN: "Administrador",
     VET: "Veterinario",
@@ -385,9 +392,11 @@ export default function Sidebar({
         <div className="flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg flex-shrink-0" />
-            <div>
+            <div className="min-w-0">
               <h1 className="text-base font-bold text-white leading-none">Vetria</h1>
-              <p className="text-[10px] text-white/40 mt-0.5">Sistema Veterinario IA</p>
+              <p className="text-[10px] text-white/40 mt-0.5 truncate">
+                {clinicName || "Sistema Veterinario IA"}
+              </p>
             </div>
           </div>
           {/* Close button — mobile only */}
@@ -451,7 +460,7 @@ export default function Sidebar({
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-white/80 font-medium truncate">{userName || "Mi cuenta"}</p>
+            <p className="text-xs text-white/80 font-medium truncate">{clinicName || "Mi clínica"}</p>
             <p className="text-[10px] text-white/40">{roleLabel[userRole] ?? userRole}</p>
           </div>
         </div>

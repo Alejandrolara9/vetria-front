@@ -87,6 +87,7 @@ function AssetUploader({
 export default function BrandingPage() {
   const [branding, setBranding] = useState<BrandingConfig | null>(null);
   const [loading, setLoading] = useState(true);
+  const [clinicName, setClinicName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#1e40af");
   const [clinicPhone, setClinicPhone] = useState("");
   const [clinicAddress, setClinicAddress] = useState("");
@@ -102,6 +103,7 @@ export default function BrandingPage() {
     getBranding()
       .then((b) => {
         setBranding(b);
+        setClinicName(b.name ?? "");
         setPrimaryColor(b.primaryColor ?? "#1e40af");
         setClinicPhone(b.clinicPhone ?? "");
         setClinicAddress(b.clinicAddress ?? "");
@@ -122,6 +124,7 @@ export default function BrandingPage() {
     setSaveMsg("");
     try {
       const updated = await updateBranding({
+        name: clinicName.trim() || undefined,
         primaryColor,
         clinicPhone: clinicPhone || undefined,
         clinicAddress: clinicAddress || undefined,
@@ -225,6 +228,18 @@ export default function BrandingPage() {
 
         <div className="bg-white rounded-xl border p-5 space-y-4">
           <h2 className="font-semibold text-gray-800">Datos del encabezado</h2>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la clínica</label>
+            <input
+              type="text"
+              value={clinicName}
+              onChange={(e) => setClinicName(e.target.value)}
+              placeholder="ej: Clínica Veterinaria San Roque"
+              maxLength={100}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <p className="text-xs text-gray-400 mt-1">Aparece en el sidebar y en los documentos generados</p>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono(s)</label>
             <input

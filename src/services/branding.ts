@@ -16,6 +16,7 @@ export interface BrandingConfig {
 }
 
 export interface UpdateBrandingDto {
+  name?: string;
   primaryColor?: string;
   clinicPhone?: string;
   clinicAddress?: string;
