@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { GoogleLogin } from "@react-oauth/google";
+import ResponsiveGoogleLogin from "@/components/ResponsiveGoogleLogin";
 import { api } from "@/services/api";
 import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/PasswordStrengthChecklist";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -290,17 +290,11 @@ export default function RegisterPage() {
                 <span className="text-xs text-slate-500">o regístrate con</span>
                 <div className="flex-1 h-px bg-white/10" />
               </div>
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setError("Error al registrarse con Google")}
-                  theme="filled_black"
-                  shape="rectangular"
-                  size="large"
-                  width="368"
-                  text="signup_with"
-                />
-              </div>
+              <ResponsiveGoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Error al registrarse con Google")}
+                text="signup_with"
+              />
             </div>
 
             <div className="mt-6 pt-6 border-t border-white/10 text-center">

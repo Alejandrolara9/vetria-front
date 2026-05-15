@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { GoogleLogin } from "@react-oauth/google";
+import ResponsiveGoogleLogin from "@/components/ResponsiveGoogleLogin";
 import { ownerLogin, ownerGoogleAuth, saveOwnerToken } from "@/services/owner-portal";
 
 export default function PortalLoginPage() {
@@ -120,17 +120,11 @@ export default function PortalLoginPage() {
               <span className="text-xs text-slate-500">o continúa con</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={handleGoogle}
-                onError={() => setError("Error al iniciar sesión con Google")}
-                theme="filled_black"
-                shape="rectangular"
-                size="large"
-                width="368"
-                text="signin_with"
-              />
-            </div>
+            <ResponsiveGoogleLogin
+              onSuccess={handleGoogle}
+              onError={() => setError("Error al iniciar sesión con Google")}
+              text="signin_with"
+            />
           </div>
         </div>
 

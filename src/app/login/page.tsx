@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { GoogleLogin } from "@react-oauth/google";
+import ResponsiveGoogleLogin from "@/components/ResponsiveGoogleLogin";
 import { api } from "@/services/api";
 
 export default function LoginPage() {
@@ -139,17 +139,11 @@ export default function LoginPage() {
                 <span className="text-xs text-slate-500">o continúa con</span>
                 <div className="flex-1 h-px bg-white/10" />
               </div>
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setError("Error al iniciar sesión con Google")}
-                  theme="filled_black"
-                  shape="rectangular"
-                  size="large"
-                  width="368"
-                  text="signin_with"
-                />
-              </div>
+              <ResponsiveGoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Error al iniciar sesión con Google")}
+                text="signin_with"
+              />
             </div>
 
             <div className="mt-6 pt-6 border-t border-white/10 text-center">
