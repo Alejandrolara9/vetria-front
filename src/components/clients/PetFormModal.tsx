@@ -91,12 +91,15 @@ export function PetFormModal({ clientId, pet, onSave, onClose }: PetFormModalPro
               onChange={(e) => setForm({ ...form, breed: e.target.value })}
             />
           )}
-          <input
-            type="date"
-            className="px-4 py-2 border border-border rounded-lg text-sm"
-            value={form.birthDate}
-            onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
-          />
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Fecha de nacimiento (opcional)</label>
+            <input
+              type="date"
+              className="w-full px-4 py-2 border border-border rounded-lg text-sm"
+              value={form.birthDate}
+              onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+            />
+          </div>
           <div className="flex gap-2 mt-1">
             <button
               type="submit" disabled={saving}

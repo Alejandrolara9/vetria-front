@@ -20,7 +20,8 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
     email: client?.email ?? "",
   });
   const [showPet, setShowPet] = useState(!client);
-  const [petForm, setPetForm] = useState({ name: "", species: "", breed: "", birthDate: "" });
+  type PetFormState = { name: string; species: string; breed: string; birthDate: string };
+  const [petForms, setPetForms] = useState<PetFormState[]>([{ name: "", species: "", breed: "", birthDate: "" }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,14 +34,18 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
         await api.put(`/clients/${client.id}`, clientForm);
       } else {
         const res = await api.post<{ id: string }>("/clients", clientForm);
-        if (showPet && petForm.name && petForm.species) {
-          await api.post("/pets", {
-            name: petForm.name,
-            species: petForm.species,
-            breed: petForm.breed || undefined,
-            birthDate: petForm.birthDate || undefined,
-            clientId: res.data.id,
-          });
+        if (showPet) {
+          for (const pf of petForms) {
+            if (pf.name && pf.species) {
+              await api.post("/pets", {
+                name: pf.name,
+                species: pf.species,
+                breed: pf.breed || undefined,
+                birthDate: pf.birthDate || undefined,
+                clientId: res.data.id,
+              });
+            }
+          }
         }
       }
       onSave();
@@ -84,56 +89,85 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
           {/* Primera mascota — solo para clientes nuevos */}
           {!client && (
             showPet ? (
-              <div className="border border-border rounded-lg p-4 space-y-3">
-                <p className="text-sm font-medium text-gray-700">Primera mascota</p>
-                <input
-                  type="text" placeholder="Nombre de la mascota" required
-                  className="w-full px-4 py-2 border border-border rounded-lg text-sm"
-                  value={petForm.name}
-                  onChange={(e) => setPetForm({ ...petForm, name: e.target.value })}
-                />
-                <select
-                  required
-                  className="w-full px-4 py-2 border border-border rounded-lg text-sm"
-                  value={petForm.species}
-                  onChange={(e) => setPetForm({ ...petForm, species: e.target.value, breed: "" })}
-                >
-                  <option value="">Seleccionar especie</option>
-                  <option value="Canino">Canino</option>
-                  <option value="Felino">Felino</option>
-                  <option value="Ave">Ave</option>
-                  <option value="Reptil">Reptil</option>
-                  <option value="Roedor">Roedor</option>
-                  <option value="Otro">Otro</option>
-                </select>
-                {BREEDS[petForm.species] ? (
-                  <SearchableSelect
-                    options={BREEDS[petForm.species]}
-                    value={petForm.breed}
-                    onChange={(v) => setPetForm({ ...petForm, breed: v })}
-                    placeholder="Seleccionar raza"
-                  />
-                ) : (
-                  <input
-                    type="text" placeholder="Raza (opcional)"
-                    className="w-full px-4 py-2 border border-border rounded-lg text-sm"
-                    value={petForm.breed}
-                    onChange={(e) => setPetForm({ ...petForm, breed: e.target.value })}
-                  />
-                )}
-                <input
-                  type="date"
-                  className="w-full px-4 py-2 border border-border rounded-lg text-sm"
-                  value={petForm.birthDate}
-                  onChange={(e) => setPetForm({ ...petForm, birthDate: e.target.value })}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPet(false)}
-                  className="text-xs text-muted-foreground hover:underline"
-                >
-                  Registrar sin mascota por ahora
-                </button>
+              <div className="space-y-3">
+                {petForms.map((pf, idx) => (
+                  <div key={idx} className="border border-border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-700">
+                        {idx === 0 ? "Primera mascota" : `Mascota ${idx + 1}`}
+                      </p>
+                      {petForms.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setPetForms(petForms.filter((_, i) => i !== idx))}
+                          className="text-xs text-red-400 hover:text-red-600"
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text" placeholder="Nombre de la mascota" required
+                      className="w-full px-4 py-2 border border-border rounded-lg text-sm"
+                      value={pf.name}
+                      onChange={(e) => setPetForms(petForms.map((p, i) => i === idx ? { ...p, name: e.target.value } : p))}
+                    />
+                    <select
+                      required
+                      className="w-full px-4 py-2 border border-border rounded-lg text-sm"
+                      value={pf.species}
+                      onChange={(e) => setPetForms(petForms.map((p, i) => i === idx ? { ...p, species: e.target.value, breed: "" } : p))}
+                    >
+                      <option value="">Seleccionar especie</option>
+                      <option value="Canino">Canino</option>
+                      <option value="Felino">Felino</option>
+                      <option value="Ave">Ave</option>
+                      <option value="Reptil">Reptil</option>
+                      <option value="Roedor">Roedor</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                    {BREEDS[pf.species] ? (
+                      <SearchableSelect
+                        options={BREEDS[pf.species]}
+                        value={pf.breed}
+                        onChange={(v) => setPetForms(petForms.map((p, i) => i === idx ? { ...p, breed: v } : p))}
+                        placeholder="Seleccionar raza"
+                      />
+                    ) : (
+                      <input
+                        type="text" placeholder="Raza (opcional)"
+                        className="w-full px-4 py-2 border border-border rounded-lg text-sm"
+                        value={pf.breed}
+                        onChange={(e) => setPetForms(petForms.map((p, i) => i === idx ? { ...p, breed: e.target.value } : p))}
+                      />
+                    )}
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">Fecha de nacimiento (opcional)</label>
+                      <input
+                        type="date"
+                        className="w-full px-4 py-2 border border-border rounded-lg text-sm"
+                        value={pf.birthDate}
+                        onChange={(e) => setPetForms(petForms.map((p, i) => i === idx ? { ...p, birthDate: e.target.value } : p))}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setPetForms([...petForms, { name: "", species: "", breed: "", birthDate: "" }])}
+                    className="text-xs text-teal-600 hover:underline"
+                  >
+                    + Agregar otra mascota
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPet(false)}
+                    className="text-xs text-muted-foreground hover:underline"
+                  >
+                    Registrar sin mascota por ahora
+                  </button>
+                </div>
               </div>
             ) : (
               <button
