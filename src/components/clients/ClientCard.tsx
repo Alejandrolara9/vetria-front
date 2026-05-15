@@ -10,6 +10,7 @@ export interface ClientWithPets {
   phone: string;
   email: string;
   pets: Pet[];
+  portalStatus: "NOT_INVITED" | "INVITED" | "ACTIVE";
 }
 
 interface ClientCardProps {

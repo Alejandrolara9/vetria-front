@@ -4,11 +4,14 @@ export interface Pet {
   breed: string | null;
 }
 
+export type PortalStatus = "NOT_INVITED" | "INVITED" | "ACTIVE";
+
 export interface ClientWithPets {
   name: string;
   phone: string;
   email: string;
   pets: Pet[];
+  portalStatus: PortalStatus;
 }
 
 export function filterClients<T extends ClientWithPets>(clients: T[], search: string): T[] {

@@ -15,6 +15,7 @@ interface RawClient {
   phone: string;
   email: string;
   createdAt: string;
+  portalStatus: "NOT_INVITED" | "INVITED" | "ACTIVE";
 }
 
 interface RawPet extends Pet {

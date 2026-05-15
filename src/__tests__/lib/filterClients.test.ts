@@ -2,20 +2,20 @@ import { filterClients } from "../../lib/filterClients";
 
 const clients = [
   {
-    id: "1", name: "Carlos Ramírez", phone: "3112345678", email: "carlos@mail.com", createdAt: "",
+    id: "1", name: "Carlos Ramírez", phone: "3112345678", email: "carlos@mail.com", createdAt: "", portalStatus: "NOT_INVITED" as const,
     pets: [
       { id: "p1", name: "Max", species: "Canino", breed: "Labrador", birthDate: null },
       { id: "p2", name: "Luna", species: "Felino", breed: "Siamés", birthDate: null },
     ],
   },
   {
-    id: "2", name: "Ana Torres", phone: "3009876543", email: "ana@mail.com", createdAt: "",
+    id: "2", name: "Ana Torres", phone: "3009876543", email: "ana@mail.com", createdAt: "", portalStatus: "NOT_INVITED" as const,
     pets: [
       { id: "p3", name: "Coco", species: "Roedor", breed: null, birthDate: null },
     ],
   },
   {
-    id: "3", name: "Pedro Gómez", phone: "3154567890", email: "", createdAt: "",
+    id: "3", name: "Pedro Gómez", phone: "3154567890", email: "", createdAt: "", portalStatus: "NOT_INVITED" as const,
     pets: [],
   },
 ];
