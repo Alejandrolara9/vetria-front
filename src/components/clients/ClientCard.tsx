@@ -1,7 +1,7 @@
 // src/components/clients/ClientCard.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { PetCard, type Pet } from "./PetCard";
 import { inviteClientToPortal } from "@/services/owner-portal";
 import type { PortalStatus } from "@/lib/filterClients";
@@ -28,20 +28,31 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvite
   const [inviting, setInviting] = useState(false);
   const [inviteError, setInviteError] = useState("");
   const [resentFeedback, setResentFeedback] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   async function handleInvite(isResend: boolean) {
     setInviting(true);
     setInviteError("");
+    setResentFeedback(false);
     try {
       await inviteClientToPortal(client.id);
       if (isResend) {
         setResentFeedback(true);
-        setTimeout(() => setResentFeedback(false), 3000);
+        timerRef.current = setTimeout(() => setResentFeedback(false), 3000);
       } else {
         onInvited(client.id);
       }
-    } catch {
-      setInviteError("No se pudo enviar la invitación");
+    } catch (error: unknown) {
+      const msg =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? "No se pudo enviar la invitación";
+      setInviteError(msg);
     } finally {
       setInviting(false);
     }

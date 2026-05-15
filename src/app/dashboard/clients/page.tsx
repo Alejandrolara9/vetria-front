@@ -88,7 +88,7 @@ export default function ClientsPage() {
 
   function handleInvited(clientId: string) {
     setClients((prev) =>
-      prev.map((c) => (c.id === clientId ? { ...c, portalStatus: "INVITED" as const } : c))
+      prev.map((c) => (c.id === clientId ? { ...c, portalStatus: "INVITED" } : c))
     );
   }
 
