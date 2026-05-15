@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { PetCard, type Pet } from "./PetCard";
+import type { PortalStatus } from "@/lib/filterClients";
 
 export interface ClientWithPets {
   id: string;
@@ -10,7 +11,7 @@ export interface ClientWithPets {
   phone: string;
   email: string;
   pets: Pet[];
-  portalStatus: "NOT_INVITED" | "INVITED" | "ACTIVE";
+  portalStatus: PortalStatus;
 }
 
 interface ClientCardProps {

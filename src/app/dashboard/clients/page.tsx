@@ -6,7 +6,7 @@ import { api } from "@/services/api";
 import { ClientCard, type ClientWithPets } from "@/components/clients/ClientCard";
 import { ClientFormModal } from "@/components/clients/ClientFormModal";
 import { PetFormModal } from "@/components/clients/PetFormModal";
-import { filterClients } from "@/lib/filterClients";
+import { filterClients, type PortalStatus } from "@/lib/filterClients";
 import type { Pet } from "@/components/clients/PetCard";
 
 interface RawClient {
@@ -15,7 +15,7 @@ interface RawClient {
   phone: string;
   email: string;
   createdAt: string;
-  portalStatus: "NOT_INVITED" | "INVITED" | "ACTIVE";
+  portalStatus: PortalStatus;
 }
 
 interface RawPet extends Pet {
