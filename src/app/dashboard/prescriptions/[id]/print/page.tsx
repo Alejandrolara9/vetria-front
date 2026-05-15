@@ -116,6 +116,10 @@ export default function PrescriptionPrintPage() {
           .print-wrap { padding-top: 0 !important; }
           body { margin: 0; background: white; }
           @page { margin: 1.2cm 1.5cm; size: A4; }
+          .vet-pattern {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
         }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f3f4f6; }
       `}</style>
@@ -151,14 +155,16 @@ export default function PrescriptionPrintPage() {
         >
           {/* Patrón de fondo: patitas y huesitos */}
           <div
-            className="absolute inset-0 pointer-events-none"
+            className="vet-pattern absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: buildVetPattern(primary),
               backgroundRepeat: "repeat",
               backgroundSize: "200px 200px",
               opacity: 0.055,
               zIndex: 0,
-            }}
+              WebkitPrintColorAdjust: "exact",
+              printColorAdjust: "exact",
+            } as React.CSSProperties}
           />
           {/* Marca de agua */}
           {watermarkSrc && (
