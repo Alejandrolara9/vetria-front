@@ -224,7 +224,7 @@ function CreditModal({ onClose }: { onClose: () => void }) {
               onClick={() => setSelected(idx as CreditPackIndex)}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-colors text-sm ${
                 selected === idx
-                  ? "border-blue-500 bg-blue-50"
+                  ? "border-teal-500 bg-teal-50"
                   : "border-gray-200 hover:border-gray-300"
               }`}
             >
@@ -251,7 +251,7 @@ function CreditModal({ onClose }: { onClose: () => void }) {
           <button
             onClick={handleCheckout}
             disabled={selected === null || submitting}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50"
           >
             {submitting ? "Redirigiendo..." : "Pagar con MercadoPago"}
           </button>
@@ -324,7 +324,7 @@ function CreditWidget() {
           </span>
           <button
             onClick={() => setShowModal(true)}
-            className="text-[10px] text-blue-400 hover:text-blue-300 font-medium transition-colors"
+            className="text-[10px] text-teal-400 hover:text-teal-300 font-medium transition-colors"
           >
             + Recargar
           </button>
@@ -438,7 +438,7 @@ export default function Sidebar({
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm mb-0.5 transition-colors ${
                     isActive
-                      ? "bg-blue-600 text-white font-medium"
+                      ? "bg-teal-600 text-white font-medium"
                       : "text-white/60 hover:bg-white/8 hover:text-white"
                   }`}
                 >
@@ -458,8 +458,8 @@ export default function Sidebar({
       {/* Footer — usuario */}
       <div className="px-3 py-3 border-t border-white/10">
         <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors mb-1">
-          <div className="w-7 h-7 rounded-full bg-blue-500/30 flex items-center justify-center flex-shrink-0">
-            <svg className="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-7 h-7 rounded-full bg-teal-500/30 flex items-center justify-center flex-shrink-0">
+            <svg className="w-4 h-4 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
             </svg>
           </div>
