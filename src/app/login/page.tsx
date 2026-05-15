@@ -55,13 +55,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-teal-950 to-slate-900 flex flex-col">
 
       {/* Navbar mínimo */}
       <nav className="flex items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-2 group">
           <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg shadow-md" />
-          <span className="font-bold text-white text-lg group-hover:text-blue-300 transition-colors">Vetria</span>
+          <span className="font-bold text-white text-lg group-hover:text-teal-300 transition-colors">Vetria</span>
         </Link>
         <Link href="/" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -97,7 +97,7 @@ export default function LoginPage() {
                   type="email"
                   placeholder="vet@miclinica.com"
                   required
-                  className="w-full px-4 py-3 bg-white/8 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all"
+                  className="w-full px-4 py-3 bg-white/8 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-teal-500 focus:bg-white/10 transition-all"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
@@ -109,7 +109,7 @@ export default function LoginPage() {
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Contraseña
                   </label>
-                  <Link href="/forgot-password" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                  <Link href="/forgot-password" className="text-xs text-teal-400 hover:text-teal-300 transition-colors">
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                   type="password"
                   placeholder="••••••••"
                   required
-                  className="w-full px-4 py-3 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
+                  className="w-full px-4 py-3 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-teal-500 transition-all"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
@@ -127,7 +127,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/30 text-sm mt-2"
+                className="w-full py-3.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-teal-600/30 text-sm mt-2"
               >
                 {loading ? "Ingresando..." : "Iniciar sesión →"}
               </button>
@@ -155,7 +155,7 @@ export default function LoginPage() {
             <div className="mt-6 pt-6 border-t border-white/10 text-center">
               <p className="text-slate-400 text-sm">
                 ¿No tienes cuenta?{" "}
-                <Link href="/register" className="text-blue-400 font-semibold hover:text-blue-300 transition-colors">
+                <Link href="/register" className="text-teal-400 font-semibold hover:text-teal-300 transition-colors">
                   Crear cuenta gratis
                 </Link>
               </p>
