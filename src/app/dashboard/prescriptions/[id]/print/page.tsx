@@ -20,6 +20,16 @@ function calcAge(birthDate: string | null): string {
   return `${years} año${years !== 1 ? "s" : ""}`;
 }
 
+function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null;
+  return (
+    <tr>
+      <td className="text-gray-500 pr-3 py-0.5 align-top whitespace-nowrap text-xs w-24">{label}</td>
+      <td className="text-gray-900 text-xs py-0.5 font-medium">{value}</td>
+    </tr>
+  );
+}
+
 export default function PrescriptionPrintPage() {
   const { id } = useParams<{ id: string }>();
   const [prescription, setPrescription] = useState<Prescription | null>(null);
@@ -31,10 +41,7 @@ export default function PrescriptionPrintPage() {
       .catch(() => setError("No se pudo cargar la fórmula"));
   }, [id]);
 
-  if (error) {
-    return <div className="p-8 text-red-600">{error}</div>;
-  }
-
+  if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!prescription) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -45,27 +52,32 @@ export default function PrescriptionPrintPage() {
 
   const p = prescription;
   const t = p.tenant;
-  const primaryColor = t.primaryColor || "#2563eb";
+  const primary = t.primaryColor || "#1e40af";
+  const ref = p.id.slice(-8).toUpperCase();
+  const watermarkSrc = t.watermarkEnabled ? (t.watermarkUrl ?? t.logoUrl) : null;
+  const watermarkOpacity = t.watermarkOpacity ?? 0.12;
+  const sigSrc = p.vet.signatureUrl ?? t.defaultSignatureUrl ?? null;
 
   return (
     <>
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          aside { display: none !important; }
-          main { margin-left: 0 !important; padding: 0 !important; width: 100% !important; }
-          .print-content { padding-top: 0 !important; }
-          body { margin: 0; }
-          @page { margin: 1.5cm 1.8cm; size: A4; }
+          aside, nav, header { display: none !important; }
+          main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+          .print-wrap { padding-top: 0 !important; }
+          body { margin: 0; background: white; }
+          @page { margin: 1.2cm 1.5cm; size: A4; }
         }
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f3f4f6; }
       `}</style>
 
-      {/* Barra de acciones — solo visible en pantalla */}
+      {/* Barra de acciones */}
       <div className="no-print fixed top-0 left-0 right-0 bg-white border-b shadow-sm px-6 py-3 flex items-center justify-between z-50">
         <p className="text-sm text-gray-600">
-          Vista previa de la fórmula médica — usa{" "}
-          <kbd className="bg-gray-100 border rounded px-1.5 py-0.5 text-xs font-mono">Ctrl+P</kbd> o el botón para imprimir / guardar como PDF
+          Vista previa — usa{" "}
+          <kbd className="bg-gray-100 border rounded px-1.5 py-0.5 text-xs font-mono">Ctrl+P</kbd>{" "}
+          para imprimir o guardar como PDF
         </p>
         <div className="flex gap-2">
           <button
@@ -76,143 +88,216 @@ export default function PrescriptionPrintPage() {
           </button>
           <button
             onClick={() => window.print()}
-            className="px-4 py-1.5 text-sm font-medium text-white rounded-lg"
-            style={{ backgroundColor: primaryColor }}
+            className="px-4 py-1.5 text-sm font-semibold text-white rounded-lg"
+            style={{ backgroundColor: primary }}
           >
             Imprimir / Guardar PDF
           </button>
         </div>
       </div>
 
-      {/* Contenido imprimible */}
-      <div className="pt-16 print-content">
+      <div className="print-wrap pt-16">
         <div
-          className="max-w-[794px] mx-auto bg-white p-10 min-h-[1122px]"
-          style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+          className="relative max-w-[794px] mx-auto bg-white shadow-lg overflow-hidden"
+          style={{ minHeight: "1122px" }}
         >
-          {/* Encabezado clínica */}
-          <div className="flex items-start justify-between mb-6 pb-5 border-b-2" style={{ borderColor: primaryColor }}>
-            <div className="flex items-center gap-4">
-              {t.logoUrl ? (
-                <img src={t.logoUrl} alt={t.name} className="h-16 w-auto object-contain" />
-              ) : (
-                <div
-                  className="h-14 w-14 rounded-xl flex items-center justify-center text-white text-2xl font-bold"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  {t.name.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">{t.name}</h1>
-                {t.clinicAddress && <p className="text-xs text-gray-500 mt-0.5">{t.clinicAddress}{t.clinicCity ? `, ${t.clinicCity}` : ""}</p>}
-                {t.clinicPhone && <p className="text-xs text-gray-500">Tel: {t.clinicPhone}</p>}
-              </div>
-            </div>
-            <div className="text-right">
-              <p
-                className="text-xs font-bold uppercase tracking-widest mb-1"
-                style={{ color: primaryColor }}
-              >
-                Fórmula Médica
-              </p>
-              <p className="text-xs text-gray-500">Fecha: {formatDate(p.issueDate)}</p>
-              {p.nextControlDate && (
-                <p className="text-xs text-gray-500">Próximo control: {formatDate(p.nextControlDate)}</p>
-              )}
-              <p className="text-[10px] text-gray-400 mt-1">Ref: {p.id.slice(-8).toUpperCase()}</p>
-            </div>
-          </div>
-
-          {/* Datos paciente + propietario */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Paciente</p>
-              <table className="text-sm w-full">
-                <tbody>
-                  <tr><td className="text-gray-500 pr-3 py-0.5 w-20">Nombre</td><td className="font-semibold">{p.pet.name}</td></tr>
-                  <tr><td className="text-gray-500 pr-3 py-0.5">Especie</td><td>{p.pet.species}</td></tr>
-                  {p.pet.breed && <tr><td className="text-gray-500 pr-3 py-0.5">Raza</td><td>{p.pet.breed}</td></tr>}
-                  <tr><td className="text-gray-500 pr-3 py-0.5">Edad</td><td>{calcAge(p.pet.birthDate)}</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Propietario</p>
-              <table className="text-sm w-full">
-                <tbody>
-                  <tr><td className="text-gray-500 pr-3 py-0.5 w-20">Nombre</td><td className="font-semibold">{p.pet.client.name}</td></tr>
-                  <tr><td className="text-gray-500 pr-3 py-0.5">Teléfono</td><td>{p.pet.client.phone}</td></tr>
-                  <tr><td className="text-gray-500 pr-3 py-0.5">Email</td><td className="break-all">{p.pet.client.email}</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Medicamentos */}
-          <div className="mb-6">
-            <p
-              className="text-[10px] font-bold uppercase tracking-widest mb-3"
-              style={{ color: primaryColor }}
+          {/* Marca de agua */}
+          {watermarkSrc && (
+            <div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              style={{ zIndex: 0 }}
             >
-              Medicamentos prescritos
-            </p>
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr style={{ backgroundColor: primaryColor }}>
-                  <th className="text-left text-white text-xs font-semibold px-3 py-2 w-8 rounded-tl">#</th>
-                  <th className="text-left text-white text-xs font-semibold px-3 py-2">Medicamento</th>
-                  <th className="text-left text-white text-xs font-semibold px-3 py-2 w-28">Cantidad</th>
-                  <th className="text-left text-white text-xs font-semibold px-3 py-2 rounded-tr">Indicaciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {p.items.map((item, idx) => (
-                  <tr key={item.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                    <td className="px-3 py-2.5 text-gray-400 border-b border-gray-100">{item.order + 1}</td>
-                    <td className="px-3 py-2.5 font-medium border-b border-gray-100">{item.productName}</td>
-                    <td className="px-3 py-2.5 text-gray-600 border-b border-gray-100">{item.quantity}</td>
-                    <td className="px-3 py-2.5 text-gray-600 border-b border-gray-100">{item.instructions}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Observaciones */}
-          {p.observations && (
-            <div className="mb-6 border-l-4 pl-4 py-2" style={{ borderColor: primaryColor }}>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Observaciones</p>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{p.observations}</p>
+              <img
+                src={watermarkSrc}
+                alt=""
+                style={{
+                  width: "55%",
+                  opacity: watermarkOpacity,
+                  objectFit: "contain",
+                }}
+              />
             </div>
           )}
 
-          {/* Firma veterinario */}
-          <div className="mt-12 pt-6 border-t border-gray-200 flex justify-end">
-            <div className="text-center min-w-[200px]">
-              {p.vet.signatureUrl ? (
-                <img
-                  src={p.vet.signatureUrl}
-                  alt="Firma"
-                  className="h-16 mx-auto mb-1 object-contain"
-                />
-              ) : (
-                <div className="h-16 mb-1 border-b border-dashed border-gray-300" />
-              )}
-              <p className="text-sm font-semibold text-gray-800">{p.vet.name}</p>
-              {p.vet.licenseNumber && (
-                <p className="text-xs text-gray-500">T.P. {p.vet.licenseNumber}</p>
-              )}
-              <p className="text-xs text-gray-400 mt-0.5">Médico Veterinario</p>
-            </div>
-          </div>
+          {/* Contenido sobre la marca de agua */}
+          <div className="relative z-10 p-10">
 
-          {/* Pie de página */}
-          <div className="mt-8 pt-4 border-t border-gray-100 text-center">
-            <p className="text-[10px] text-gray-400">
-              Documento generado el {formatDate(new Date().toISOString())} — {t.name}
-              {t.clinicCity ? ` — ${t.clinicCity}` : ""}
-            </p>
+            {/* ENCABEZADO */}
+            <div className="flex items-start justify-between mb-6">
+              {/* Logo + datos clínica */}
+              <div className="flex items-center gap-4">
+                {t.logoUrl ? (
+                  <img src={t.logoUrl} alt={t.name} className="h-20 w-auto max-w-[160px] object-contain" />
+                ) : (
+                  <div
+                    className="h-16 w-16 rounded-2xl flex items-center justify-center text-white text-3xl font-black flex-shrink-0"
+                    style={{ backgroundColor: primary }}
+                  >
+                    {t.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <p className="text-xl font-black text-gray-900 leading-tight">{t.name}</p>
+                  {t.clinicAddress && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {t.clinicAddress}{t.clinicCity ? `, ${t.clinicCity}` : ""}
+                    </p>
+                  )}
+                  {t.clinicPhone && (
+                    <p className="text-xs text-gray-500">Tel: {t.clinicPhone}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Bloque decorativo derecho */}
+              <div
+                className="rounded-2xl px-5 py-3 text-right flex-shrink-0"
+                style={{ backgroundColor: `${primary}18` }}
+              >
+                <p
+                  className="text-xs font-black uppercase tracking-widest"
+                  style={{ color: primary }}
+                >
+                  Fórmula Médica
+                </p>
+                <p className="text-[11px] text-gray-500 mt-1">Fecha: {formatDate(p.issueDate)}</p>
+                {p.nextControlDate && (
+                  <p className="text-[11px] text-gray-500">
+                    Próx. control: {formatDate(p.nextControlDate)}
+                  </p>
+                )}
+                <p className="text-[10px] text-gray-400 mt-1 font-mono">Ref: {ref}</p>
+              </div>
+            </div>
+
+            {/* Línea separadora */}
+            <div className="h-1 rounded-full mb-6" style={{ backgroundColor: primary }} />
+
+            {/* DATOS PACIENTE + PROPIETARIO */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="border border-gray-100 rounded-xl p-4 bg-white/80">
+                <p
+                  className="text-[10px] font-black uppercase tracking-widest mb-3"
+                  style={{ color: primary }}
+                >
+                  Datos del Paciente
+                </p>
+                <table className="w-full">
+                  <tbody>
+                    <InfoRow label="Nombre" value={p.pet.name} />
+                    <InfoRow label="Especie" value={p.pet.species} />
+                    <InfoRow label="Raza" value={p.pet.breed} />
+                    <InfoRow label="Edad" value={calcAge(p.pet.birthDate)} />
+                  </tbody>
+                </table>
+              </div>
+              <div className="border border-gray-100 rounded-xl p-4 bg-white/80">
+                <p
+                  className="text-[10px] font-black uppercase tracking-widest mb-3"
+                  style={{ color: primary }}
+                >
+                  Datos del Propietario
+                </p>
+                <table className="w-full">
+                  <tbody>
+                    <InfoRow label="Nombre" value={p.pet.client.name} />
+                    <InfoRow label="Teléfono" value={p.pet.client.phone} />
+                    <InfoRow label="Email" value={p.pet.client.email} />
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* MEDICAMENTOS */}
+            <div className="mb-6">
+              <p
+                className="text-[10px] font-black uppercase tracking-widest mb-3"
+                style={{ color: primary }}
+              >
+                Medicamentos Prescritos
+              </p>
+              <table className="w-full text-xs border-collapse rounded-xl overflow-hidden">
+                <thead>
+                  <tr style={{ backgroundColor: primary }}>
+                    <th className="text-left text-white font-bold px-3 py-2.5 w-8">#</th>
+                    <th className="text-left text-white font-bold px-3 py-2.5 w-[28%]">Producto</th>
+                    <th className="text-left text-white font-bold px-3 py-2.5 w-24">Cantidad</th>
+                    <th className="text-left text-white font-bold px-3 py-2.5">Indicaciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {p.items.map((item, idx) => (
+                    <tr
+                      key={item.id}
+                      className="border-b border-gray-100"
+                      style={{ backgroundColor: idx % 2 === 0 ? "white" : "#f9fafb" }}
+                    >
+                      <td className="px-3 py-2.5 text-gray-400">{item.order + 1}</td>
+                      <td className="px-3 py-2.5 font-semibold text-gray-900">{item.productName}</td>
+                      <td className="px-3 py-2.5 text-gray-600">{item.quantity}</td>
+                      <td className="px-3 py-2.5 text-gray-600">{item.instructions}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* OBSERVACIONES */}
+            {p.observations && (
+              <div
+                className="mb-6 rounded-xl p-4 border-l-4"
+                style={{ borderColor: primary, backgroundColor: `${primary}0d` }}
+              >
+                <p
+                  className="text-[10px] font-black uppercase tracking-widest mb-2"
+                  style={{ color: primary }}
+                >
+                  Observaciones
+                </p>
+                <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {p.observations}
+                </p>
+              </div>
+            )}
+
+            {/* FIRMA */}
+            <div className="mt-10 flex justify-end">
+              <div className="text-center" style={{ minWidth: 180 }}>
+                {sigSrc ? (
+                  <img
+                    src={sigSrc}
+                    alt="Firma"
+                    className="h-20 mx-auto mb-2 object-contain"
+                  />
+                ) : (
+                  <div className="h-16 mb-2 border-b-2 border-dashed border-gray-300" />
+                )}
+                <div className="border-t border-gray-300 pt-2">
+                  <p className="text-sm font-bold text-gray-900">{p.vet.name}</p>
+                  {p.vet.licenseNumber && (
+                    <p className="text-xs text-gray-500">T.P. {p.vet.licenseNumber}</p>
+                  )}
+                  <p className="text-xs text-gray-400">Médico Veterinario</p>
+                </div>
+              </div>
+            </div>
+
+            {/* FOOTER */}
+            <div className="mt-8 pt-4 border-t border-gray-100 flex items-center justify-between">
+              <div>
+                {(t.clinicPhone || t.clinicAddress) && (
+                  <p className="text-[10px] text-gray-400">
+                    {t.clinicPhone && `Tel: ${t.clinicPhone}`}
+                    {t.clinicPhone && t.clinicAddress && "   ·   "}
+                    {t.clinicAddress}
+                    {t.clinicCity && `, ${t.clinicCity}`}
+                  </p>
+                )}
+              </div>
+              <p className="text-[10px] text-gray-300">
+                Generado el {formatDate(new Date().toISOString())} · Ref {ref}
+              </p>
+            </div>
           </div>
         </div>
       </div>
