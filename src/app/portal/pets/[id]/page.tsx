@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import {
   getOwnerToken,
@@ -152,8 +153,8 @@ export default function PortalPetDetailPage() {
       {/* ─── Sidebar (desktop only) ─────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-white/10 h-screen sticky top-0">
         <div className="p-5 border-b border-white/10">
-          <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center text-2xl mb-3">
-            🐾
+          <div className="w-14 h-14 relative mb-3">
+            <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
           </div>
           <p className="font-bold text-white text-base leading-tight">{pet?.name}</p>
           <p className="text-slate-400 text-xs mt-0.5">

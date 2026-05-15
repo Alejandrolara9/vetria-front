@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { GoogleLogin } from "@react-oauth/google";
 import { ownerLogin, ownerGoogleAuth, saveOwnerToken } from "@/services/owner-portal";
@@ -48,8 +49,8 @@ export default function PortalLoginPage() {
     <div className="flex items-center justify-center px-6 py-12 min-h-screen">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-3xl">🐾</span>
+          <div className="w-20 h-20 relative mx-auto mb-4">
+            <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
           </div>
           <h1 className="text-2xl font-extrabold text-white mb-1">Portal de Mascotas</h1>
           <p className="text-slate-400 text-sm">Consulta el historial de salud de tus mascotas</p>
