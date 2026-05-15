@@ -114,6 +114,7 @@ type SpeechRec = {
   interimResults: boolean;
   onresult: ((e: { results: { [i: number]: { [i: number]: { transcript: string } }; length: number } }) => void) | null;
   onend: (() => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
   start(): void;
   stop(): void;
 };
@@ -128,15 +129,27 @@ function getSpeechRecognition(): SpeechRecConstructor | null {
 function useVoiceInput(onTranscript: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(false);
+  const [permissionError, setPermissionError] = useState(false);
   const recognitionRef = useRef<SpeechRec | null>(null) as MutableRefObject<SpeechRec | null>;
 
   useEffect(() => {
     setSupported(getSpeechRecognition() !== null);
   }, []);
 
-  function start() {
+  async function start() {
     const SR = getSpeechRecognition();
     if (!SR) return;
+
+    setPermissionError(false);
+
+    // Pedir permiso explícito antes de iniciar — el navegador muestra el diálogo nativo
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop()); // solo necesitamos el permiso, no el stream
+    } catch {
+      setPermissionError(true);
+      return;
+    }
 
     const recognition = new SR();
     recognition.lang = "es-CO";
@@ -146,6 +159,13 @@ function useVoiceInput(onTranscript: (text: string) => void) {
     recognition.onresult = (e) => {
       const transcript = Array.from({ length: e.results.length }, (_, i) => e.results[i][0].transcript).join(" ");
       onTranscript(transcript);
+    };
+
+    recognition.onerror = (e) => {
+      if (e.error === "not-allowed" || e.error === "permission-denied") {
+        setPermissionError(true);
+      }
+      setListening(false);
     };
 
     recognition.onend = () => setListening(false);
@@ -159,7 +179,7 @@ function useVoiceInput(onTranscript: (text: string) => void) {
     setListening(false);
   }
 
-  return { listening, supported, start, stop };
+  return { listening, supported, permissionError, start, stop };
 }
 
 function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
@@ -176,7 +196,7 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
   const [noteSource, setNoteSource] = useState<"ai" | "fallback" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const streamBoxRef = useRef<HTMLDivElement>(null);
-  const { listening, supported: voiceSupported, start: startVoice, stop: stopVoice } = useVoiceInput(
+  const { listening, supported: voiceSupported, permissionError: micBlocked, start: startVoice, stop: stopVoice } = useVoiceInput(
     (transcript) => setRawInput(transcript)
   );
 
@@ -350,11 +370,17 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
                   listening ? "border-red-300 bg-red-50/30" : "border-gray-200"
                 }`}
                 value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
-              <p className="text-xs text-gray-400 mt-1">
-                {listening
-                  ? "Hablando... el texto aparece en tiempo real. Presiona Detener cuando termines."
-                  : "Escribe o dicta tu nota. La IA la expandirá en una historia clínica completa."}
-              </p>
+              {micBlocked ? (
+                <p className="mt-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  El navegador bloqueó el micrófono. Haz clic en el ícono de candado o cámara (🔒) en la barra de dirección, selecciona <strong>Micrófono</strong> y cámbialo a <strong>Permitir</strong>. Luego recarga la página.
+                </p>
+              ) : (
+                <p className="text-xs text-gray-400 mt-1">
+                  {listening
+                    ? "Hablando... el texto aparece en tiempo real. Presiona Detener cuando termines."
+                    : "Escribe o dicta tu nota. La IA la expandirá en una historia clínica completa."}
+                </p>
+              )}
             </div>
 
             {/* Signos vitales */}
