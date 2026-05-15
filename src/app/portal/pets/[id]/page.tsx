@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import {
   getOwnerToken,
@@ -152,8 +153,8 @@ export default function PortalPetDetailPage() {
       {/* ─── Sidebar (desktop only) ─────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-white/10 h-screen sticky top-0">
         <div className="p-5 border-b border-white/10">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-2xl mb-3">
-            🐾
+          <div className="w-14 h-14 relative mb-3">
+            <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
           </div>
           <p className="font-bold text-white text-base leading-tight">{pet?.name}</p>
           <p className="text-slate-400 text-xs mt-0.5">
@@ -172,7 +173,7 @@ export default function PortalPetDetailPage() {
               onClick={() => setSection(item.key)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 section === item.key
-                  ? "bg-blue-600/20 text-blue-400"
+                  ? "bg-teal-600/20 text-teal-400"
                   : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
@@ -224,17 +225,17 @@ export default function PortalPetDetailPage() {
                   <div className={`rounded-xl p-4 border ${
                     overdue  ? "bg-red-500/10 border-red-500/30" :
                     urgent   ? "bg-orange-500/10 border-orange-500/30" :
-                               "bg-blue-600/10 border-blue-500/30"
+                               "bg-teal-600/10 border-teal-500/30"
                   }`}>
                     <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${
-                      overdue ? "text-red-400" : urgent ? "text-orange-400" : "text-blue-400"
+                      overdue ? "text-red-400" : urgent ? "text-orange-400" : "text-teal-400"
                     }`}>
                       {overdue ? "Vacuna vencida" : "Próxima vacuna"}
                     </p>
                     <div className="flex items-center justify-between">
                       <p className="font-semibold text-white text-sm">{nextVaccine.title}</p>
                       <div className={`rounded-lg px-3 py-1 text-center ${
-                        overdue ? "bg-red-500/20" : urgent ? "bg-orange-500/20" : "bg-blue-600/20"
+                        overdue ? "bg-red-500/20" : urgent ? "bg-orange-500/20" : "bg-teal-600/20"
                       }`}>
                         {overdue ? (
                           <p className="text-red-400 text-xs font-bold">Vencida</p>
@@ -243,7 +244,7 @@ export default function PortalPetDetailPage() {
                             <p className={`text-xl font-extrabold leading-tight ${urgent ? "text-orange-400" : "text-white"}`}>
                               {days}
                             </p>
-                            <p className={`text-[10px] ${urgent ? "text-orange-300" : "text-blue-300"}`}>días</p>
+                            <p className={`text-[10px] ${urgent ? "text-orange-300" : "text-teal-300"}`}>días</p>
                           </>
                         )}
                       </div>
@@ -320,7 +321,7 @@ export default function PortalPetDetailPage() {
                             {isLong && (
                               <button
                                 onClick={() => toggleNote(note.id)}
-                                className="text-blue-400 text-xs mt-1 hover:text-blue-300 transition-colors"
+                                className="text-teal-400 text-xs mt-1 hover:text-teal-300 transition-colors"
                               >
                                 {isExpanded ? "Ver menos" : "Ver más"}
                               </button>
@@ -413,7 +414,7 @@ export default function PortalPetDetailPage() {
                           <button
                             onClick={() => handleApprove(req.id)}
                             disabled={accessLoading === req.id}
-                            className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all"
+                            className="flex-1 py-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all"
                           >
                             {accessLoading === req.id ? "..." : "Aprobar"}
                           </button>
@@ -453,7 +454,7 @@ export default function PortalPetDetailPage() {
               key={item.key}
               onClick={() => setSection(item.key)}
               className={`flex-1 flex flex-col items-center gap-0.5 py-3 text-xs font-medium transition-colors relative ${
-                section === item.key ? "text-blue-400" : "text-slate-500"
+                section === item.key ? "text-teal-400" : "text-slate-500"
               }`}
             >
               <span className="text-lg leading-none">{item.icon}</span>

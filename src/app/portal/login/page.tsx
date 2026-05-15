@@ -1,20 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { GoogleLogin } from "@react-oauth/google";
+import ResponsiveGoogleLogin from "@/components/ResponsiveGoogleLogin";
 import { ownerLogin, ownerGoogleAuth, saveOwnerToken } from "@/services/owner-portal";
 
 export default function PortalLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isValidEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!isValidEmail(email)) {
+      setEmailError("Ingresa un correo electrónico válido");
+      return;
+    }
     setLoading(true);
     try {
       const res = await ownerLogin({ email, password });
@@ -48,8 +57,8 @@ export default function PortalLoginPage() {
     <div className="flex items-center justify-center px-6 py-12 min-h-screen">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-3xl">🐾</span>
+          <div className="w-20 h-20 relative mx-auto mb-4">
+            <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
           </div>
           <h1 className="text-2xl font-extrabold text-white mb-1">Portal de Mascotas</h1>
           <p className="text-slate-400 text-sm">Consulta el historial de salud de tus mascotas</p>
@@ -72,9 +81,16 @@ export default function PortalLoginPage() {
                 placeholder="tu@email.com"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
+                onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
+                onBlur={() => {
+                  if (email && !isValidEmail(email))
+                    setEmailError("Ingresa un correo electrónico válido");
+                }}
+                className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none transition-all ${emailError ? "border-red-500 focus:border-red-500" : "border-white/15 focus:border-teal-500"}`}
               />
+              {emailError && (
+                <p className="mt-1 text-xs text-red-400">{emailError}</p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -86,13 +102,13 @@ export default function PortalLoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-teal-500 transition-all"
               />
             </div>
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold rounded-xl transition-all text-sm mt-2"
+              disabled={loading || !isValidEmail(email)}
+              className="w-full py-3.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-60 text-white font-bold rounded-xl transition-all text-sm mt-2"
             >
               {loading ? "Ingresando..." : "Iniciar sesión →"}
             </button>
@@ -104,17 +120,11 @@ export default function PortalLoginPage() {
               <span className="text-xs text-slate-500">o continúa con</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={handleGoogle}
-                onError={() => setError("Error al iniciar sesión con Google")}
-                theme="filled_black"
-                shape="rectangular"
-                size="large"
-                width="368"
-                text="signin_with"
-              />
-            </div>
+            <ResponsiveGoogleLogin
+              onSuccess={handleGoogle}
+              onError={() => setError("Error al iniciar sesión con Google")}
+              text="signin_with"
+            />
           </div>
         </div>
 

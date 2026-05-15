@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getOwnerPets, clearOwnerToken, getOwnerToken, type OwnerPet } from "@/services/owner-portal";
@@ -35,8 +36,8 @@ export default function PortalPetsPage() {
     <div className="min-h-screen">
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-lg">🐾</span>
+          <div className="w-8 h-8 relative">
+            <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
           </div>
           <span className="font-bold text-white">Portal Vetria</span>
         </div>
