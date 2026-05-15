@@ -47,7 +47,11 @@ export default function ClientsPage() {
         return acc;
       }, {});
       setClients(
-        clientsRes.data.map((c) => ({ ...c, pets: petsByClientId[c.id] ?? [] }))
+        clientsRes.data.map((c) => ({
+          ...c,
+          portalStatus: c.portalStatus ?? "NOT_INVITED",
+          pets: petsByClientId[c.id] ?? [],
+        }))
       );
     } catch {
       setClients([]);
