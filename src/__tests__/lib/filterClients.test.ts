@@ -85,7 +85,8 @@ describe("filterClients", () => {
     expect(result[0].id).toBe("3");
   });
 
-  it("handles pet with null breed without crashing", () => {
-    expect(() => filterClients(clients, "algo")).not.toThrow();
+  it("does not match string 'null' when breed is null", () => {
+    const result = filterClients(clients, "null");
+    expect(result).toHaveLength(0);
   });
 });

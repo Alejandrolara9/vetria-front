@@ -1,10 +1,10 @@
-interface Pet {
+export interface Pet {
   name: string;
   species: string;
   breed: string | null;
 }
 
-interface ClientWithPets {
+export interface ClientWithPets {
   name: string;
   phone: string;
   email: string;
