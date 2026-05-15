@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { PetCard, type Pet } from "./PetCard";
+import { inviteClientToPortal } from "@/services/owner-portal";
 import type { PortalStatus } from "@/lib/filterClients";
 
 export interface ClientWithPets {
@@ -19,16 +20,38 @@ interface ClientCardProps {
   onEditClient: (client: ClientWithPets) => void;
   onEditPet: (pet: Pet, clientId: string) => void;
   onAddPet: (clientId: string) => void;
+  onInvited: (clientId: string) => void;
 }
 
-export function ClientCard({ client, onEditClient, onEditPet, onAddPet }: ClientCardProps) {
+export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvited }: ClientCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [inviting, setInviting] = useState(false);
+  const [inviteError, setInviteError] = useState("");
+  const [resentFeedback, setResentFeedback] = useState(false);
+
+  async function handleInvite(isResend: boolean) {
+    setInviting(true);
+    setInviteError("");
+    try {
+      await inviteClientToPortal(client.id);
+      if (isResend) {
+        setResentFeedback(true);
+        setTimeout(() => setResentFeedback(false), 3000);
+      } else {
+        onInvited(client.id);
+      }
+    } catch {
+      setInviteError("No se pudo enviar la invitación");
+    } finally {
+      setInviting(false);
+    }
+  }
 
   return (
     <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-white">
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-3 gap-2">
         <button
-          className="flex items-center gap-3 flex-1 text-left"
+          className="flex items-center gap-3 flex-1 text-left min-w-0"
           onClick={() => setExpanded((e) => !e)}
         >
           <div className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center text-base flex-shrink-0">
@@ -45,12 +68,55 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet }: Client
             {expanded ? "▼" : "▶"}
           </span>
         </button>
-        <button
-          onClick={() => onEditClient(client)}
-          className="ml-4 text-xs px-3 py-1.5 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 text-muted-foreground flex-shrink-0"
-        >
-          ✏️ Editar
-        </button>
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => onEditClient(client)}
+            className="text-xs px-3 py-1.5 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 text-muted-foreground"
+          >
+            ✏️ Editar
+          </button>
+
+          {client.portalStatus === "NOT_INVITED" && (
+            <div className="flex flex-col items-end">
+              <button
+                onClick={() => handleInvite(false)}
+                disabled={inviting}
+                className="text-xs px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 text-teal-700 disabled:opacity-50"
+              >
+                {inviting ? "Enviando…" : "✉️ Invitar al portal"}
+              </button>
+              {inviteError && (
+                <p className="text-xs text-red-500 mt-1">{inviteError}</p>
+              )}
+            </div>
+          )}
+
+          {client.portalStatus === "INVITED" && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg text-amber-700">
+                🕐 Invitación enviada
+              </span>
+              {resentFeedback ? (
+                <span className="text-xs text-teal-600">✓ Reenviado</span>
+              ) : (
+                <button
+                  onClick={() => handleInvite(true)}
+                  disabled={inviting}
+                  className="text-xs text-muted-foreground hover:underline disabled:opacity-50"
+                >
+                  {inviting ? "…" : "Reenviar"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {client.portalStatus === "ACTIVE" && (
+            <span className="text-xs px-2 py-1 bg-green-50 border border-green-200 rounded-lg text-green-700">
+              🟢 Portal activo
+            </span>
+          )}
+        </div>
       </div>
 
       {expanded && (

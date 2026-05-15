@@ -86,6 +86,12 @@ export default function ClientsPage() {
     loadData();
   }
 
+  function handleInvited(clientId: string) {
+    setClients((prev) =>
+      prev.map((c) => (c.id === clientId ? { ...c, portalStatus: "INVITED" as const } : c))
+    );
+  }
+
   const filtered = filterClients(clients, search);
 
   return (
@@ -130,6 +136,7 @@ export default function ClientsPage() {
               onEditClient={openEditClient}
               onEditPet={openEditPet}
               onAddPet={openAddPet}
+              onInvited={handleInvited}
             />
           ))}
         </div>
