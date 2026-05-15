@@ -466,11 +466,11 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-5">
           <div className="text-center mb-14">
             <span className="inline-block px-3 py-1 bg-teal-100 text-teal-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
-              Todo lo que necesitas
+              Sin fricciones
             </span>
-            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Una plataforma. Todo resuelto.</h2>
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Agenda, historia clínica y recordatorios — sin pegar un software con otro.</h2>
             <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
-              Desde la primera consulta hasta el seguimiento post-vacuna. Vetria cubre cada paso del flujo de tu clínica.
+              En la mayoría de clínicas la agenda va por un lado, las historias por otro y los recordatorios nunca llegan. Vetria une todo: el veterinario dicta, la IA genera la historia en 4 segundos, el sistema programa la próxima vacuna solo y el tutor la recibe en su celular.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
