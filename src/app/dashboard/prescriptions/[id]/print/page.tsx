@@ -20,6 +20,54 @@ function calcAge(birthDate: string | null): string {
   return `${years} año${years !== 1 ? "s" : ""}`;
 }
 
+function buildVetPattern(color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+    <g transform="translate(38,52) rotate(-15)" fill="${color}">
+      <ellipse cx="0" cy="7" rx="12" ry="10"/>
+      <ellipse cx="-12" cy="-5" rx="5.5" ry="7"/>
+      <ellipse cx="-4" cy="-14" rx="5.5" ry="7"/>
+      <ellipse cx="6" cy="-14" rx="5.5" ry="7"/>
+      <ellipse cx="13" cy="-5" rx="5.5" ry="7"/>
+    </g>
+    <g transform="translate(152,148) rotate(40)" fill="${color}">
+      <rect x="-15" y="-4.5" width="30" height="9" rx="4"/>
+      <circle cx="-16" cy="-7" r="6"/>
+      <circle cx="-16" cy="7" r="6"/>
+      <circle cx="16" cy="-7" r="6"/>
+      <circle cx="16" cy="7" r="6"/>
+    </g>
+    <g transform="translate(125,75) rotate(20) scale(0.65)" fill="${color}">
+      <ellipse cx="0" cy="7" rx="12" ry="10"/>
+      <ellipse cx="-12" cy="-5" rx="5.5" ry="7"/>
+      <ellipse cx="-4" cy="-14" rx="5.5" ry="7"/>
+      <ellipse cx="6" cy="-14" rx="5.5" ry="7"/>
+      <ellipse cx="13" cy="-5" rx="5.5" ry="7"/>
+    </g>
+    <g transform="translate(168,28) rotate(-35) scale(0.55)" fill="${color}">
+      <rect x="-15" y="-4.5" width="30" height="9" rx="4"/>
+      <circle cx="-16" cy="-7" r="6"/>
+      <circle cx="-16" cy="7" r="6"/>
+      <circle cx="16" cy="-7" r="6"/>
+      <circle cx="16" cy="7" r="6"/>
+    </g>
+    <g transform="translate(20,160) rotate(10) scale(0.5)" fill="${color}">
+      <ellipse cx="0" cy="7" rx="12" ry="10"/>
+      <ellipse cx="-12" cy="-5" rx="5.5" ry="7"/>
+      <ellipse cx="-4" cy="-14" rx="5.5" ry="7"/>
+      <ellipse cx="6" cy="-14" rx="5.5" ry="7"/>
+      <ellipse cx="13" cy="-5" rx="5.5" ry="7"/>
+    </g>
+    <g transform="translate(85,160) rotate(-20) scale(0.5)" fill="${color}">
+      <rect x="-15" y="-4.5" width="30" height="9" rx="4"/>
+      <circle cx="-16" cy="-7" r="6"/>
+      <circle cx="-16" cy="7" r="6"/>
+      <circle cx="16" cy="-7" r="6"/>
+      <circle cx="16" cy="7" r="6"/>
+    </g>
+  </svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
 function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
   return (
@@ -101,6 +149,17 @@ export default function PrescriptionPrintPage() {
           className="relative max-w-[794px] mx-auto bg-white shadow-lg overflow-hidden"
           style={{ minHeight: "1122px" }}
         >
+          {/* Patrón de fondo: patitas y huesitos */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: buildVetPattern(primary),
+              backgroundRepeat: "repeat",
+              backgroundSize: "200px 200px",
+              opacity: 0.055,
+              zIndex: 0,
+            }}
+          />
           {/* Marca de agua */}
           {watermarkSrc && (
             <div
