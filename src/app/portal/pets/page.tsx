@@ -35,7 +35,7 @@ export default function PortalPetsPage() {
     <div className="min-h-screen">
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
             <span className="text-lg">🐾</span>
           </div>
           <span className="font-bold text-white">Portal Vetria</span>

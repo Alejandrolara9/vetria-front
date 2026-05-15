@@ -67,12 +67,12 @@ function AcceptInviteForm() {
     <div className="flex items-center justify-center px-6 py-12 min-h-screen">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">🐾</span>
           </div>
           <h1 className="text-2xl font-extrabold text-white mb-1">Activa tu cuenta</h1>
           <p className="text-slate-400 text-sm">
-            Ingreso para <span className="text-blue-400">{email}</span>
+            Ingreso para <span className="text-teal-400">{email}</span>
           </p>
         </div>
 
@@ -93,7 +93,7 @@ function AcceptInviteForm() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-teal-500 transition-all"
               />
             </div>
             <div>
@@ -106,14 +106,14 @@ function AcceptInviteForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-teal-500 transition-all"
               />
               <PasswordStrengthChecklist password={password} />
             </div>
             <button
               type="submit"
               disabled={submitting || !isPasswordStrong(password)}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold rounded-xl transition-all text-sm mt-2"
+              className="w-full py-3.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-60 text-white font-bold rounded-xl transition-all text-sm mt-2"
             >
               {submitting ? "Activando..." : "Activar mi cuenta →"}
             </button>
