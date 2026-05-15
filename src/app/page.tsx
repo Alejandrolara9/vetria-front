@@ -17,17 +17,17 @@ const FEATURES = [
     icon: "✨",
     title: "Historia clínica con IA",
     desc: "Escribe dos frases o dicta en voz. La IA genera la historia completa con terminología clínica precisa en menos de 5 segundos.",
-    gradient: "from-purple-500 to-indigo-600",
-    bg: "bg-purple-50",
-    border: "border-purple-100",
+    gradient: "from-teal-500 to-emerald-600",
+    bg: "bg-teal-50",
+    border: "border-teal-100",
     badge: "IA",
-    badgeColor: "bg-purple-100 text-purple-700",
+    badgeColor: "bg-teal-100 text-teal-700",
   },
   {
     icon: "🎙️",
     title: "Dictado por voz",
     desc: "Dicta la nota del paciente con tu voz directamente en la app. Sin costo adicional — usa el micrófono del navegador.",
-    gradient: "from-rose-500 to-pink-600",
+    gradient: "from-rose-500 to-orange-500",
     bg: "bg-rose-50",
     border: "border-rose-100",
     badge: "Nuevo",
@@ -37,9 +37,9 @@ const FEATURES = [
     icon: "📅",
     title: "Agenda inteligente",
     desc: "Gestión de citas por veterinario, detección de conflictos y confirmación automática. Invitaciones al calendario de Google, Outlook y Apple.",
-    gradient: "from-blue-500 to-cyan-600",
-    bg: "bg-blue-50",
-    border: "border-blue-100",
+    gradient: "from-cyan-500 to-teal-600",
+    bg: "bg-cyan-50",
+    border: "border-cyan-100",
     badge: null,
     badgeColor: "",
   },
@@ -47,7 +47,7 @@ const FEATURES = [
     icon: "🔔",
     title: "Recordatorios automáticos",
     desc: "El sistema calcula cuándo vence cada vacuna o desparasitación y envía el recordatorio en el canal exacto al cliente.",
-    gradient: "from-amber-500 to-orange-600",
+    gradient: "from-amber-500 to-orange-500",
     bg: "bg-amber-50",
     border: "border-amber-100",
     badge: "IA",
@@ -80,9 +80,9 @@ const STEPS = [
     num: "01",
     title: "Registra tu clínica",
     desc: "Configura tu clínica en menos de 5 minutos. Agrega tu equipo, protocolos y datos de la veterinaria.",
-    color: "text-blue-600",
-    border: "border-blue-200",
-    bg: "bg-blue-50",
+    color: "text-teal-600",
+    border: "border-teal-200",
+    bg: "bg-teal-50",
     icon: "🏥",
   },
   {
@@ -204,6 +204,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -261,20 +262,20 @@ export default function LandingPage() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg shadow-md shadow-blue-600/40" />
+            <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg shadow-md shadow-teal-600/40" />
             <span className={`font-bold text-xl tracking-tight transition-colors ${scrolled ? "text-gray-900" : "text-white"}`}>Vetria</span>
-            <span className={`hidden sm:inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${scrolled ? "bg-blue-100 text-blue-600" : "bg-blue-500/30 text-blue-200"}`}>Colombia</span>
+            <span className={`hidden sm:inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${scrolled ? "bg-teal-100 text-teal-700" : "bg-teal-500/30 text-teal-200"}`}>Colombia</span>
           </div>
           <div className="hidden md:flex items-center gap-7">
             {[["#funciones", "Funciones"], ["#como-funciona", "Cómo funciona"], ["#ia", "IA"], ["#precios", "Precios"]].map(([href, label]) => (
-              <a key={href} href={href} className={`text-sm font-medium transition-colors hover:text-blue-400 ${scrolled ? "text-gray-600" : "text-white/80"}`}>{label}</a>
+              <a key={href} href={href} className={`text-sm font-medium transition-colors hover:text-teal-400 ${scrolled ? "text-gray-600" : "text-white/80"}`}>{label}</a>
             ))}
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className={`text-sm font-medium transition-colors hidden sm:block ${scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"}`}>
               Iniciar sesión
             </Link>
-            <Link href="/register" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-all shadow-md shadow-blue-600/30">
+            <Link href="/register" className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold rounded-lg transition-all shadow-md shadow-teal-600/30">
               Prueba gratis →
             </Link>
           </div>
@@ -282,10 +283,10 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="relative min-h-screen flex items-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 overflow-hidden">
+      <section className="relative min-h-screen flex items-center bg-gradient-to-br from-gray-950 via-teal-950 to-slate-900 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-20 left-10 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-3xl" />
+          <div className="absolute top-20 left-10 w-80 h-80 bg-teal-600/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] bg-blue-800/8 rounded-full blur-3xl" />
           <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
         </div>
@@ -293,8 +294,8 @@ export default function LandingPage() {
         <div className="relative max-w-6xl mx-auto px-5 pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/15 border border-blue-400/25 rounded-full text-blue-300 text-xs font-semibold backdrop-blur-sm">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-500/15 border border-teal-400/25 rounded-full text-teal-300 text-xs font-semibold backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse" />
                 Inteligencia Artificial nativa
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-500/15 border border-green-400/20 rounded-full text-green-300 text-xs font-medium">
@@ -304,7 +305,7 @@ export default function LandingPage() {
 
             <h1 className="text-4xl sm:text-5xl xl:text-[3.5rem] font-extrabold text-white leading-[1.1] tracking-tight mb-5">
               El veterinario que<br />
-              <span style={{ background: "linear-gradient(90deg, #60a5fa, #38bdf8, #34d399)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <span style={{ background: "linear-gradient(90deg, #2dd4bf, #34d399, #fbbf24)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 usa IA trabaja 10×
               </span><br />
               más rápido.
@@ -316,7 +317,7 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
-              <Link href="/register" className="px-7 py-4 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl transition-all text-center shadow-xl shadow-blue-500/30 text-sm">
+              <Link href="/register" className="px-7 py-4 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl transition-all text-center shadow-xl shadow-teal-600/30 text-sm">
                 Empieza gratis — 30 días →
               </Link>
               <a href="#ia" className="px-7 py-4 border border-white/15 text-white rounded-xl hover:bg-white/8 transition-all text-center font-medium text-sm">
@@ -368,36 +369,36 @@ export default function LandingPage() {
                   </div>
                   <div className="bg-slate-800 rounded-xl px-4 py-3 border border-slate-700/60 min-h-[52px]">
                     <span className="text-sm text-slate-200 font-mono">{displayText}</span>
-                    <span className="text-blue-400 font-mono animate-pulse">|</span>
+                    <span className="text-teal-400 font-mono animate-pulse">|</span>
                   </div>
                 </div>
 
                 <div className={`transition-all duration-700 ${showGenerated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"}`}>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
+                    <div className="w-5 h-5 bg-teal-600 rounded-full flex items-center justify-center">
                       <span className="text-[9px] text-white font-bold">IA</span>
                     </div>
-                    <p className="text-xs text-purple-400 font-semibold">Historia generada · 3.8s</p>
+                    <p className="text-xs text-teal-400 font-semibold">Historia generada · 3.8s</p>
                     <span className="ml-auto text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium border border-green-500/20">
                       Lista para revisar
                     </span>
                   </div>
-                  <div className="bg-slate-800 rounded-xl p-4 border border-purple-500/20 space-y-2.5 text-xs text-slate-300 leading-relaxed">
+                  <div className="bg-slate-800 rounded-xl p-4 border border-teal-500/20 space-y-2.5 text-xs text-slate-300 leading-relaxed">
                     <div>
-                      <span className="text-blue-400 font-semibold">Anamnesis: </span>
+                      <span className="text-teal-400 font-semibold">Anamnesis: </span>
                       Paciente canino de 3 años que consulta por cuadro emético de 48 horas de evolución con hiporexia marcada...
                     </div>
                     <div>
-                      <span className="text-blue-400 font-semibold">Examen físico: </span>
+                      <span className="text-teal-400 font-semibold">Examen físico: </span>
                       T°: 39.5°C (febricular leve). Mucosas rosadas, TLC 2s. Hidratación: 5% deshidratación estimada...
                     </div>
                     <div>
-                      <span className="text-blue-400 font-semibold">Plan: </span>
+                      <span className="text-teal-400 font-semibold">Plan: </span>
                       Fluidoterapia IV LR 50 mL/kg/día. Metronidazol 25 mg/kg BID IV. Ayuno 12h, dieta blanda...
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
-                    <button className="flex-1 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-500 transition-colors">
+                    <button className="flex-1 py-2 bg-teal-600 text-white text-xs font-semibold rounded-lg hover:bg-teal-500 transition-colors">
                       ✓ Aprobar historia
                     </button>
                     <button className="px-3 py-2 border border-slate-600 text-slate-400 text-xs rounded-lg hover:bg-slate-700 transition-colors">
@@ -442,7 +443,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── STATS ── */}
-      <section className="bg-gradient-to-r from-blue-700 to-blue-600 py-10">
+      <section className="bg-gradient-to-r from-teal-700 to-emerald-600 py-10">
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
@@ -464,7 +465,7 @@ export default function LandingPage() {
       <section id="funciones" className="py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-5">
           <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+            <span className="inline-block px-3 py-1 bg-teal-100 text-teal-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
               Todo lo que necesitas
             </span>
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Una plataforma. Todo resuelto.</h2>
@@ -525,12 +526,12 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+              <span className="inline-block px-3 py-1 bg-teal-100 text-teal-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
                 IA Generativa
               </span>
               <h2 className="text-4xl font-extrabold text-gray-900 mb-6 leading-tight">
                 De nota breve a historia{" "}
-                <span style={{ background: "linear-gradient(90deg, #7c3aed, #2563eb)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                <span style={{ background: "linear-gradient(90deg, #0d9488, #059669)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                   clínica completa.
                 </span>
               </h2>
@@ -552,7 +553,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link href="/register"
-                className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-purple-500/25 text-sm">
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-teal-500/25 text-sm">
                 Prueba la IA gratis — 30 días
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -580,10 +581,10 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-950 to-purple-950 border border-blue-700/40 rounded-2xl p-5">
+              <div className="bg-gradient-to-br from-teal-950 to-slate-900 border border-teal-700/40 rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-xs font-semibold text-blue-300 uppercase tracking-wide">Con Vetria IA</span>
+                  <span className="text-xs font-semibold text-teal-300 uppercase tracking-wide">Con Vetria IA</span>
                 </div>
                 <div className="space-y-2">
                   {[
@@ -600,8 +601,8 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 pt-3 border-t border-blue-700/30 flex items-center justify-between">
-                  <span className="text-xs text-blue-400">Tiempo total</span>
+                <div className="mt-3 pt-3 border-t border-teal-700/30 flex items-center justify-between">
+                  <span className="text-xs text-teal-400">Tiempo total</span>
                   <span className="text-sm font-bold text-green-400">~2 minutos</span>
                 </div>
               </div>
@@ -650,10 +651,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEEDBACK FORM ── */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
+      <section className="py-20 bg-gradient-to-br from-teal-50 to-emerald-50">
         <div className="max-w-2xl mx-auto px-5">
           <div className="text-center mb-10">
-            <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+            <span className="inline-block px-3 py-1 bg-teal-100 text-teal-700 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
               Tu opinión importa
             </span>
             <h2 className="text-3xl font-extrabold text-gray-900 mb-3">¿Qué piensas de Vetria?</h2>
@@ -667,7 +668,7 @@ export default function LandingPage() {
               <p className="text-gray-500 text-sm mb-5">Tu feedback ha sido enviado. Nos ayuda a seguir mejorando Vetria.</p>
               <button
                 onClick={() => setFbSent(false)}
-                className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
+                className="text-sm text-teal-600 hover:text-teal-500 font-medium transition-colors"
               >
                 Enviar otro mensaje
               </button>
@@ -700,7 +701,7 @@ export default function LandingPage() {
                   onChange={(e) => setFbName(e.target.value)}
                   placeholder="Dr. Carlos López"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 transition-all"
                 />
               </div>
 
@@ -712,7 +713,7 @@ export default function LandingPage() {
                   value={fbEmail}
                   onChange={(e) => setFbEmail(e.target.value)}
                   placeholder="doctor@clinica.com"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 transition-all"
                 />
               </div>
 
@@ -725,7 +726,7 @@ export default function LandingPage() {
                   placeholder="Cuéntanos qué te parece Vetria, qué mejorarías o qué te ha gustado más..."
                   required
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 transition-all resize-none"
                 />
               </div>
 
@@ -736,7 +737,7 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={fbLoading}
-                className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all text-sm shadow-md shadow-blue-600/20"
+                className="w-full py-3.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all text-sm shadow-md shadow-teal-600/20"
               >
                 {fbLoading ? "Enviando..." : "Enviar opinión →"}
               </button>
@@ -787,31 +788,31 @@ export default function LandingPage() {
             </div>
 
             {/* Basic — highlighted */}
-            <div className="relative border-2 border-blue-600 rounded-2xl p-7 bg-gradient-to-br from-slate-900 to-blue-950 shadow-2xl shadow-blue-900/30 overflow-hidden flex flex-col">
+            <div className="relative border-2 border-teal-600 rounded-2xl p-7 bg-gradient-to-br from-slate-900 to-teal-950 shadow-2xl shadow-teal-900/30 overflow-hidden flex flex-col">
               <div className="absolute top-5 right-5 bg-amber-400 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
                 Recomendado
               </div>
               <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
               <div className="relative mb-5">
-                <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Plan BASIC</p>
+                <p className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-1">Plan BASIC</p>
                 <h3 className="text-xl font-bold text-white mb-3">Para clínicas que crecen</h3>
                 <div className="flex items-end gap-1">
                   <span className="text-5xl font-extrabold text-white">$100k</span>
-                  <span className="text-blue-300 mb-2 text-sm">/mes COP</span>
+                  <span className="text-teal-300 mb-2 text-sm">/mes COP</span>
                 </div>
-                <p className="text-xs text-blue-400 mt-1">≈ $25 USD · facturación mensual</p>
+                <p className="text-xs text-teal-400 mt-1">≈ $25 USD · facturación mensual</p>
               </div>
               <ul className="relative space-y-2.5 mb-8 flex-1">
                 {PLAN_BASIC.map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-blue-100">
-                    <svg className="w-4 h-4 text-blue-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <svg className="w-4 h-4 text-teal-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
                   </li>
                 ))}
               </ul>
-              <Link href="/register" className="relative block text-center py-3.5 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-all text-sm shadow-lg">
+              <Link href="/register" className="relative block text-center py-3.5 bg-white text-teal-700 font-bold rounded-xl hover:bg-teal-50 transition-all text-sm shadow-lg">
                 Empezar con BASIC →
               </Link>
             </div>
@@ -819,11 +820,11 @@ export default function LandingPage() {
 
           {/* Credits explainer */}
           <div className="mt-8 max-w-3xl mx-auto">
-            <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">IA</div>
+            <div className="bg-teal-50 border border-teal-100 rounded-xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">IA</div>
               <div>
-                <p className="text-sm font-semibold text-blue-900 mb-0.5">¿Qué son los créditos IA?</p>
-                <p className="text-xs text-blue-700 leading-relaxed">
+                <p className="text-sm font-semibold text-teal-900 mb-0.5">¿Qué son los créditos IA?</p>
+                <p className="text-xs text-teal-700 leading-relaxed">
                   1 crédito = 1 historia clínica generada por IA. Tu plan incluye créditos mensuales que se renuevan automáticamente.
                   ¿Necesitas más? Recarga desde <strong>$20.000 COP</strong> (50 créditos) directamente desde el panel.
                 </p>
@@ -870,16 +871,16 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA FINAL ── */}
-      <section className="py-24 bg-gradient-to-br from-slate-900 to-blue-950 relative overflow-hidden">
+      <section className="py-24 bg-gradient-to-br from-slate-900 to-teal-950 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
         </div>
         <div className="relative max-w-3xl mx-auto px-5 text-center">
           <div className="text-5xl mb-6">🐾</div>
           <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6 leading-tight">
             Tu clínica merece la mejor<br />
-            <span style={{ background: "linear-gradient(90deg, #60a5fa, #34d399)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <span style={{ background: "linear-gradient(90deg, #2dd4bf, #34d399)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               tecnología veterinaria.
             </span>
           </h2>
@@ -888,7 +889,7 @@ export default function LandingPage() {
             30 días gratis — sin tarjeta, sin compromiso.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register" className="px-8 py-4 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl transition-all shadow-xl shadow-blue-500/30 text-sm">
+            <Link href="/register" className="px-8 py-4 bg-teal-500 hover:bg-teal-400 text-white font-bold rounded-xl transition-all shadow-xl shadow-teal-500/30 text-sm">
               Crear cuenta gratis — 30 días
             </Link>
             <Link href="/login" className="px-8 py-4 border border-white/20 text-white rounded-xl hover:bg-white/8 transition-all font-medium text-sm">
@@ -907,7 +908,7 @@ export default function LandingPage() {
               <div className="flex items-center gap-2 mb-4">
                 <Image src="/logo.png" alt="Vetria" width={28} height={28} className="rounded-lg" />
                 <span className="font-bold text-white text-lg">Vetria</span>
-                <span className="text-[10px] bg-blue-900 text-blue-300 px-1.5 py-0.5 rounded font-medium">vetria.cloud</span>
+                <span className="text-[10px] bg-teal-900 text-teal-300 px-1.5 py-0.5 rounded font-medium">vetria.cloud</span>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed max-w-xs mb-4">
                 Software veterinario con IA para clínicas colombianas. Construido para que el veterinario se concentre en lo que importa: los pacientes.
