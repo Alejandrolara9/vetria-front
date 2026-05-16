@@ -897,7 +897,9 @@ export default function AppointmentsPage() {
         }
         // RECEPTIONIST: se asigna al primer vet disponible cuando cargan los vets
       })
-      .catch(() => {});
+      .catch(() => {
+        setLoadingCalendar(false);
+      });
   }, []);
 
   // Cargar mascotas y veterinarios una sola vez
@@ -929,6 +931,8 @@ export default function AppointmentsPage() {
     }
   }, [vets, currentUser, selectedVetId]);
 
+  // weekStart is not in deps — week navigation doesn't re-fetch; filtering is done in-memory
+  // by the calendar library after the full appointment set for the logged-in vet is loaded.
   const loadCalendar = useCallback(async () => {
     if (!currentUser) return;
     setLoadingCalendar(true);
