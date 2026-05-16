@@ -49,6 +49,9 @@ describe("calcDuration", () => {
   it("returns hours and minutes", () => {
     expect(calcDuration("09:00", "10:30")).toBe("1 hora 30 minutos");
   });
+  it("returns empty string for cross-midnight times (same-day contract)", () => {
+    expect(calcDuration("23:30", "00:30")).toBe("");
+  });
 });
 
 describe("isEndTimeValid", () => {

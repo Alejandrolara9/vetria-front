@@ -963,7 +963,6 @@ export default function AppointmentsPage() {
     end: Date,
     errorMsg: string
   ) {
-    const prev = [...appointments];
     const fields = dateToApiFields(start, end);
     setAppointments((appts) =>
       appts.map((a) => (a.id === eventId ? { ...a, ...fields } : a))
@@ -971,7 +970,8 @@ export default function AppointmentsPage() {
     try {
       await updateAppointment(eventId, fields);
     } catch {
-      setAppointments(prev);
+      // Refetch from server so concurrent drags don't compound stale rollbacks
+      loadCalendar();
       setDragError(errorMsg);
     }
   }
