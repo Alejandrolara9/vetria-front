@@ -207,6 +207,7 @@ function CreateAppointmentModal({
 
   const reasonOptions = REASON_OPTIONS[form.type] ?? ["Otro"];
   const isCustomReason = form.reason === "Otro" || form.reason === "Otra vacuna" || form.reason === "Otra cirugía" || form.reason === "Otra emergencia" || form.reason === "Otro procedimiento";
+  const appointmentDuration = calcDuration(form.startTime, form.endTime);
 
   const filteredPets = petSearch.trim()
     ? pets.filter(
@@ -373,9 +374,9 @@ function CreateAppointmentModal({
               />
             </div>
           </div>
-          {calcDuration(form.startTime, form.endTime) && (
+          {appointmentDuration && (
             <p className="text-xs text-green-600 font-medium -mt-1">
-              ✓ Duración: {calcDuration(form.startTime, form.endTime)}
+              ✓ Duración: {appointmentDuration}
             </p>
           )}
 
