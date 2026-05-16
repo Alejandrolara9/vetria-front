@@ -32,6 +32,16 @@ import withDragAndDrop, { type EventInteractionArgs } from "react-big-calendar/l
 // DnDCalendar defined at module level to avoid recreating on every render
 const DnDCalendar = withDragAndDrop<CalendarEvent>(Calendar);
 
+const RBC_COLOR_MAP: Record<string, { bg: string; border: string }> = {
+  CONSULTATION: { bg: "#dbeafe", border: "#2563eb" },
+  VACCINATION:  { bg: "#dcfce7", border: "#16a34a" },
+  SURGERY:      { bg: "#fee2e2", border: "#dc2626" },
+  GROOMING:     { bg: "#f3e8ff", border: "#7c3aed" },
+  CHECKUP:      { bg: "#fef9c3", border: "#ca8a04" },
+  EMERGENCY:    { bg: "#ffedd5", border: "#ea580c" },
+  OTHER:        { bg: "#f3f4f6", border: "#6b7280" },
+};
+
 // ─── Utilidades de color por tipo ────────────────────────────────────────────
 
 const TYPE_LABELS: Record<AppointmentType, string> = {
@@ -947,58 +957,53 @@ export default function AppointmentsPage() {
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
-  async function handleDrop({ event, start, end }: EventInteractionArgs<CalendarEvent>) {
+  async function applyReschedule(
+    eventId: string,
+    start: Date,
+    end: Date,
+    errorMsg: string
+  ) {
     const prev = [...appointments];
-    const fields = dateToApiFields(new Date(start), new Date(end));
+    const fields = dateToApiFields(start, end);
     setAppointments((appts) =>
-      appts.map((a) => (a.id === event.id ? { ...a, ...fields } : a))
+      appts.map((a) => (a.id === eventId ? { ...a, ...fields } : a))
     );
     try {
-      await updateAppointment(event.id, fields);
+      await updateAppointment(eventId, fields);
     } catch {
       setAppointments(prev);
-      setDragError("No se pudo mover la cita — revisa que el horario esté libre");
+      setDragError(errorMsg);
     }
   }
 
-  async function handleResize({ event, start, end }: EventInteractionArgs<CalendarEvent>) {
-    const prev = [...appointments];
-    const fields = dateToApiFields(new Date(start), new Date(end));
-    setAppointments((appts) =>
-      appts.map((a) => (a.id === event.id ? { ...a, ...fields } : a))
+  function handleDrop({ event, start, end }: EventInteractionArgs<CalendarEvent>) {
+    applyReschedule(
+      event.id,
+      new Date(start),
+      new Date(end),
+      "No se pudo mover la cita — revisa que el horario esté libre"
     );
-    try {
-      await updateAppointment(event.id, fields);
-    } catch {
-      setAppointments(prev);
-      setDragError("No se pudo cambiar la duración — revisa que el horario esté libre");
-    }
+  }
+
+  function handleResize({ event, start, end }: EventInteractionArgs<CalendarEvent>) {
+    applyReschedule(
+      event.id,
+      new Date(start),
+      new Date(end),
+      "No se pudo cambiar la duración — revisa que el horario esté libre"
+    );
   }
 
   function handleSelectSlot({ start, end }: { start: Date; end: Date }) {
-    const pad = (n: number) => String(n).padStart(2, "0");
-    setPreselectedSlot({
-      date: `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`,
-      startTime: `${pad(start.getHours())}:${pad(start.getMinutes())}`,
-      endTime: `${pad(end.getHours())}:${pad(end.getMinutes())}`,
-    });
+    setPreselectedSlot(dateToApiFields(start, end));
     setShowCreate(true);
   }
 
   function eventPropGetter(event: CalendarEvent) {
     const appt = event.resource;
     const isCancelled = appt.status === "CANCELLED";
-    const COLOR_MAP: Record<string, { bg: string; border: string }> = {
-      CONSULTATION: { bg: "#dbeafe", border: "#2563eb" },
-      VACCINATION:  { bg: "#dcfce7", border: "#16a34a" },
-      SURGERY:      { bg: "#fee2e2", border: "#dc2626" },
-      GROOMING:     { bg: "#f3e8ff", border: "#7c3aed" },
-      CHECKUP:      { bg: "#fef9c3", border: "#ca8a04" },
-      EMERGENCY:    { bg: "#ffedd5", border: "#ea580c" },
-      OTHER:        { bg: "#f3f4f6", border: "#6b7280" },
-    };
     const type = inferAppointmentType(appt.title);
-    const colors = COLOR_MAP[type] ?? COLOR_MAP.OTHER;
+    const colors = RBC_COLOR_MAP[type] ?? RBC_COLOR_MAP.OTHER;
     return {
       style: {
         backgroundColor: colors.bg,
