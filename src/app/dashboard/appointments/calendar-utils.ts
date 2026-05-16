@@ -44,6 +44,7 @@ export function dateToApiFields(
   };
 }
 
+// Assumes both times are on the same calendar day; cross-midnight returns ""
 export function calcDuration(startTime: string, endTime: string): string {
   const [sh, sm] = startTime.split(":").map(Number);
   const [eh, em] = endTime.split(":").map(Number);
