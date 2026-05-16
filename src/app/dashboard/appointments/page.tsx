@@ -15,7 +15,8 @@ import {
   type AppointmentStats,
   type AppointmentType,
 } from "@/services/appointments";
-import { calcDuration, isEndTimeValid } from "./calendar-utils";
+import { calcDuration, isEndTimeValid, getVisibleVetId } from "./calendar-utils";
+import { getMyProfile, type UserProfile } from "@/services/user-profile";
 
 // ─── Utilidades de color por tipo ────────────────────────────────────────────
 
@@ -869,12 +870,35 @@ export default function AppointmentsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [selectedVetId, setSelectedVetId] = useState<string>("all");
+  const [dragError, setDragError] = useState<string | null>(null);
+  const [preselectedSlot, setPreselectedSlot] = useState<{
+    date: string;
+    startTime: string;
+    endTime: string;
+  } | null>(null);
+
   // Abrir modal de creacion si viene ?action=new desde el dashboard
   useEffect(() => {
     if (searchParams.get("action") === "new") {
       setShowCreate(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    getMyProfile()
+      .then((user) => {
+        setCurrentUser(user);
+        if (user.role === "VET") {
+          setSelectedVetId(user.id);
+        } else if (user.role === "ADMIN") {
+          setSelectedVetId("all");
+        }
+        // RECEPTIONIST: se asigna al primer vet disponible cuando cargan los vets
+      })
+      .catch(() => {});
+  }, []);
 
   // Cargar mascotas y veterinarios una sola vez
   useEffect(() => {
@@ -895,19 +919,29 @@ export default function AppointmentsPage() {
     loadSelectors();
   }, []);
 
+  useEffect(() => {
+    if (
+      currentUser?.role === "RECEPTIONIST" &&
+      selectedVetId === "all" &&
+      vets.length > 0
+    ) {
+      setSelectedVetId(vets[0].id);
+    }
+  }, [vets, currentUser, selectedVetId]);
+
   const loadCalendar = useCallback(async () => {
+    if (!currentUser) return;
     setLoadingCalendar(true);
     try {
-      // El backend acepta ?date para filtrar; cargamos todo el rango haciendo una query sin filtro
-      // y filtramos en el cliente por la semana visible
-      const data = await listAppointments();
+      const vetId = getVisibleVetId(currentUser.role, currentUser.id, selectedVetId);
+      const data = await listAppointments(vetId ? { vetId } : undefined);
       setAppointments(data);
     } catch {
       setAppointments([]);
     } finally {
       setLoadingCalendar(false);
     }
-  }, [weekStart]);
+  }, [currentUser, selectedVetId]);
 
   const loadStats = useCallback(async () => {
     setLoadingStats(true);
@@ -928,6 +962,12 @@ export default function AppointmentsPage() {
   useEffect(() => {
     loadStats();
   }, [loadStats]);
+
+  useEffect(() => {
+    if (!dragError) return;
+    const timer = setTimeout(() => setDragError(null), 4000);
+    return () => clearTimeout(timer);
+  }, [dragError]);
 
   // Construir los 7 dias de la semana actual
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -1042,7 +1082,30 @@ export default function AppointmentsPage() {
         {loadingCalendar && (
           <span className="text-xs text-muted-foreground animate-pulse">Cargando...</span>
         )}
+
+        {/* Selector de vet: solo RECEPTIONIST y ADMIN */}
+        {currentUser && currentUser.role !== "VET" && vets.length > 0 && (
+          <select
+            className="ml-auto px-3 py-1.5 border border-border rounded-lg text-sm bg-white"
+            value={selectedVetId}
+            onChange={(e) => setSelectedVetId(e.target.value)}
+          >
+            {currentUser.role === "ADMIN" && (
+              <option value="all">Todos los veterinarios</option>
+            )}
+            {vets.map((v) => (
+              <option key={v.id} value={v.id}>{v.name}</option>
+            ))}
+          </select>
+        )}
       </div>
+
+      {dragError && (
+        <div className="mb-3 px-4 py-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-center justify-between">
+          <span>{dragError}</span>
+          <button onClick={() => setDragError(null)} className="ml-3 text-red-400 hover:text-red-600 text-lg leading-none">✕</button>
+        </div>
+      )}
 
       {/* Calendario semanal — horizontally scrollable on mobile */}
       <div className="overflow-x-auto rounded-xl border border-border">
