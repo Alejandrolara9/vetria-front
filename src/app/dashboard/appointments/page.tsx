@@ -15,6 +15,7 @@ import {
   type AppointmentStats,
   type AppointmentType,
 } from "@/services/appointments";
+import { calcDuration, isEndTimeValid } from "./calendar-utils";
 
 // ─── Utilidades de color por tipo ────────────────────────────────────────────
 
@@ -161,26 +162,39 @@ interface Vet {
 interface CreateModalProps {
   pets: Pet[];
   vets: Vet[];
+  initialDate?: string;
+  initialStartTime?: string;
+  initialEndTime?: string;
+  initialVetId?: string;
   onClose: () => void;
   onCreated: () => void;
 }
 
-function CreateAppointmentModal({ pets, vets, onClose, onCreated }: CreateModalProps) {
+function CreateAppointmentModal({
+  pets,
+  vets,
+  initialDate,
+  initialStartTime,
+  initialEndTime,
+  initialVetId,
+  onClose,
+  onCreated,
+}: CreateModalProps) {
   const [form, setForm] = useState<{
     petId: string;
     vetId: string;
     date: string;
-    time: string;
-    durationMinutes: number;
+    startTime: string;
+    endTime: string;
     type: AppointmentType;
     reason: string;
     notes: string;
   }>({
     petId: "",
-    vetId: "",
-    date: toDateStr(new Date()),
-    time: "09:00",
-    durationMinutes: 30,
+    vetId: initialVetId ?? "",
+    date: initialDate ?? toDateStr(new Date()),
+    startTime: initialStartTime ?? "09:00",
+    endTime: initialEndTime ?? "10:00",
     type: "CONSULTATION",
     reason: "",
     notes: "",
@@ -209,13 +223,12 @@ function CreateAppointmentModal({ pets, vets, onClose, onCreated }: CreateModalP
       setError("Debes seleccionar mascota y veterinario.");
       return;
     }
+    if (!isEndTimeValid(form.startTime, form.endTime)) {
+      setError("La hora de fin debe ser posterior a la de inicio.");
+      return;
+    }
     const selectedPet = pets.find((p) => p.id === form.petId);
     if (!selectedPet) { setError("Mascota no válida."); return; }
-
-    // Calcular endTime sumando durationMinutes al startTime
-    const [h, m] = form.time.split(":").map(Number);
-    const endTotalMin = h * 60 + m + form.durationMinutes;
-    const endTime = `${String(Math.floor(endTotalMin / 60) % 24).padStart(2, "0")}:${String(endTotalMin % 60).padStart(2, "0")}`;
 
     const finalReason = isCustomReason ? customReason : form.reason;
     const payload = {
@@ -224,8 +237,8 @@ function CreateAppointmentModal({ pets, vets, onClose, onCreated }: CreateModalP
       vetId: form.vetId,
       title: TYPE_LABELS[form.type] + (finalReason ? ` — ${finalReason}` : ""),
       date: form.date,
-      startTime: form.time,
-      endTime,
+      startTime: form.startTime,
+      endTime: form.endTime,
       notes: form.notes || undefined,
     };
     setSaving(true);
@@ -327,59 +340,61 @@ function CreateAppointmentModal({ pets, vets, onClose, onCreated }: CreateModalP
           </div>
 
           {/* Fecha y hora */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Fecha</label>
+            <input
+              type="date"
+              required
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1">Fecha</label>
-              <input
-                type="date"
-                required
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Hora</label>
+              <label className="block text-sm font-medium mb-1">Hora inicio</label>
               <input
                 type="time"
                 required
                 className="w-full px-3 py-2 border border-border rounded-lg text-sm"
-                value={form.time}
-                onChange={(e) => setForm({ ...form, time: e.target.value })}
+                value={form.startTime}
+                onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Hora fin</label>
+              <input
+                type="time"
+                required
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm"
+                value={form.endTime}
+                onChange={(e) => setForm({ ...form, endTime: e.target.value })}
               />
             </div>
           </div>
+          {calcDuration(form.startTime, form.endTime) && (
+            <p className="text-xs text-green-600 font-medium -mt-1">
+              ✓ Duración: {calcDuration(form.startTime, form.endTime)}
+            </p>
+          )}
 
-          {/* Duracion y tipo */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1">Duracion (min)</label>
-              <select
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm"
-                value={form.durationMinutes}
-                onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
-              >
-                {[15, 30, 45, 60, 90, 120].map((m) => (
-                  <option key={m} value={m}>{m} min</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Tipo</label>
-              <select
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm"
-                value={form.type}
-                onChange={(e) => {
-                  const t = e.target.value as AppointmentType;
-                  setForm({ ...form, type: t, reason: REASON_OPTIONS[t][0] });
-                  setCustomReason("");
-                }}
-              >
-                {(Object.keys(TYPE_LABELS) as AppointmentType[]).map((t) => (
-                  <option key={t} value={t}>{TYPE_LABELS[t]}</option>
-                ))}
-              </select>
-            </div>
+          {/* Tipo */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Tipo</label>
+            <select
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm"
+              value={form.type}
+              onChange={(e) => {
+                const t = e.target.value as AppointmentType;
+                setForm({ ...form, type: t, reason: REASON_OPTIONS[t][0] });
+                setCustomReason("");
+              }}
+            >
+              {(Object.keys(TYPE_LABELS) as AppointmentType[]).map((t) => (
+                <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+              ))}
+            </select>
           </div>
 
           {/* Motivo */}
