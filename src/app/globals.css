@@ -84,3 +84,57 @@ body {
   background-color: var(--background);
   color: var(--foreground);
 }
+
+/* ── react-big-calendar overrides ─────────────────────────────────────── */
+.rbc-wrapper .rbc-toolbar {
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rbc-wrapper .rbc-toolbar button {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+}
+.rbc-wrapper .rbc-toolbar button:hover {
+  background: #f9fafb;
+}
+.rbc-wrapper .rbc-toolbar button.rbc-active {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+  font-weight: 600;
+}
+.rbc-wrapper .rbc-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 8px 4px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.rbc-wrapper .rbc-today {
+  background-color: #eff6ff;
+}
+.rbc-wrapper .rbc-event:focus {
+  outline: 2px solid #2563eb;
+}
+.rbc-wrapper .rbc-time-slot {
+  font-size: 11px;
+  color: #9ca3af;
+}
+.rbc-wrapper .rbc-timeslot-group {
+  border-bottom: 1px solid #f3f4f6;
+}
+.rbc-wrapper .rbc-time-view {
+  border: none;
+}
+.rbc-wrapper .rbc-time-content {
+  border-top: 1px solid #e5e7eb;
+}
+.rbc-wrapper .rbc-current-time-indicator {
+  background-color: #2563eb;
+}

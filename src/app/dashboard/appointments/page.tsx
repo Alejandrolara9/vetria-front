@@ -7,6 +7,7 @@ import {
   listAppointments,
   getAppointmentStatsToday,
   createAppointment,
+  updateAppointment,
   cancelAppointment,
   confirmAppointment,
   completeAppointment,
@@ -15,8 +16,21 @@ import {
   type AppointmentStats,
   type AppointmentType,
 } from "@/services/appointments";
-import { calcDuration, isEndTimeValid, getVisibleVetId } from "./calendar-utils";
+import {
+  calcDuration,
+  isEndTimeValid,
+  getVisibleVetId,
+  localizer,
+  toCalendarEvent,
+  dateToApiFields,
+  type CalendarEvent,
+} from "./calendar-utils";
 import { getMyProfile, type UserProfile } from "@/services/user-profile";
+import { Calendar } from "react-big-calendar";
+import withDragAndDrop, { type EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
+
+// DnDCalendar defined at module level to avoid recreating on every render
+const DnDCalendar = withDragAndDrop<CalendarEvent>(Calendar);
 
 // ─── Utilidades de color por tipo ────────────────────────────────────────────
 
@@ -115,22 +129,6 @@ export const VACCINE_NEXT_DAYS: Record<string, number> = {
 
 // ─── Helpers de fecha ─────────────────────────────────────────────────────────
 
-function startOfWeek(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay(); // 0=dom, 1=lun, …
-  // Semana empieza en lunes
-  const diff = (day === 0 ? -6 : 1) - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
-
 function toDateStr(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
@@ -138,10 +136,6 @@ function toDateStr(date: Date): string {
 export function formatTime(isoString: string): string {
   const d = new Date(isoString);
   return d.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", hour12: false });
-}
-
-function formatDateLong(date: Date): string {
-  return date.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" });
 }
 
 // ─── Componentes internos ─────────────────────────────────────────────────────
@@ -832,33 +826,11 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
   );
 }
 
-// ─── Componente de bloque de cita en el calendario ───────────────────────────
-
-interface AppointmentBlockProps {
-  appointment: Appointment;
-  onClick: (a: Appointment) => void;
-}
-
-function AppointmentBlock({ appointment, onClick }: AppointmentBlockProps) {
-  const isCancelled = appointment.status === "CANCELLED";
-
-  return (
-    <button
-      onClick={() => onClick(appointment)}
-      className={`w-full text-left px-2 py-1 rounded-md border text-xs mb-1 transition-opacity hover:opacity-80 bg-blue-100 text-blue-800 border-blue-300 ${isCancelled ? "opacity-40 line-through" : ""}`}
-    >
-      <span className="font-medium block truncate">{appointment.startTime} {appointment.pet.name}</span>
-      <span className="block truncate opacity-75">{appointment.title}</span>
-    </button>
-  );
-}
-
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function AppointmentsPage() {
   const searchParams = useSearchParams();
 
-  const [weekStart, setWeekStart] = useState<Date>(() => startOfWeek(new Date()));
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [stats, setStats] = useState<AppointmentStats | null>(null);
   const [loadingCalendar, setLoadingCalendar] = useState(true);
@@ -931,8 +903,6 @@ export default function AppointmentsPage() {
     }
   }, [vets, currentUser, selectedVetId]);
 
-  // weekStart is not in deps — week navigation doesn't re-fetch; filtering is done in-memory
-  // by the calendar library after the full appointment set for the logged-in vet is loaded.
   const loadCalendar = useCallback(async () => {
     if (!currentUser) return;
     setLoadingCalendar(true);
@@ -973,39 +943,75 @@ export default function AppointmentsPage() {
     return () => clearTimeout(timer);
   }, [dragError]);
 
-  // Construir los 7 dias de la semana actual
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const weekEnd = addDays(weekStart, 6);
+  const visibleAppointments = appointments
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
-  // Agrupar citas por dia (string YYYY-MM-DD)
-  const appointmentsByDay: Record<string, Appointment[]> = {};
-  for (const appt of appointments) {
-    const dayKey = toDateStr(new Date(appt.date));
-    if (!appointmentsByDay[dayKey]) appointmentsByDay[dayKey] = [];
-    appointmentsByDay[dayKey].push(appt);
-  }
-  for (const key of Object.keys(appointmentsByDay)) {
-    appointmentsByDay[key].sort((a, b) => a.startTime.localeCompare(b.startTime));
-  }
-
-  const weekDayKeys = new Set(weekDays.map(toDateStr));
-  const weekAppointments = appointments.filter((a) => weekDayKeys.has(toDateStr(new Date(a.date))));
-
-  const todayStr = toDateStr(new Date());
-
-  function prevWeek() {
-    setWeekStart((d) => addDays(d, -7));
+  async function handleDrop({ event, start, end }: EventInteractionArgs<CalendarEvent>) {
+    const prev = [...appointments];
+    const fields = dateToApiFields(new Date(start), new Date(end));
+    setAppointments((appts) =>
+      appts.map((a) => (a.id === event.id ? { ...a, ...fields } : a))
+    );
+    try {
+      await updateAppointment(event.id, fields);
+    } catch {
+      setAppointments(prev);
+      setDragError("No se pudo mover la cita — revisa que el horario esté libre");
+    }
   }
 
-  function nextWeek() {
-    setWeekStart((d) => addDays(d, 7));
+  async function handleResize({ event, start, end }: EventInteractionArgs<CalendarEvent>) {
+    const prev = [...appointments];
+    const fields = dateToApiFields(new Date(start), new Date(end));
+    setAppointments((appts) =>
+      appts.map((a) => (a.id === event.id ? { ...a, ...fields } : a))
+    );
+    try {
+      await updateAppointment(event.id, fields);
+    } catch {
+      setAppointments(prev);
+      setDragError("No se pudo cambiar la duración — revisa que el horario esté libre");
+    }
   }
 
-  function goToToday() {
-    setWeekStart(startOfWeek(new Date()));
+  function handleSelectSlot({ start, end }: { start: Date; end: Date }) {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    setPreselectedSlot({
+      date: `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`,
+      startTime: `${pad(start.getHours())}:${pad(start.getMinutes())}`,
+      endTime: `${pad(end.getHours())}:${pad(end.getMinutes())}`,
+    });
+    setShowCreate(true);
   }
 
-  const weekLabel = `${weekStart.toLocaleDateString("es-CO", { day: "numeric", month: "short" })} — ${weekEnd.toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}`;
+  function eventPropGetter(event: CalendarEvent) {
+    const appt = event.resource;
+    const isCancelled = appt.status === "CANCELLED";
+    const COLOR_MAP: Record<string, { bg: string; border: string }> = {
+      CONSULTATION: { bg: "#dbeafe", border: "#2563eb" },
+      VACCINATION:  { bg: "#dcfce7", border: "#16a34a" },
+      SURGERY:      { bg: "#fee2e2", border: "#dc2626" },
+      GROOMING:     { bg: "#f3e8ff", border: "#7c3aed" },
+      CHECKUP:      { bg: "#fef9c3", border: "#ca8a04" },
+      EMERGENCY:    { bg: "#ffedd5", border: "#ea580c" },
+      OTHER:        { bg: "#f3f4f6", border: "#6b7280" },
+    };
+    const type = inferAppointmentType(appt.title);
+    const colors = COLOR_MAP[type] ?? COLOR_MAP.OTHER;
+    return {
+      style: {
+        backgroundColor: colors.bg,
+        borderLeft: `3px solid ${colors.border}`,
+        color: "#111827",
+        opacity: isCancelled ? 0.4 : 1,
+        textDecoration: isCancelled ? "line-through" : "none",
+        borderRadius: "4px",
+        fontSize: "11px",
+        padding: "2px 4px",
+      },
+    };
+  }
 
   return (
     <div>
@@ -1054,39 +1060,11 @@ export default function AppointmentsPage() {
         ))}
       </div>
 
-      {/* Navegacion de semana */}
+      {/* Barra de herramientas */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={prevWeek}
-            className="p-2 border border-border rounded-lg hover:bg-gray-50 text-sm"
-            aria-label="Semana anterior"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button
-            onClick={goToToday}
-            className="px-3 py-1.5 border border-border rounded-lg text-sm hover:bg-gray-50"
-          >
-            Hoy
-          </button>
-          <button
-            onClick={nextWeek}
-            className="p-2 border border-border rounded-lg hover:bg-gray-50 text-sm"
-            aria-label="Semana siguiente"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-        <span className="text-sm font-medium text-muted-foreground">{weekLabel}</span>
         {loadingCalendar && (
           <span className="text-xs text-muted-foreground animate-pulse">Cargando...</span>
         )}
-
         {/* Selector de vet: solo RECEPTIONIST y ADMIN */}
         {currentUser && currentUser.role !== "VET" && vets.length > 0 && (
           <select
@@ -1111,68 +1089,44 @@ export default function AppointmentsPage() {
         </div>
       )}
 
-      {/* Calendario semanal — horizontally scrollable on mobile */}
-      <div className="overflow-x-auto rounded-xl border border-border">
-        <div className="min-w-[640px] bg-card-bg">
-          {/* Header de dias */}
-          <div className="grid grid-cols-7 border-b border-border">
-            {weekDays.map((day) => {
-              const dayStr = toDateStr(day);
-              const isToday = dayStr === todayStr;
-              const count = (appointmentsByDay[dayStr] ?? []).length;
-              return (
-                <div
-                  key={dayStr}
-                  className={`p-2 text-center border-r last:border-r-0 border-border ${isToday ? "bg-blue-50" : "bg-gray-50"}`}
-                >
-                  <p className={`text-xs uppercase font-medium leading-tight ${isToday ? "text-blue-700" : "text-muted-foreground"}`}>
-                    {formatDateLong(day)}
-                  </p>
-                  {count > 0 && (
-                    <span className="inline-block mt-1 text-xs bg-primary text-white rounded-full w-5 h-5 leading-5 text-center">
-                      {count}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Cuerpo del calendario */}
-          <div className="grid grid-cols-7 min-h-48">
-            {weekDays.map((day) => {
-              const dayStr = toDateStr(day);
-              const isToday = dayStr === todayStr;
-              const dayAppts = appointmentsByDay[dayStr] ?? [];
-
-              return (
-                <div
-                  key={dayStr}
-                  className={`p-1.5 border-r last:border-r-0 border-border min-h-32 ${isToday ? "bg-blue-50/30" : ""}`}
-                >
-                  {dayAppts.length === 0 ? (
-                    <p className="text-xs text-muted-foreground/50 text-center mt-4">—</p>
-                  ) : (
-                    dayAppts.map((appt) => (
-                      <AppointmentBlock
-                        key={appt.id}
-                        appointment={appt}
-                        onClick={setSelectedAppointment}
-                      />
-                    ))
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      {/* Calendario con DnD */}
+      <div className="rounded-xl border border-border overflow-hidden bg-white rbc-wrapper">
+        <DnDCalendar
+          localizer={localizer}
+          culture="es"
+          events={appointments.map(toCalendarEvent)}
+          defaultView="week"
+          views={["week", "day"]}
+          step={30}
+          timeslots={2}
+          min={new Date(0, 0, 0, 7, 0)}
+          max={new Date(0, 0, 0, 20, 0)}
+          style={{ height: 620 }}
+          messages={{
+            week: "Semana",
+            day: "Día",
+            today: "Hoy",
+            previous: "←",
+            next: "→",
+            noEventsInRange: "No hay citas en este rango",
+            showMore: (total: number) => `+${total} más`,
+          }}
+          eventPropGetter={eventPropGetter}
+          onEventDrop={handleDrop}
+          onEventResize={handleResize}
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={(event: CalendarEvent) => setSelectedAppointment(event.resource)}
+          selectable
+          resizable
+          popup
+        />
       </div>
 
-      {/* Resumen de citas de la semana */}
-      {weekAppointments.length > 0 && (
+      {/* Resumen de citas cargadas */}
+      {visibleAppointments.length > 0 && (
         <div className="mt-6">
           <h2 className="text-base font-semibold mb-3">
-            Citas esta semana ({weekAppointments.length})
+            Citas cargadas ({visibleAppointments.length})
           </h2>
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-sm min-w-[560px] bg-card-bg">
@@ -1186,7 +1140,7 @@ export default function AppointmentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {weekAppointments.map((appt) => (
+                {visibleAppointments.map((appt) => (
                   <tr
                     key={appt.id}
                     onClick={() => setSelectedAppointment(appt)}
@@ -1223,8 +1177,22 @@ export default function AppointmentsPage() {
         <CreateAppointmentModal
           pets={pets}
           vets={vets}
-          onClose={() => setShowCreate(false)}
+          initialDate={preselectedSlot?.date}
+          initialStartTime={preselectedSlot?.startTime}
+          initialEndTime={preselectedSlot?.endTime}
+          initialVetId={
+            currentUser?.role === "VET"
+              ? currentUser.id
+              : selectedVetId !== "all"
+              ? selectedVetId
+              : undefined
+          }
+          onClose={() => {
+            setShowCreate(false);
+            setPreselectedSlot(null);
+          }}
           onCreated={() => {
+            setPreselectedSlot(null);
             loadCalendar();
             loadStats();
           }}
