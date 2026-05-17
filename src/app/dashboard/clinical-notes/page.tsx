@@ -17,6 +17,8 @@ import {
   type CreateClinicalNoteDto,
   type VitalSigns,
 } from "@/services/clinical-notes";
+import { SectionReviewPanel } from "@/components/SectionReviewPanel";
+import { hasNewSectionsFormat } from "@/lib/section-utils";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -477,24 +479,41 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
             {/* Acciones al terminar */}
             {phase === "done" && finalNote && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-                <p className="text-sm text-gray-600 mb-3">
-                  Historia generada. Puedes aprobarla directamente o revisarla en detalle.
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={async () => {
-                      await reviewClinicalNote(finalNote.id, { status: "APPROVED" });
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0 overflow-y-auto" style={{ maxHeight: "55vh" }}>
+                {hasNewSectionsFormat(finalNote.sections as Record<string, string> | undefined) ? (
+                  <SectionReviewPanel
+                    sections={finalNote.sections as Record<string, string>}
+                    onApprove={async (finalNoteText, sections) => {
+                      await reviewClinicalNote(finalNote.id, {
+                        status: "EDITED",
+                        finalNote: finalNoteText,
+                        sections,
+                      });
                       onClose();
                     }}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">
-                    Aprobar historia
-                  </button>
-                  <button onClick={onClose}
-                    className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-100">
-                    Revisar después
-                  </button>
-                </div>
+                    onSaveAsDraft={onClose}
+                  />
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Historia generada. Puedes aprobarla directamente o revisarla en detalle.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          await reviewClinicalNote(finalNote.id, { status: "APPROVED" });
+                          onClose();
+                        }}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">
+                        Aprobar historia
+                      </button>
+                      <button onClick={onClose}
+                        className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-100">
+                        Revisar después
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -659,46 +678,78 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
             </div>
           )}
 
-          {/* Historia generada */}
-          {!isGenerating && noteText && (
+          {/* Historia en revisión — secciones estructuradas o fallback markdown */}
+          {isPendingReview && !isGenerating && (
             <div className="text-sm">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-gray-400">
-                  Historia clínica {isReadOnly ? "(aprobada)" : "generada por IA — revisa y edita si es necesario"}
-                </p>
-                {!isReadOnly && !isRejected && (
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setViewMode("preview")}
-                      className={`text-xs px-2 py-1 rounded ${viewMode === "preview" ? "bg-blue-100 text-blue-700" : "text-gray-400 hover:text-gray-600"}`}>
-                      Vista
-                    </button>
-                    <button
-                      onClick={() => setViewMode("edit")}
-                      className={`text-xs px-2 py-1 rounded ${viewMode === "edit" ? "bg-blue-100 text-blue-700" : "text-gray-400 hover:text-gray-600"}`}>
-                      Editar
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {(isReadOnly || viewMode === "preview") ? (
-                <div className="border border-gray-200 rounded-lg px-4 py-3 bg-white max-h-80 overflow-y-auto">
-                  <NoteMarkdown text={editedText || noteText} />
-                </div>
-              ) : (
-                <textarea
-                  rows={16}
-                  value={editedText}
-                  onChange={(e) => setEditedText(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-blue-200"
+              {hasNewSectionsFormat(note.sections as Record<string, string> | undefined) ? (
+                <SectionReviewPanel
+                  sections={note.sections as Record<string, string>}
+                  isApproving={acting}
+                  onApprove={async (finalNoteText, sections) => {
+                    setActing(true);
+                    setError(null);
+                    try {
+                      await reviewClinicalNote(note.id, {
+                        status: "EDITED",
+                        finalNote: finalNoteText,
+                        sections,
+                      });
+                      onUpdated();
+                      onClose();
+                    } catch (err: unknown) {
+                      const e = err as { response?: { data?: { message?: string } } };
+                      setError(e.response?.data?.message || "Error al aprobar.");
+                      setActing(false);
+                    }
+                  }}
+                  onSaveAsDraft={onClose}
                 />
+              ) : (
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-gray-400">Historia clínica generada por IA — revisa y edita si es necesario</p>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => setViewMode("preview")}
+                        className={`text-xs px-2 py-1 rounded ${viewMode === "preview" ? "bg-blue-100 text-blue-700" : "text-gray-400 hover:text-gray-600"}`}>
+                        Vista
+                      </button>
+                      <button
+                        onClick={() => setViewMode("edit")}
+                        className={`text-xs px-2 py-1 rounded ${viewMode === "edit" ? "bg-blue-100 text-blue-700" : "text-gray-400 hover:text-gray-600"}`}>
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+                  {viewMode === "preview" ? (
+                    <div className="border border-gray-200 rounded-lg px-4 py-3 bg-white max-h-80 overflow-y-auto">
+                      <NoteMarkdown text={editedText || noteText} />
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={16}
+                      value={editedText}
+                      onChange={(e) => setEditedText(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    />
+                  )}
+                </>
               )}
             </div>
           )}
 
-          {/* Feedback */}
-          {isPendingReview && (
+          {/* Historia aprobada — solo lectura */}
+          {isReadOnly && noteText && (
+            <div className="text-sm">
+              <p className="text-xs text-gray-400 mb-2">Historia clínica (aprobada)</p>
+              <div className="border border-gray-200 rounded-lg px-4 py-3 bg-white max-h-80 overflow-y-auto">
+                <NoteMarkdown text={editedText || noteText} />
+              </div>
+            </div>
+          )}
+
+          {/* Feedback — solo para notas sin secciones estructuradas */}
+          {isPendingReview && !hasNewSectionsFormat(note.sections as Record<string, string> | undefined) && (
             <div className="text-sm">
               <label className="block text-xs text-gray-400 mb-1">
                 Comentarios para mejorar (opcional)
@@ -710,8 +761,8 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
             </div>
           )}
 
-          {/* Botones de revisión */}
-          {isPendingReview && (
+          {/* Botones de revisión — solo para notas sin secciones estructuradas */}
+          {isPendingReview && !hasNewSectionsFormat(note.sections as Record<string, string> | undefined) && (
             <div className="flex gap-2 pt-2 flex-wrap">
               <button onClick={handleApprove} disabled={acting}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 disabled:opacity-50 font-medium">
