@@ -33,14 +33,18 @@ export default function ClientsPage() {
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [targetClientId, setTargetClientId] = useState("");
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    loadData(controller.signal);
+    return () => controller.abort();
+  }, []);
 
-  async function loadData() {
+  async function loadData(signal?: AbortSignal) {
     setLoading(true);
     try {
       const [clientsRes, petsRes] = await Promise.all([
-        api.get<RawClient[]>("/clients"),
-        api.get<RawPet[]>("/pets"),
+        api.get<RawClient[]>("/clients", { signal }),
+        api.get<RawPet[]>("/pets", { signal }),
       ]);
       const petsByClientId = petsRes.data.reduce<Record<string, Pet[]>>((acc, { client, ...pet }) => {
         acc[client.id] = [...(acc[client.id] ?? []), pet];
@@ -53,8 +57,10 @@ export default function ClientsPage() {
           pets: petsByClientId[c.id] ?? [],
         }))
       );
-    } catch {
-      setClients([]);
+    } catch (err: unknown) {
+      if ((err as { name?: string })?.name !== "CanceledError" && (err as { name?: string })?.name !== "AbortError") {
+        setClients([]);
+      }
     } finally {
       setLoading(false);
     }

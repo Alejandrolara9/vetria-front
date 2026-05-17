@@ -523,6 +523,7 @@ export default function RemindersPage() {
   const [all, setAll] = useState<Reminder[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingList, setLoadingList] = useState(true);
+  const [listError, setListError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [sending, setSending] = useState(false);
 
@@ -539,6 +540,7 @@ export default function RemindersPage() {
 
   const loadLists = useCallback(async () => {
     setLoadingList(true);
+    setListError(null);
     try {
       const [upcomingData, overdueData, allData, petsData] = await Promise.all([
         getUpcomingReminders(7),
@@ -552,7 +554,7 @@ export default function RemindersPage() {
       setPets(petsData);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      alert(axiosErr.response?.data?.message || "Error al cargar recordatorios.");
+      setListError(axiosErr.response?.data?.message ?? "Error al cargar recordatorios. Intenta de nuevo.");
     } finally {
       setLoadingList(false);
     }
@@ -613,6 +615,19 @@ export default function RemindersPage() {
           </button>
         </div>
       </div>
+
+      {/* Error al cargar listas */}
+      {listError && (
+        <div className="mb-4 flex items-center justify-between gap-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+          <span>{listError}</span>
+          <button
+            onClick={loadLists}
+            className="text-xs px-3 py-1.5 border border-red-300 rounded-lg hover:bg-red-100 transition-colors font-medium flex-shrink-0"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
