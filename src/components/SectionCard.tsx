@@ -112,6 +112,7 @@ export function SectionCard({ section, onChange, onRemove, onRestore }: SectionC
             <button
               type="button"
               onClick={() => onRemove(section.key)}
+              aria-label={`Quitar sección ${section.title}`}
               className="text-xs text-red-600 border border-red-200 rounded px-2 py-1 hover:bg-red-50"
             >
               ✕
@@ -126,7 +127,7 @@ export function SectionCard({ section, onChange, onRemove, onRestore }: SectionC
   if (isEditing) {
     const borderColor = isVet ? "border-blue-300" : "border-green-300";
     const bgColor = isVet ? "bg-blue-50" : "bg-green-50";
-    const inputBorder = isVet ? "border-blue-200 bg-blue-50" : "border-green-200 bg-green-50";
+    const inputBorder = isVet ? "border-blue-200 bg-blue-50 focus:ring-blue-200" : "border-green-200 bg-green-50 focus:ring-green-200";
     return (
       <div className={`border-2 ${borderColor} rounded-xl overflow-hidden`}>
         <div className={`flex justify-between items-center px-4 py-2.5 ${bgColor}`}>
@@ -160,7 +161,8 @@ export function SectionCard({ section, onChange, onRemove, onRestore }: SectionC
             rows={6}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            className={`w-full text-sm border ${inputBorder} rounded-lg px-3 py-2 font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-200`}
+            aria-label={`Contenido de ${section.title}`}
+            className={`w-full text-sm border ${inputBorder} rounded-lg px-3 py-2 font-mono resize-none focus:outline-none focus:ring-2`}
           />
         </div>
       </div>
@@ -194,6 +196,7 @@ export function SectionCard({ section, onChange, onRemove, onRestore }: SectionC
           <button
             type="button"
             onClick={() => onRemove(section.key)}
+            aria-label={`Quitar sección ${section.title}`}
             className="text-xs text-red-600 border border-red-200 rounded px-2 py-1 hover:bg-red-50"
           >
             ✕
