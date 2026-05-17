@@ -5,7 +5,7 @@ export interface SectionState {
   source: "ai" | "vet" | "removed";
 }
 
-export const SECTION_ORDER: { key: string; title: string }[] = [
+export const SECTION_ORDER: ReadonlyArray<{ readonly key: string; readonly title: string }> = [
   { key: "datos_del_paciente",       title: "1. Datos del paciente" },
   { key: "motivo_de_consulta",       title: "2. Motivo de consulta" },
   { key: "anamnesis",                title: "3. Anamnesis" },

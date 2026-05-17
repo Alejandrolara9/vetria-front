@@ -4,6 +4,7 @@ import {
   reconstructMarkdown,
   hasPendingSections,
   hasNewSectionsFormat,
+  sectionsToRecord,
   type SectionState,
 } from "../../lib/section-utils";
 
@@ -96,5 +97,33 @@ describe("hasNewSectionsFormat", () => {
 
   it("devuelve false para el formato antiguo (nota_generada, signos_vitales)", () => {
     expect(hasNewSectionsFormat({ nota_generada: "texto", signos_vitales: "{}" })).toBe(false);
+  });
+});
+
+describe("sectionsToRecord", () => {
+  it("omite secciones con source=removed", () => {
+    const sections: SectionState[] = [
+      { key: "motivo_de_consulta", title: "2. Motivo de consulta", content: "Pancreatitis", source: "ai" },
+      { key: "anamnesis", title: "3. Anamnesis", content: "Sin datos", source: "removed" },
+    ];
+    const result = sectionsToRecord(sections);
+    expect(result).toHaveProperty("motivo_de_consulta", "Pancreatitis");
+    expect(result).not.toHaveProperty("anamnesis");
+  });
+
+  it("incluye secciones con source=vet aunque tengan contenido vacío", () => {
+    const sections: SectionState[] = [
+      { key: "pronostico", title: "9. Pronóstico", content: "", source: "vet" },
+    ];
+    const result = sectionsToRecord(sections);
+    expect(result).toHaveProperty("pronostico", "");
+  });
+
+  it("devuelve objeto vacío si todas las secciones son removed", () => {
+    const sections: SectionState[] = [
+      { key: "anamnesis", title: "3. Anamnesis", content: "algo", source: "removed" },
+    ];
+    const result = sectionsToRecord(sections);
+    expect(result).toEqual({});
   });
 });
