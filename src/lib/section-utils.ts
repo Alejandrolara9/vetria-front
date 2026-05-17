@@ -41,9 +41,8 @@ export function hasPendingSections(sections: SectionState[]): boolean {
 
 export function hasNewSectionsFormat(sections: Record<string, string> | undefined): boolean {
   if (!sections) return false;
-  return Object.keys(sections).some(
-    (k) => k === "motivo_de_consulta" || k === "plan_terapeutico"
-  );
+  const keys = Object.keys(sections);
+  return keys.includes("motivo_de_consulta") && keys.includes("plan_terapeutico");
 }
 
 export function sectionsToRecord(sections: SectionState[]): Record<string, string> {

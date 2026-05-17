@@ -98,6 +98,10 @@ describe("hasNewSectionsFormat", () => {
   it("devuelve false para el formato antiguo (nota_generada, signos_vitales)", () => {
     expect(hasNewSectionsFormat({ nota_generada: "texto", signos_vitales: "{}" })).toBe(false);
   });
+
+  it("devuelve false si solo tiene uno de los marcadores del nuevo formato", () => {
+    expect(hasNewSectionsFormat({ motivo_de_consulta: "x" })).toBe(false);
+  });
 });
 
 describe("sectionsToRecord", () => {

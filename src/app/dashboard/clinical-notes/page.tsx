@@ -514,8 +514,13 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
                     <div className="flex gap-2">
                       <button
                         onClick={async () => {
-                          await reviewClinicalNote(finalNote.id, { status: "APPROVED" });
-                          onClose();
+                          try {
+                            await reviewClinicalNote(finalNote.id, { status: "APPROVED" });
+                            onClose();
+                          } catch (err: unknown) {
+                            const e = err as { response?: { data?: { message?: string } } };
+                            setError(e.response?.data?.message || "Error al aprobar la historia.");
+                          }
                         }}
                         className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">
                         Aprobar historia
