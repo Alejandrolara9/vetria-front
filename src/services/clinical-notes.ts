@@ -59,6 +59,7 @@ export interface CreateClinicalNoteDto {
 export interface ReviewClinicalNoteDto {
   status: "APPROVED" | "EDITED" | "REJECTED";
   finalNote?: string;
+  sections?: Record<string, string>;
   vetFeedback?: string;
 }
 
