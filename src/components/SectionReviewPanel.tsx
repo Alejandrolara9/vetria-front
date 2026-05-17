@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SectionCard } from "./SectionCard";
 import {
   initSections,
@@ -12,6 +12,7 @@ import {
 
 interface SectionReviewPanelProps {
   sections: Record<string, string>;
+  /** Caller must handle errors and reset `isApproving` to false on rejection. */
   onApprove: (finalNote: string, sections: Record<string, string>) => Promise<void>;
   onSaveAsDraft?: () => void;
   isApproving?: boolean;
@@ -26,6 +27,7 @@ export function SectionReviewPanel({
   const [sectionList, setSectionList] = useState<SectionState[]>(() =>
     initSections(rawSections)
   );
+  const sourceBeforeRemoval = useRef<Record<string, "ai" | "vet">>({});
 
   function handleChange(key: string, content: string) {
     setSectionList((prev) =>
@@ -36,14 +38,20 @@ export function SectionReviewPanel({
   }
 
   function handleRemove(key: string) {
-    setSectionList((prev) =>
-      prev.map((s) => (s.key === key ? { ...s, source: "removed" as const } : s))
-    );
+    setSectionList((prev) => {
+      const section = prev.find((s) => s.key === key);
+      if (section && (section.source === "ai" || section.source === "vet")) {
+        sourceBeforeRemoval.current[key] = section.source;
+      }
+      return prev.map((s) => (s.key === key ? { ...s, source: "removed" as const } : s));
+    });
   }
 
   function handleRestore(key: string) {
+    const prevSource = sourceBeforeRemoval.current[key] ?? "ai";
+    delete sourceBeforeRemoval.current[key];
     setSectionList((prev) =>
-      prev.map((s) => (s.key === key ? { ...s, source: "ai" as const } : s))
+      prev.map((s) => (s.key === key ? { ...s, source: prevSource as "ai" | "vet" } : s))
     );
   }
 
@@ -122,6 +130,7 @@ export function SectionReviewPanel({
           type="button"
           onClick={handleApprove}
           disabled={blocked}
+          aria-busy={isApproving}
           className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {isApproving ? "Aprobando..." : "✓ Aprobar historia clínica"}
@@ -130,7 +139,8 @@ export function SectionReviewPanel({
           <button
             type="button"
             onClick={onSaveAsDraft}
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50"
+            disabled={isApproving}
+            className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Revisar después
           </button>
