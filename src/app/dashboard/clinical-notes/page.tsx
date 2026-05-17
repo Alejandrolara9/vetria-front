@@ -197,6 +197,7 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
   const [finalNote, setFinalNote] = useState<ClinicalNote | null>(null);
   const [noteSource, setNoteSource] = useState<"ai" | "fallback" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [acting, setActing] = useState(false);
   const streamBoxRef = useRef<HTMLDivElement>(null);
   const { listening, supported: voiceSupported, permissionError: micBlocked, start: startVoice, stop: stopVoice } = useVoiceInput(
     (transcript) => setRawInput(transcript)
@@ -479,17 +480,29 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
             {/* Acciones al terminar */}
             {phase === "done" && finalNote && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0 overflow-y-auto" style={{ maxHeight: "55vh" }}>
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0 overflow-y-auto max-h-[55vh]">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2 mb-3">{error}</div>
+                )}
                 {hasNewSectionsFormat(finalNote.sections as Record<string, string> | undefined) ? (
                   <SectionReviewPanel
                     sections={finalNote.sections as Record<string, string>}
+                    isApproving={acting}
                     onApprove={async (finalNoteText, sections) => {
-                      await reviewClinicalNote(finalNote.id, {
-                        status: "EDITED",
-                        finalNote: finalNoteText,
-                        sections,
-                      });
-                      onClose();
+                      setActing(true);
+                      setError(null);
+                      try {
+                        await reviewClinicalNote(finalNote.id, {
+                          status: "EDITED",
+                          finalNote: finalNoteText,
+                          sections,
+                        });
+                        onClose();
+                      } catch (err: unknown) {
+                        const e = err as { response?: { data?: { message?: string } } };
+                        setError(e.response?.data?.message || "Error al aprobar la historia.");
+                        setActing(false);
+                      }
                     }}
                     onSaveAsDraft={onClose}
                   />
@@ -611,6 +624,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   const isGenerating = note.status === "GENERATING" || note.status === "DRAFT";
   const isRejected = note.status === "REJECTED";
   const noteText = note.finalNote ?? note.generatedNote ?? "";
+  const hasStructuredSections = hasNewSectionsFormat(note.sections as Record<string, string> | undefined);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -681,7 +695,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           {/* Historia en revisión — secciones estructuradas o fallback markdown */}
           {isPendingReview && !isGenerating && (
             <div className="text-sm">
-              {hasNewSectionsFormat(note.sections as Record<string, string> | undefined) ? (
+              {hasStructuredSections ? (
                 <SectionReviewPanel
                   sections={note.sections as Record<string, string>}
                   isApproving={acting}
@@ -749,7 +763,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           )}
 
           {/* Feedback — solo para notas sin secciones estructuradas */}
-          {isPendingReview && !hasNewSectionsFormat(note.sections as Record<string, string> | undefined) && (
+          {isPendingReview && !hasStructuredSections && (
             <div className="text-sm">
               <label className="block text-xs text-gray-400 mb-1">
                 Comentarios para mejorar (opcional)
@@ -762,7 +776,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           )}
 
           {/* Botones de revisión — solo para notas sin secciones estructuradas */}
-          {isPendingReview && !hasNewSectionsFormat(note.sections as Record<string, string> | undefined) && (
+          {isPendingReview && !hasStructuredSections && (
             <div className="flex gap-2 pt-2 flex-wrap">
               <button onClick={handleApprove} disabled={acting}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 disabled:opacity-50 font-medium">
