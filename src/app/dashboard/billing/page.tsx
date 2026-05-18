@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  initiateCheckout,
+  initiateSubscription,
+  cancelSubscription,
+  BILLING_PRICES,
+  BILLING_DESCRIPTIONS,
   initiateCreditsCheckout,
-  PLAN_PRICES,
   CREDIT_PACKS,
-  PlanTarget,
-  CreditPackIndex,
+  type BillingPeriod,
+  type CreditPackIndex,
 } from "@/services/payments";
+import { fetchMyCredits } from "@/services/credits";
 
 function CheckIcon() {
   return (
@@ -19,7 +22,7 @@ function CheckIcon() {
 }
 
 const FREE_FEATURES = [
-  "7 días gratis · sin tarjeta",
+  "Sin cobro los primeros 7 días",
   "100 créditos IA incluidos",
   "Todas las funciones del plan BASIC",
   "Hasta 8 usuarios",
@@ -31,7 +34,7 @@ const FREE_FEATURES = [
 ];
 
 const BASIC_FEATURES = [
-  "100 créditos IA / mes",
+  "100 créditos IA / período",
   "Hasta 8 usuarios",
   "Hasta 1.000 mascotas",
   "Historia clínica con IA",
@@ -42,20 +45,59 @@ const BASIC_FEATURES = [
   "Portal del dueño de mascota",
 ];
 
-export default function BillingPage() {
-  const [loadingPlan, setLoadingPlan] = useState<PlanTarget | null>(null);
-  const [loadingCredits, setLoadingCredits] = useState<CreditPackIndex | null>(null);
-  const [error, setError] = useState("");
+const PERIOD_LABELS: Record<BillingPeriod, string> = {
+  MONTHLY:  "Mensual",
+  SEMESTER: "Semestral",
+  ANNUAL:   "Anual",
+};
 
-  async function handleUpgrade(plan: PlanTarget) {
+const PERIOD_BADGES: Partial<Record<BillingPeriod, string>> = {
+  SEMESTER: "−15%",
+  ANNUAL:   "⭐ 2 meses gratis",
+};
+
+export default function BillingPage() {
+  const [period, setPeriod]                     = useState<BillingPeriod>("MONTHLY");
+  const [loadingSubscription, setLoadingSub]    = useState(false);
+  const [loadingCancel, setLoadingCancel]       = useState(false);
+  const [loadingCredits, setLoadingCredits]     = useState<CreditPackIndex | null>(null);
+  const [error, setError]                       = useState("");
+  const [currentPeriod, setCurrentPeriod]       = useState<BillingPeriod | null>(null);
+  const [planPeriodEndsAt, setPlanPeriodEndsAt] = useState<string | null>(null);
+  const [hasSubscription, setHasSubscription]   = useState(false);
+
+  useEffect(() => {
+    fetchMyCredits().then((c) => {
+      if (c.billingPeriod) setCurrentPeriod(c.billingPeriod as BillingPeriod);
+      if (c.planPeriodEndsAt) setPlanPeriodEndsAt(c.planPeriodEndsAt);
+      setHasSubscription(!!c.mpSubscriptionId);
+    }).catch(() => { /* show page without subscription info */ });
+  }, []);
+
+  async function handleSubscribe() {
     setError("");
-    setLoadingPlan(plan);
+    setLoadingSub(true);
     try {
-      const { checkoutUrl } = await initiateCheckout(plan);
+      const { checkoutUrl } = await initiateSubscription(period);
       globalThis.window.location.assign(checkoutUrl);
     } catch {
-      setError("No se pudo iniciar el pago. Intenta de nuevo.");
-      setLoadingPlan(null);
+      setError("No se pudo iniciar la suscripción. Intenta de nuevo.");
+      setLoadingSub(false);
+    }
+  }
+
+  async function handleCancel() {
+    if (!confirm("¿Seguro que quieres cancelar tu suscripción? Tu plan permanecerá activo hasta su fecha de vencimiento.")) return;
+    setError("");
+    setLoadingCancel(true);
+    try {
+      await cancelSubscription();
+      setHasSubscription(false);
+      setCurrentPeriod(null);
+    } catch {
+      setError("No se pudo cancelar la suscripción. Intenta de nuevo.");
+    } finally {
+      setLoadingCancel(false);
     }
   }
 
@@ -71,7 +113,9 @@ export default function BillingPage() {
     }
   }
 
-  const isAnyLoading = loadingPlan !== null || loadingCredits !== null;
+  const periodEndsStr = planPeriodEndsAt
+    ? new Date(planPeriodEndsAt).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })
+    : null;
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -88,36 +132,47 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Planes */}
+      {/* Period toggle */}
+      <div className="flex gap-2 flex-wrap">
+        {(["MONTHLY", "SEMESTER", "ANNUAL"] as BillingPeriod[]).map((p) => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+              period === p
+                ? "bg-teal-600 text-white border-teal-600"
+                : "bg-white text-gray-600 border-gray-200 hover:border-teal-400"
+            }`}
+          >
+            {PERIOD_LABELS[p]}
+            {PERIOD_BADGES[p] && (
+              <span className="ml-2 text-xs">{PERIOD_BADGES[p]}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Plans */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Prueba gratuita */}
+        {/* Free trial */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 flex flex-col gap-4">
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Prueba gratuita</p>
             <h3 className="text-xl font-bold">7 días gratis</h3>
             <p className="text-3xl font-bold mt-1">
-              $0
-              <span className="text-sm font-normal text-muted-foreground"> COP</span>
+              $0<span className="text-sm font-normal text-muted-foreground"> COP</span>
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Sin tarjeta de crédito · Sin compromisos</p>
+            <p className="text-xs text-muted-foreground mt-1">Sin cobro los primeros 7 días</p>
           </div>
           <ul className="space-y-2 flex-1">
             {FREE_FEATURES.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm">
-                <CheckIcon />
-                {f}
-              </li>
+              <li key={f} className="flex items-center gap-2 text-sm"><CheckIcon />{f}</li>
             ))}
           </ul>
-          <button
-            disabled
-            className="w-full py-2.5 rounded-lg text-sm font-semibold border border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed"
-          >
+          <button disabled className="w-full py-2.5 rounded-lg text-sm font-semibold border border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed">
             Empezar prueba gratis
           </button>
-          <p className="text-xs text-center text-muted-foreground -mt-2">
-            La prueba gratuita se activa al registrarte
-          </p>
+          <p className="text-xs text-center text-muted-foreground -mt-2">La prueba gratuita se activa al registrarte</p>
         </div>
 
         {/* Plan BASIC */}
@@ -129,72 +184,64 @@ export default function BillingPage() {
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Plan BASIC</p>
             <h3 className="text-xl font-bold">Para clínicas que crecen</h3>
             <p className="text-3xl font-bold mt-1">
-              ${PLAN_PRICES.BASIC.toLocaleString("es-CO")}
-              <span className="text-sm font-normal text-muted-foreground"> /mes COP</span>
+              ${BILLING_PRICES[period].toLocaleString("es-CO")}
+              <span className="text-sm font-normal text-muted-foreground"> COP</span>
             </p>
-            <p className="text-xs text-muted-foreground mt-1">≈ $25 USD · facturación mensual</p>
+            <p className="text-xs text-muted-foreground mt-1">{BILLING_DESCRIPTIONS[period]}</p>
           </div>
           <ul className="space-y-2 flex-1">
             {BASIC_FEATURES.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm">
-                <CheckIcon />
-                {f}
-              </li>
+              <li key={f} className="flex items-center gap-2 text-sm"><CheckIcon />{f}</li>
             ))}
           </ul>
-          <button
-            onClick={() => handleUpgrade("BASIC")}
-            disabled={isAnyLoading}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
-          >
-            {loadingPlan === "BASIC" ? "Redirigiendo a MercadoPago..." : "Empezar con BASIC →"}
-          </button>
+
+          {hasSubscription ? (
+            <div className="space-y-2">
+              <p className="text-xs text-center text-green-600 font-medium">
+                ✅ Suscripción activa · {currentPeriod ? PERIOD_LABELS[currentPeriod] : ""}
+                {periodEndsStr && ` · próximo cobro ${periodEndsStr}`}
+              </p>
+              <button
+                onClick={handleCancel}
+                disabled={loadingCancel}
+                className="w-full py-2.5 rounded-lg text-sm font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+              >
+                {loadingCancel ? "Cancelando..." : "Cancelar suscripción"}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleSubscribe}
+              disabled={loadingSubscription}
+              className="w-full py-2.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {loadingSubscription ? "Iniciando..." : "Suscribirse"}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Packs de créditos */}
+      {/* AI Credits */}
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-semibold bg-purple-100 text-purple-700 rounded px-2 py-0.5">IA</span>
-          <h2 className="text-base font-semibold">¿Qué son los créditos IA?</h2>
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          1 crédito = 1 historia clínica generada por IA. Tu plan incluye créditos mensuales que se renuevan
-          automáticamente. ¿Necesitas más? Recarga desde{" "}
-          <span className="font-medium">$20.000 COP (50 créditos)</span> directamente desde el panel.
-        </p>
-        <div className="grid md:grid-cols-2 gap-4">
+        <h2 className="text-lg font-semibold mb-4">Comprar créditos adicionales</h2>
+        <div className="grid sm:grid-cols-2 gap-4">
           {CREDIT_PACKS.map((pack, i) => (
-            <div
-              key={pack.credits}
-              className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col gap-3"
-            >
+            <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 flex items-center justify-between">
               <div>
-                <p className="text-lg font-bold">{pack.label}</p>
-                <p className="text-2xl font-bold mt-1">
-                  ${pack.priceCOP.toLocaleString("es-CO")}
-                  <span className="text-sm font-normal text-muted-foreground"> COP</span>
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  ${Math.round(pack.priceCOP / pack.credits).toLocaleString("es-CO")} por crédito
-                </p>
+                <p className="font-semibold text-sm">{pack.label}</p>
+                <p className="text-xs text-muted-foreground">${pack.priceCOP.toLocaleString("es-CO")} COP</p>
               </div>
               <button
                 onClick={() => handleCreditsPurchase(i as CreditPackIndex)}
-                disabled={isAnyLoading}
-                className="w-full py-2 rounded-lg text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                disabled={loadingCredits !== null}
+                className="px-4 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
               >
-                {loadingCredits === i ? "Redirigiendo..." : `Comprar ${pack.label}`}
+                {loadingCredits === i ? "..." : "Comprar"}
               </button>
             </div>
           ))}
         </div>
       </div>
-
-      <p className="text-xs text-muted-foreground text-center">
-        Pagos procesados de forma segura por{" "}
-        <span className="font-medium">MercadoPago</span>. Al contratar aceptas los términos de servicio.
-      </p>
     </div>
   );
 }
