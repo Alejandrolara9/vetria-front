@@ -159,6 +159,14 @@ const PLAN_BASIC = [
   "Portal del dueño de mascota",
 ];
 
+type BillingPeriod = "MONTHLY" | "SEMESTER" | "ANNUAL";
+
+const BILLING_OPTIONS: { id: BillingPeriod; label: string; price: string; sub: string; badge: string | null }[] = [
+  { id: "MONTHLY",  label: "Mensual",    price: "$100k",  sub: "/mes COP",      badge: null },
+  { id: "SEMESTER", label: "Semestral",  price: "$510k",  sub: "/6 meses COP",  badge: "−15%" },
+  { id: "ANNUAL",   label: "Anual",      price: "$1M",    sub: "/año COP",      badge: "2 meses gratis" },
+];
+
 const FAQS = [
   {
     q: "¿Necesito instalar algo?",
@@ -194,6 +202,7 @@ export default function LandingPage() {
   const [showGenerated, setShowGenerated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("MONTHLY");
   const [fbName, setFbName] = useState("");
   const [fbEmail, setFbEmail] = useState("");
   const [fbMessage, setFbMessage] = useState("");
@@ -756,7 +765,7 @@ export default function LandingPage() {
               Precios en COP
             </span>
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">7 días gratis. Luego crece sin límites.</h2>
-            <p className="text-gray-500 text-lg">Sin contratos anuales. Cancela cuando quieras.</p>
+            <p className="text-gray-500 text-lg">Mensual, semestral o anual. Cancela cuando quieras.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
@@ -795,12 +804,38 @@ export default function LandingPage() {
               <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
               <div className="relative mb-5">
                 <p className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-1">Plan BASIC</p>
-                <h3 className="text-xl font-bold text-white mb-3">Para clínicas que crecen</h3>
-                <div className="flex items-end gap-1">
-                  <span className="text-5xl font-extrabold text-white">$100k</span>
-                  <span className="text-teal-300 mb-2 text-sm">/mes COP</span>
+                <h3 className="text-xl font-bold text-white mb-4">Para clínicas que crecen</h3>
+
+                {/* Billing period toggle */}
+                <div className="flex bg-slate-800/70 rounded-xl p-1 gap-0.5 mb-5">
+                  {BILLING_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setBillingPeriod(opt.id)}
+                      className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition-all ${
+                        billingPeriod === opt.id
+                          ? "bg-teal-600 text-white shadow"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
-                <p className="text-xs text-teal-400 mt-1">≈ $25 USD · facturación mensual</p>
+
+                {BILLING_OPTIONS.filter((o) => o.id === billingPeriod).map((opt) => (
+                  <div key={opt.id}>
+                    <div className="flex items-end gap-1">
+                      <span className="text-5xl font-extrabold text-white">{opt.price}</span>
+                      <span className="text-teal-300 mb-2 text-sm">{opt.sub}</span>
+                    </div>
+                    {opt.badge && (
+                      <span className="inline-block mt-1.5 bg-amber-400/20 text-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-400/30">
+                        {opt.badge}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
               <ul className="relative space-y-2.5 mb-8 flex-1">
                 {PLAN_BASIC.map((item) => (
