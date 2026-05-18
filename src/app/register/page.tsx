@@ -168,7 +168,7 @@ export default function RegisterPage() {
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/15 border border-blue-400/25 rounded-full text-blue-300 text-xs font-semibold">
               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
-              30 días de prueba gratis · Sin tarjeta de crédito
+              7 días de prueba gratis · Sin tarjeta de crédito
             </div>
           </div>
 
@@ -308,7 +308,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="flex items-center justify-center gap-6 mt-6">
-            {["30 días gratis", "Cancela cuando quieras", "Datos seguros"].map((t) => (
+            {["7 días gratis", "Cancela cuando quieras", "Datos seguros"].map((t) => (
               <div key={t} className="flex items-center gap-1.5 text-slate-500 text-xs">
                 <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />

@@ -19,7 +19,7 @@ function CheckIcon() {
 }
 
 const FREE_FEATURES = [
-  "30 días gratis · sin tarjeta",
+  "7 días gratis · sin tarjeta",
   "100 créditos IA incluidos",
   "Todas las funciones del plan BASIC",
   "Hasta 8 usuarios",
@@ -78,7 +78,7 @@ export default function BillingPage() {
       <div>
         <h1 className="text-2xl font-bold">Planes y facturación</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          30 días gratis. Luego crece sin límites. Sin contratos anuales. Cancela cuando quieras.
+          7 días gratis. Luego crece sin límites. Sin contratos anuales. Cancela cuando quieras.
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export default function BillingPage() {
         <div className="rounded-xl border border-gray-200 bg-white p-6 flex flex-col gap-4">
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Prueba gratuita</p>
-            <h3 className="text-xl font-bold">30 días gratis</h3>
+            <h3 className="text-xl font-bold">7 días gratis</h3>
             <p className="text-3xl font-bold mt-1">
               $0
               <span className="text-sm font-normal text-muted-foreground"> COP</span>
