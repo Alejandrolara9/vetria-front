@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import { RenewalWarningModal } from "@/components/RenewalWarningModal";
+import { fetchMyCredits } from "@/services/credits";
 
 type Role = "ADMIN" | "VET" | "RECEPTIONIST";
 
@@ -38,6 +40,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [ready, setReady] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [gracePeriodEndsAt, setGracePeriodEndsAt] = useState<string | null>(null);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
@@ -64,6 +67,9 @@ export default function DashboardLayout({
     }
 
     setReady(true);
+    fetchMyCredits()
+      .then((c) => setGracePeriodEndsAt(c.gracePeriodEndsAt))
+      .catch(() => { /* modal simply won't show */ });
   }, [router, pathname]);
 
   if (!ready) {
@@ -103,6 +109,10 @@ export default function DashboardLayout({
       <main className="flex-1 md:ml-60 pt-14 md:pt-0 p-4 md:p-8 min-w-0">
         {children}
       </main>
+
+      {gracePeriodEndsAt && (
+        <RenewalWarningModal gracePeriodEndsAt={gracePeriodEndsAt} />
+      )}
     </div>
   );
 }
