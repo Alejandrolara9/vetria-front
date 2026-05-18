@@ -6,7 +6,7 @@ import Link from "next/link";
 import { getTransactionStatus } from "@/services/payments";
 
 type TxStatus = "APPROVED" | "DECLINED" | "VOIDED" | "ERROR" | "PENDING" | "loading";
-type ReturnType = "one-time" | "subscription" | "unknown";
+type PaymentReturnKind = "one-time" | "subscription" | "unknown";
 
 const MAX_POLLS = 12;
 const POLL_INTERVAL_MS = 3000;
@@ -68,7 +68,7 @@ function PaymentReturnContent() {
   const [status, setStatus]   = useState<TxStatus>("loading");
   const [plan, setPlan]       = useState<string | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
-  const [returnType, setReturnType] = useState<ReturnType>("unknown");
+  const [returnType, setReturnType] = useState<PaymentReturnKind>("unknown");
   const [mpStatus, setMpStatus]     = useState<string>("");
   const pollCount = useRef(0);
   const timerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
