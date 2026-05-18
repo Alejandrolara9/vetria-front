@@ -41,7 +41,7 @@ export default function PrivacidadPage() {
             <section>
               <h2 className="text-lg font-semibold text-gray-900 mb-3">1. Responsable del Tratamiento</h2>
               <p>
-                <strong>Vetria Cloud</strong> (en adelante, "el Responsable" o "la Plataforma"), accesible en{" "}
+                <strong>Vetria Cloud</strong> (en adelante, &ldquo;el Responsable&rdquo; o &ldquo;la Plataforma&rdquo;), accesible en{" "}
                 <strong>vetria.cloud</strong>, es responsable del tratamiento de los datos personales que usted
                 nos suministra directamente al registrarse y usar el Servicio.
               </p>

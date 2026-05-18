@@ -41,9 +41,9 @@ export default function TerminosPage() {
             <section>
               <h2 className="text-lg font-semibold text-gray-900 mb-3">1. Aceptación de los Términos</h2>
               <p>
-                Al registrarse, acceder o utilizar la plataforma <strong>Vetria Cloud</strong> (en adelante, "la Plataforma"),
+                Al registrarse, acceder o utilizar la plataforma <strong>Vetria Cloud</strong> (en adelante, &ldquo;la Plataforma&rdquo;),
                 disponible en <strong>vetria.cloud</strong>, usted declara haber leído, entendido y aceptado íntegramente los
-                presentes Términos y Condiciones de Uso ("Términos"), así como la Política de Privacidad vigente.
+                presentes Términos y Condiciones de Uso (&ldquo;Términos&rdquo;), así como la Política de Privacidad vigente.
               </p>
               <p className="mt-3">
                 Si actúa en nombre de una persona jurídica (clínica veterinaria, empresa o consultorio), declara tener

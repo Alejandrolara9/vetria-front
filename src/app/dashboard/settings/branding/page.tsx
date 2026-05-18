@@ -55,6 +55,7 @@ function AssetUploader({
       <p className="text-xs text-gray-500">{hint}</p>
       <div className="flex items-center gap-3">
         {currentUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={currentUrl}
             alt={label}

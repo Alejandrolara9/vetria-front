@@ -254,6 +254,7 @@ export default function ProfilePage() {
         </p>
         <div className="flex items-center gap-4">
           {signatureUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={signatureUrl}
               alt="Firma"

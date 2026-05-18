@@ -172,6 +172,7 @@ export default function PrescriptionPrintPage() {
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
               style={{ zIndex: 0 }}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={watermarkSrc}
                 alt=""
@@ -192,6 +193,7 @@ export default function PrescriptionPrintPage() {
               {/* Logo + datos clínica */}
               <div className="flex items-center gap-4">
                 {t.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={t.logoUrl} alt={t.name} className="h-20 w-auto max-w-[160px] object-contain" />
                 ) : (
                   <div
@@ -329,6 +331,7 @@ export default function PrescriptionPrintPage() {
             <div className="mt-10 flex justify-end">
               <div className="text-center" style={{ minWidth: 180 }}>
                 {sigSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={sigSrc}
                     alt="Firma"
