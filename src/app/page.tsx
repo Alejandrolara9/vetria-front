@@ -926,8 +926,13 @@ export default function LandingPage() {
             <div>
               <p className="text-white font-semibold text-sm mb-4">Empresa</p>
               <ul className="space-y-2.5">
-                {["Acerca de", "Contacto", "Términos de uso", "Privacidad"].map((l) => (
-                  <li key={l}><a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">{l}</a></li>
+                {[
+                  { label: "Acerca de", href: "#" },
+                  { label: "Contacto", href: "#" },
+                  { label: "Términos de uso", href: "/terminos" },
+                  { label: "Privacidad", href: "/privacidad" },
+                ].map(({ label, href }) => (
+                  <li key={label}><a href={href} className="text-slate-400 text-sm hover:text-white transition-colors">{label}</a></li>
                 ))}
               </ul>
             </div>
