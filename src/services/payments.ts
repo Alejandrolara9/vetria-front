@@ -50,3 +50,34 @@ export async function getTransactionStatus(reference: string): Promise<{
   const res = await api.get(`/mp/transaction/${reference}`);
   return res.data;
 }
+
+export type BillingPeriod = "MONTHLY" | "SEMESTER" | "ANNUAL";
+
+export const BILLING_PRICES: Record<BillingPeriod, number> = {
+  MONTHLY:  100_000,
+  SEMESTER: 510_000,
+  ANNUAL:   1_000_000,
+};
+
+export const BILLING_LABELS: Record<BillingPeriod, string> = {
+  MONTHLY:  "Mensual",
+  SEMESTER: "Semestral",
+  ANNUAL:   "Anual",
+};
+
+export const BILLING_DESCRIPTIONS: Record<BillingPeriod, string> = {
+  MONTHLY:  "$100.000 / mes",
+  SEMESTER: "$510.000 / 6 meses · −15%",
+  ANNUAL:   "$1.000.000 / año · 2 meses gratis",
+};
+
+export async function initiateSubscription(
+  period: BillingPeriod
+): Promise<{ checkoutUrl: string; subscriptionId: string }> {
+  const res = await api.post("/mp/checkout/subscription", { plan: "BASIC", period });
+  return res.data;
+}
+
+export async function cancelSubscription(): Promise<void> {
+  await api.delete("/mp/subscription");
+}
