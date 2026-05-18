@@ -136,7 +136,7 @@ const TESTIMONIALS = [
 ];
 
 const PLAN_TRIAL = [
-  "7 días gratis · sin tarjeta",
+  "7 días gratis · sin cobro los primeros 7 días",
   "100 créditos IA incluidos",
   "Todas las funciones del plan BASIC",
   "Hasta 8 usuarios",
@@ -326,7 +326,7 @@ export default function LandingPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400">
-              {["Sin tarjeta de crédito", "7 días gratis", "Configura en 5 min"].map((t) => (
+              {["Sin cobro los primeros 7 días", "7 días gratis", "Configura en 5 min"].map((t) => (
                 <span key={t} className="flex items-center gap-1.5">
                   <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -770,7 +770,7 @@ export default function LandingPage() {
                   <span className="text-5xl font-extrabold text-gray-900">$0</span>
                   <span className="text-gray-400 mb-2 text-sm">COP</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Sin tarjeta de crédito · Sin compromisos</p>
+                <p className="text-xs text-gray-400 mt-1">Sin cobro los primeros 7 días · Sin compromisos</p>
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {PLAN_TRIAL.map((item) => (
@@ -886,7 +886,7 @@ export default function LandingPage() {
           </h2>
           <p className="text-slate-300 text-lg mb-10 leading-relaxed">
             Únete a las clínicas colombianas que ya están ahorrando horas cada semana con IA.
-            7 días gratis — sin tarjeta, sin compromiso.
+            7 días gratis — sin cobro los primeros 7 días, sin compromiso.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register" className="px-8 py-4 bg-teal-500 hover:bg-teal-400 text-white font-bold rounded-xl transition-all shadow-xl shadow-teal-500/30 text-sm">
@@ -896,7 +896,7 @@ export default function LandingPage() {
               Ya tengo cuenta →
             </Link>
           </div>
-          <p className="text-slate-500 text-xs mt-6">Sin tarjeta · Sin instalación · Configura en 5 minutos</p>
+          <p className="text-slate-500 text-xs mt-6">Sin cobro los primeros 7 días · Sin instalación · Configura en 5 minutos</p>
         </div>
       </section>
 
