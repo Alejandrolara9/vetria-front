@@ -94,7 +94,8 @@ export async function listPrescriptions(filters?: ListPrescriptionsFilters): Pro
   if (filters?.from) params.append("from", filters.from);
   if (filters?.to) params.append("to", filters.to);
   const qs = params.toString();
-  const res = await api.get<Prescription[]>(`/prescriptions${qs ? `?${qs}` : ""}`);
+  const url = qs ? `/prescriptions?${qs}` : "/prescriptions";
+  const res = await api.get<Prescription[]>(url);
   return res.data;
 }
 
