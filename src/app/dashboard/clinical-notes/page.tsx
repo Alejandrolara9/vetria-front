@@ -19,6 +19,8 @@ import {
 } from "@/services/clinical-notes";
 import { SectionReviewPanel } from "@/components/SectionReviewPanel";
 import { hasNewSectionsFormat } from "@/lib/section-utils";
+import { AppointmentSuggestionModal } from "@/components/AppointmentSuggestionModal";
+import { type AppointmentSuggestion } from "@/services/clinical-notes";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -556,6 +558,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   const [acting, setActing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"preview" | "edit">("preview");
+  const [appointmentSuggestion, setAppointmentSuggestion] = useState<AppointmentSuggestion | null>(null);
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -580,8 +583,13 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   async function handleApprove() {
     setActing(true); setError(null);
     try {
-      await reviewClinicalNote(note.id, { status: "APPROVED" });
-      onUpdated(); onClose();
+      const result = await reviewClinicalNote(note.id, { status: "APPROVED" });
+      if (result.suggestion) {
+        setAppointmentSuggestion(result.suggestion);
+        setActing(false);
+      } else {
+        onUpdated(); onClose();
+      }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setError(e.response?.data?.message || "Error al aprobar."); setActing(false);
@@ -592,8 +600,13 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
     if (!editedText.trim()) { setError("El texto no puede estar vacío."); return; }
     setActing(true); setError(null);
     try {
-      await reviewClinicalNote(note.id, { status: "EDITED", finalNote: editedText.trim(), vetFeedback: vetFeedback.trim() || undefined });
-      onUpdated(); onClose();
+      const result = await reviewClinicalNote(note.id, { status: "EDITED", finalNote: editedText.trim(), vetFeedback: vetFeedback.trim() || undefined });
+      if (result.suggestion) {
+        setAppointmentSuggestion(result.suggestion);
+        setActing(false);
+      } else {
+        onUpdated(); onClose();
+      }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setError(e.response?.data?.message || "Error al guardar."); setActing(false);
@@ -708,13 +721,18 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
                     setActing(true);
                     setError(null);
                     try {
-                      await reviewClinicalNote(note.id, {
+                      const result = await reviewClinicalNote(note.id, {
                         status: "EDITED",
                         finalNote: finalNoteText,
                         sections,
                       });
-                      onUpdated();
-                      onClose();
+                      if (result.suggestion) {
+                        setAppointmentSuggestion(result.suggestion);
+                        setActing(false);
+                      } else {
+                        onUpdated();
+                        onClose();
+                      }
                     } catch (err: unknown) {
                       const e = err as { response?: { data?: { message?: string } } };
                       setError(e.response?.data?.message || "Error al aprobar.");
@@ -814,6 +832,19 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           </div>
         </div>
       </div>
+      {appointmentSuggestion && (
+        <AppointmentSuggestionModal
+          suggestion={appointmentSuggestion}
+          petId={note.petId}
+          clientId={note.pet?.client?.id ?? ""}
+          vetId={note.author?.id ?? ""}
+          onClose={() => {
+            setAppointmentSuggestion(null);
+            onUpdated();
+            onClose();
+          }}
+        />
+      )}
     </div>
   );
 }
