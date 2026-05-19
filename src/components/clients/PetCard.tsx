@@ -27,6 +27,7 @@ export interface Pet {
   name: string;
   species: string;
   breed: string | null;
+  sex: string;
   birthDate: string | null;
 }
 
@@ -46,7 +47,9 @@ export function PetCard({ pet, onEdit }: PetCardProps) {
       >
         {pet.name}
       </Link>
-      <p className="text-xs text-muted-foreground">{pet.breed ?? pet.species} · {getAge(pet.birthDate)}</p>
+      <p className="text-xs text-muted-foreground">
+        {pet.sex} · {pet.breed ?? pet.species} · {getAge(pet.birthDate)}
+      </p>
       <button
         onClick={() => onEdit(pet)}
         className="mt-1 text-xs px-2 py-1 border border-border rounded hover:bg-gray-50 text-muted-foreground"

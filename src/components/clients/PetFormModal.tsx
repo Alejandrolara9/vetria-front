@@ -17,6 +17,7 @@ interface PetFormModalProps {
 export function PetFormModal({ clientId, pet, onSave, onClose }: PetFormModalProps) {
   const [form, setForm] = useState({
     name: pet?.name ?? "",
+    sex: pet?.sex ?? "",
     species: pet?.species ?? "",
     breed: pet?.breed ?? "",
     birthDate: pet?.birthDate ? pet.birthDate.split("T")[0] : "",
@@ -31,6 +32,7 @@ export function PetFormModal({ clientId, pet, onSave, onClose }: PetFormModalPro
     try {
       const payload = {
         name: form.name,
+        sex: form.sex,
         species: form.species,
         breed: form.breed || undefined,
         clientId,
@@ -62,6 +64,16 @@ export function PetFormModal({ clientId, pet, onSave, onClose }: PetFormModalPro
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
+          <select
+            required
+            className="px-4 py-2 border border-border rounded-lg text-sm"
+            value={form.sex}
+            onChange={(e) => setForm({ ...form, sex: e.target.value })}
+          >
+            <option value="">Seleccionar sexo</option>
+            <option value="Macho">Macho</option>
+            <option value="Hembra">Hembra</option>
+          </select>
           <select
             required
             className="px-4 py-2 border border-border rounded-lg text-sm"
