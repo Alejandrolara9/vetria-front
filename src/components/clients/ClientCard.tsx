@@ -71,7 +71,7 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvite
           <div className="min-w-0">
             <p className="font-semibold text-sm truncate">{client.name}</p>
             <p className="text-xs text-muted-foreground">
-              📞 {client.phone} · {client.pets.length}{" "}
+              📞 {client.phone} · ✉️ {client.email} · {client.pets.length}{" "}
               {client.pets.length === 1 ? "mascota" : "mascotas"}
             </p>
           </div>
