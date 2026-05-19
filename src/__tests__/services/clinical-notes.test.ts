@@ -53,6 +53,22 @@ describe("reviewClinicalNote", () => {
     expect(result.status).toBe("APPROVED");
     expect(JSON.parse(mock.history.patch[0].data)).toEqual({ status: "APPROVED" });
   });
+
+  it("incluye suggestion en la respuesta cuando el backend la devuelve", async () => {
+    const mockSuggestion = { daysFromNow: 7, reason: "Control a los 7 días" };
+    mock
+      .onPatch("/clinical-notes/n1/review")
+      .reply(200, { ...note, status: "APPROVED", suggestion: mockSuggestion });
+    const result = await reviewClinicalNote("n1", { status: "APPROVED" });
+    expect(result.suggestion).toEqual(mockSuggestion);
+    expect(result.status).toBe("APPROVED");
+  });
+
+  it("suggestion es undefined cuando el backend no la incluye", async () => {
+    mock.onPatch("/clinical-notes/n1/review").reply(200, { ...note, status: "REJECTED" });
+    const result = await reviewClinicalNote("n1", { status: "REJECTED", vetFeedback: "rehacer" });
+    expect(result.suggestion).toBeUndefined();
+  });
 });
 
 describe("listClinicalNotes", () => {
