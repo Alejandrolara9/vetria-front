@@ -1,19 +1,21 @@
-import axios, { InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333",
+  withCredentials: true,
 });
 
-api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token"); // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
+/** Exported so tests can spy on it without fighting jsdom's non-configurable window.location */
+export const redirect = (url: string): void => {
+  globalThis.window.location.href = url;
+};
 
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      redirect("/login?expired=1");
     }
-
-    return config;
+    return Promise.reject(error);
   }
 );
