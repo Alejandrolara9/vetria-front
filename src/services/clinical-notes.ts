@@ -119,10 +119,37 @@ export async function deleteClinicalNote(id: string): Promise<void> {
 }
 
 /**
+ * Parsea una línea SSE individual y despacha al callback correspondiente.
+ * Extracción necesaria para mantener la complejidad cognitiva de streamClinicalNote dentro
+ * de los límites aceptables (SonarQube).
+ */
+function handleSSELine(
+  line: string,
+  callbacks: {
+    onToken: (text: string) => void;
+    onComplete: (note: ClinicalNote, source: "ai" | "fallback") => void;
+    onError: (msg: string) => void;
+  }
+): void {
+  if (!line.startsWith("data: ")) return;
+  try {
+    const event = JSON.parse(line.slice(6));
+    if (event.type === "token") callbacks.onToken(event.text);
+    else if (event.type === "complete") callbacks.onComplete(event.note, event.source ?? "fallback");
+    else if (event.type === "error") callbacks.onError(event.message);
+  } catch {
+    // Ignorar líneas mal formadas
+  }
+}
+
+/**
  * Consume el stream SSE de generación de historia clínica.
  * Llama a onToken por cada fragmento de texto recibido.
  * Llama a onComplete cuando la IA termina con la nota final.
  * Llama a onError si hay un error.
+ *
+ * La autenticación se delega a la cookie HttpOnly enviada automáticamente
+ * mediante `credentials: "include"`. No se leen tokens de localStorage.
  */
 export async function streamClinicalNote(
   id: string,
@@ -133,14 +160,13 @@ export async function streamClinicalNote(
   }
 ): Promise<void> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
-  const token = localStorage.getItem("token"); // NOSONAR S5122 — JWT in localStorage; migration to HttpOnly cookie is tracked as a future security hardening task
 
   const response = await fetch(`${apiUrl}/clinical-notes/${id}/stream`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
       Accept: "text/event-stream",
     },
+    credentials: "include",
   });
 
   if (!response.ok || !response.body) {
@@ -161,19 +187,7 @@ export async function streamClinicalNote(
     buffer = lines.pop() ?? "";
 
     for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
-      try {
-        const event = JSON.parse(line.slice(6));
-        if (event.type === "token") {
-          callbacks.onToken(event.text);
-        } else if (event.type === "complete") {
-          callbacks.onComplete(event.note, event.source ?? "fallback");
-        } else if (event.type === "error") {
-          callbacks.onError(event.message);
-        }
-      } catch {
-        // Ignorar líneas mal formadas
-      }
+      handleSSELine(line, callbacks);
     }
   }
 }

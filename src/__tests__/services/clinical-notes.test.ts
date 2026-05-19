@@ -27,7 +27,6 @@ const note = {
 
 beforeEach(() => {
   mock.reset();
-  localStorage.clear();
 });
 afterAll(() => mock.restore());
 
@@ -88,7 +87,6 @@ describe("streamClinicalNote", () => {
   let originalFetch: typeof global.fetch;
 
   beforeEach(() => {
-    localStorage.setItem("token", "test-token");
     originalFetch = global.fetch;
     global.fetch = jest.fn();
   });
@@ -168,7 +166,7 @@ describe("streamClinicalNote", () => {
     expect(onError).toHaveBeenCalledWith("Error al conectar con el servidor de IA");
   });
 
-  it("sends Authorization header with token from localStorage", async () => {
+  it("sends credentials: include and no Authorization header", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       body: makeBody([]),
@@ -176,11 +174,8 @@ describe("streamClinicalNote", () => {
 
     await streamClinicalNote("n1", { onToken: jest.fn(), onComplete: jest.fn(), onError: jest.fn() });
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/clinical-notes/n1/stream"),
-      expect.objectContaining({
-        headers: expect.objectContaining({ Authorization: "Bearer test-token" }),
-      })
-    );
+    const [, fetchOptions] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(fetchOptions.credentials).toBe("include");
+    expect(fetchOptions.headers?.Authorization).toBeUndefined();
   });
 });
