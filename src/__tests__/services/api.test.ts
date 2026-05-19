@@ -1,5 +1,6 @@
 import MockAdapter from "axios-mock-adapter";
-import { api } from "../../services/api";
+import { api, redirect } from "../../services/api";
+import * as apiModule from "../../services/api";
 
 const mock = new MockAdapter(api);
 
@@ -10,21 +11,39 @@ beforeEach(() => {
 
 afterAll(() => mock.restore());
 
-describe("api interceptor", () => {
-  it("adds Authorization header when token is in localStorage", async () => {
-    localStorage.setItem("token", "my-jwt");
-    mock.onGet("/test").reply(200, {});
-    await api.get("/test");
-    expect(mock.history.get[0].headers?.Authorization).toBe("Bearer my-jwt");
+describe("api client", () => {
+  it("has withCredentials: true", () => {
+    expect(api.defaults.withCredentials).toBe(true);
   });
 
-  it("does not add Authorization header when no token", async () => {
+  it("uses NEXT_PUBLIC_API_URL as baseURL", () => {
+    expect(api.defaults.baseURL).toBeDefined();
+  });
+
+  it("does NOT add Authorization header from localStorage", async () => {
+    localStorage.setItem("token", "some-old-token");
     mock.onGet("/test").reply(200, {});
     await api.get("/test");
     expect(mock.history.get[0].headers?.Authorization).toBeUndefined();
   });
 
-  it("uses NEXT_PUBLIC_API_URL as baseURL when set", () => {
-    expect(api.defaults.baseURL).toBeDefined();
+  it("redirects to /login?expired=1 on 401 response", async () => {
+    // spy on the exported redirect helper to avoid fighting jsdom's
+    // non-configurable window.location
+    const redirectSpy = jest
+      .spyOn(apiModule, "redirect")
+      .mockImplementation(() => {});
+
+    mock.onGet("/protected").reply(401);
+    await api.get("/protected").catch(() => {});
+    expect(redirectSpy).toHaveBeenCalledWith("/login?expired=1");
+
+    redirectSpy.mockRestore();
+  });
+
+  it("does not crash on network errors (error.response undefined)", async () => {
+    mock.onGet("/test").networkError();
+    await api.get("/test").catch(() => {});
+    // No redirect should have been called — verify no crash
   });
 });

@@ -103,7 +103,8 @@ export async function getProducts(
   if (filters?.lowStock) params.append("lowStock", "true");
 
   const qs = params.toString();
-  const res = await api.get<Product[]>(`/inventory/products${qs ? `?${qs}` : ""}`);
+  const url = qs ? `/inventory/products?${qs}` : "/inventory/products";
+  const res = await api.get<Product[]>(url);
   return res.data;
 }
 

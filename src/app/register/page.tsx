@@ -44,7 +44,6 @@ export default function RegisterPage() {
         ...(googleDepartment ? { clinicDepartment: googleDepartment } : {}),
         ...(googleCity ? { clinicCity: googleCity } : {}),
       });
-      localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -68,7 +67,6 @@ export default function RegisterPage() {
         ...(department ? { clinicDepartment: department } : {}),
         ...(city ? { clinicCity: city } : {}),
       });
-      localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
