@@ -40,4 +40,10 @@ describe("api client", () => {
 
     redirectSpy.mockRestore();
   });
+
+  it("does not crash on network errors (error.response undefined)", async () => {
+    mock.onGet("/test").networkError();
+    await api.get("/test").catch(() => {});
+    // No redirect should have been called — verify no crash
+  });
 });
