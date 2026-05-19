@@ -337,7 +337,7 @@ function CreditWidget() {
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
-  role: string | null;
+  role: Role | null;
 }
 
 export default function Sidebar({
@@ -405,7 +405,7 @@ export default function Sidebar({
       <nav className="flex-1 overflow-y-auto py-3 px-2">
         {ALL_MENU_GROUPS.map((group) => {
           const visibleItems = group.items.filter(
-            (item) => !item.roles || !role || item.roles.includes(role as Role)
+            (item) => !item.roles || !role || item.roles.includes(role)
           );
           if (visibleItems.length === 0) return null;
           return (

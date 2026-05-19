@@ -5,9 +5,10 @@ import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import { RenewalWarningModal } from "@/components/RenewalWarningModal";
 import { fetchMyCredits } from "@/services/credits";
-import { api } from "@/services/api";
+import { api, redirect } from "@/services/api";
 
 type Role = "ADMIN" | "VET" | "RECEPTIONIST";
+const VALID_ROLES: Role[] = ["ADMIN", "VET", "RECEPTIONIST"];
 
 const ROUTE_ROLES: Record<string, Role[]> = {
   "/dashboard/clinical-notes": ["ADMIN", "VET"],
@@ -41,14 +42,21 @@ export default function DashboardLayout({
   useEffect(() => {
     api.get<{ role: string }>("/users/me")
       .then(({ data }) => {
-        setRole(data.role as Role);
-        fetchMyCredits()
-          .then((c) => setGracePeriodEndsAt(c.gracePeriodEndsAt))
-          .catch(() => {});
+        const raw = data.role as string;
+        if (VALID_ROLES.includes(raw as Role)) {
+          setRole(raw as Role);
+        } else {
+          redirect("/login");
+        }
       })
-      .catch(() => {
-        // 401 → interceptor already redirects to /login?expired=1
-      });
+      .catch(() => {});
+  }, []);
+
+  // Fetch credits independently — runs in parallel with role effect
+  useEffect(() => {
+    fetchMyCredits()
+      .then((c) => setGracePeriodEndsAt(c.gracePeriodEndsAt))
+      .catch(() => {});
   }, []);
 
   // Check route permissions whenever role or pathname changes
