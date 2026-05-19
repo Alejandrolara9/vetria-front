@@ -57,6 +57,7 @@ interface PetProfile {
   name: string;
   species: string;
   breed: string | null;
+  sex: string;
   birthDate: string | null;
   client: { id: string; name: string; phone: string; email: string };
   clinicalEvents: ClinicalEvent[];
@@ -261,7 +262,7 @@ export default function PetProfilePage() {
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight">{pet.name}</h1>
                   <p className="text-muted-foreground text-sm mt-0.5">
-                    {pet.species}{pet.breed ? ` · ${pet.breed}` : ""}
+                    {pet.sex} · {pet.breed ?? pet.species}
                     {pet.birthDate ? ` · ${calcAge(pet.birthDate)}` : ""}
                   </p>
                 </div>
