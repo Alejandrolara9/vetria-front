@@ -63,6 +63,11 @@ export interface ReviewClinicalNoteDto {
   vetFeedback?: string;
 }
 
+export interface AppointmentSuggestion {
+  daysFromNow: number;
+  reason: string;
+}
+
 // ─── Servicio ─────────────────────────────────────────────────────────────────
 
 /**
@@ -90,8 +95,11 @@ export async function generateClinicalNote(id: string): Promise<ClinicalNote> {
 export async function reviewClinicalNote(
   id: string,
   dto: ReviewClinicalNoteDto
-): Promise<ClinicalNote> {
-  const res = await api.patch<ClinicalNote>(`/clinical-notes/${id}/review`, dto);
+): Promise<ClinicalNote & { suggestion?: AppointmentSuggestion }> {
+  const res = await api.patch<ClinicalNote & { suggestion?: AppointmentSuggestion }>(
+    `/clinical-notes/${id}/review`,
+    dto
+  );
   return res.data;
 }
 
