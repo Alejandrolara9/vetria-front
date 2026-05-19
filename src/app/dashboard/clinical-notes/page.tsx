@@ -836,7 +836,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
         <AppointmentSuggestionModal
           suggestion={appointmentSuggestion}
           petId={note.petId}
-          clientId={(note.pet as any)?.client?.id ?? ""}
+          clientId={note.pet?.client?.id ?? ""}
           vetId={note.author?.id ?? ""}
           onClose={() => {
             setAppointmentSuggestion(null);

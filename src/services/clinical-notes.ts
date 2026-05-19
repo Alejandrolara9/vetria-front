@@ -34,6 +34,7 @@ export interface ClinicalNote {
     id: string;
     name: string;
     species: string;
+    client?: { id: string; name: string };
   };
   author?: {
     id: string;
