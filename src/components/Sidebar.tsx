@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchMyCredits, type TenantCredits } from "@/services/credits";
 import { initiateCreditsCheckout, CREDIT_PACKS, type CreditPackIndex } from "@/services/payments";
 import { getBranding } from "@/services/branding";
+import { api } from "@/services/api";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -333,16 +334,18 @@ function CreditWidget() {
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+  role: string | null;
+}
+
 export default function Sidebar({
   isOpen = true,
   onClose,
-}: {
-  isOpen?: boolean;
-  onClose?: () => void;
-}) {
+  role,
+}: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [userRole, setUserRole] = useState<string>("");
   const [clinicName, setClinicName] = useState<string>("");
   const prevPathname = useRef(pathname);
 
@@ -353,20 +356,6 @@ export default function Sidebar({
       onClose?.();
     }
   }, [pathname, onClose]);
-
-  useEffect(() => {
-    try {
-      const token = localStorage.getItem("token");
-      if (token && token.split(".").length === 3) {
-        const raw = atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"));
-        const payload = JSON.parse(raw);
-        const allowedRoles = ["ADMIN", "VET", "RECEPTIONIST"];
-        if (allowedRoles.includes(payload.role)) {
-          setUserRole(payload.role);
-        }
-      }
-    } catch { /* ignore */ }
-  }, []);
 
   useEffect(() => {
     getBranding()
@@ -380,9 +369,9 @@ export default function Sidebar({
     RECEPTIONIST: "Recepcionista",
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+  const handleLogout = async () => {
+    await api.post("/auth/logout").catch(() => {});
+    globalThis.window.location.href = "/login";
   };
 
   return (
@@ -416,7 +405,7 @@ export default function Sidebar({
       <nav className="flex-1 overflow-y-auto py-3 px-2">
         {ALL_MENU_GROUPS.map((group) => {
           const visibleItems = group.items.filter(
-            (item) => !item.roles || !userRole || item.roles.includes(userRole as Role)
+            (item) => !item.roles || !role || item.roles.includes(role as Role)
           );
           if (visibleItems.length === 0) return null;
           return (
@@ -461,7 +450,7 @@ export default function Sidebar({
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs text-white/80 font-medium truncate">{clinicName || "Mi clínica"}</p>
-            <p className="text-[10px] text-white/40">{roleLabel[userRole] ?? userRole}</p>
+            <p className="text-[10px] text-white/40">{roleLabel[role ?? ""] ?? role}</p>
           </div>
         </div>
         <button

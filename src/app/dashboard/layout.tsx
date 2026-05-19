@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import { RenewalWarningModal } from "@/components/RenewalWarningModal";
 import { fetchMyCredits } from "@/services/credits";
+import { api } from "@/services/api";
 
 type Role = "ADMIN" | "VET" | "RECEPTIONIST";
 
@@ -22,15 +23,6 @@ const ROUTE_ROLES: Record<string, Role[]> = {
   "/dashboard/settings/profile": ["VET", "ADMIN"],
 };
 
-function decodeRole(token: string): Role | null {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
-    const role = payload.role as string;
-    if (role === "ADMIN" || role === "VET" || role === "RECEPTIONIST") return role;
-  } catch { /* ignore */ }
-  return null;
-}
-
 export default function DashboardLayout({
   children,
 }: {
@@ -39,23 +31,29 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [ready, setReady] = useState(false);
+  const [role, setRole] = useState<Role | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [gracePeriodEndsAt, setGracePeriodEndsAt] = useState<string | null>(null);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
+  // Fetch role once on mount — 401 is handled by api.ts interceptor (redirects to /login?expired=1)
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
+    api.get<{ role: string }>("/users/me")
+      .then(({ data }) => {
+        setRole(data.role as Role);
+        fetchMyCredits()
+          .then((c) => setGracePeriodEndsAt(c.gracePeriodEndsAt))
+          .catch(() => {});
+      })
+      .catch(() => {
+        // 401 → interceptor already redirects to /login?expired=1
+      });
+  }, []);
 
-    const role = decodeRole(token);
-    if (!role) {
-      router.push("/login");
-      return;
-    }
+  // Check route permissions whenever role or pathname changes
+  useEffect(() => {
+    if (!role) return;
 
     const requiredRoles = Object.entries(ROUTE_ROLES).find(([path]) =>
       pathname === path || pathname.startsWith(path + "/")
@@ -67,10 +65,7 @@ export default function DashboardLayout({
     }
 
     setReady(true);
-    fetchMyCredits()
-      .then((c) => setGracePeriodEndsAt(c.gracePeriodEndsAt))
-      .catch(() => { /* modal simply won't show */ });
-  }, [router, pathname]);
+  }, [role, pathname, router]);
 
   if (!ready) {
     return (
@@ -82,7 +77,6 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -90,9 +84,8 @@ export default function DashboardLayout({
         />
       )}
 
-      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
+      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} role={role} />
 
-      {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-sidebar-bg flex items-center px-4 z-30 shadow-lg">
         <button
           onClick={() => setSidebarOpen(true)}
