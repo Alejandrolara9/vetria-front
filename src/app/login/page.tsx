@@ -1,14 +1,16 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import ResponsiveGoogleLogin from "@/components/ResponsiveGoogleLogin";
 import { api } from "@/services/api";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const expired = searchParams.get("expired") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +26,6 @@ export default function LoginPage() {
         router.push("/register");
         return;
       }
-      localStorage.setItem("token", response.data.token);
       router.push("/dashboard");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -43,8 +44,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const response = await api.post("/auth/login", { email, password });
-      localStorage.setItem("token", response.data.token);
+      await api.post("/auth/login", { email, password });
       router.push("/dashboard");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -81,6 +81,12 @@ export default function LoginPage() {
               <h1 className="text-2xl font-extrabold text-white mb-1">Bienvenido de vuelta</h1>
               <p className="text-slate-400 text-sm">Ingresa a tu clínica veterinaria</p>
             </div>
+
+            {expired && (
+              <div className="mb-5 px-4 py-3 bg-amber-500/15 border border-amber-500/30 rounded-xl text-amber-400 text-sm text-center">
+                Tu sesión expiró. Ingresá de nuevo.
+              </div>
+            )}
 
             {error && (
               <div className="mb-5 px-4 py-3 bg-red-500/15 border border-red-500/30 rounded-xl text-red-400 text-sm text-center">
@@ -163,5 +169,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
   );
 }
