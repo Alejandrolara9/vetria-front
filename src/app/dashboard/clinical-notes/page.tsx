@@ -21,6 +21,8 @@ import { SectionReviewPanel } from "@/components/SectionReviewPanel";
 import { hasNewSectionsFormat } from "@/lib/section-utils";
 import { AppointmentSuggestionModal } from "@/components/AppointmentSuggestionModal";
 import { type AppointmentSuggestion } from "@/services/clinical-notes";
+import { PrescriptionFromNoteModal } from "@/components/PrescriptionFromNoteModal";
+import type { MedicationItem } from "@/services/clinical-notes";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -559,6 +561,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"preview" | "edit">("preview");
   const [appointmentSuggestion, setAppointmentSuggestion] = useState<AppointmentSuggestion | null>(null);
+  const [pendingMedications, setPendingMedications] = useState<MedicationItem[] | null>(null);
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -586,6 +589,10 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
       const result = await reviewClinicalNote(note.id, { status: "APPROVED" });
       if (result.suggestion) {
         setAppointmentSuggestion(result.suggestion);
+        if (result.medications?.length) setPendingMedications(result.medications);
+        setActing(false);
+      } else if (result.medications?.length) {
+        setPendingMedications(result.medications);
         setActing(false);
       } else {
         onUpdated(); onClose();
@@ -603,6 +610,10 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
       const result = await reviewClinicalNote(note.id, { status: "EDITED", finalNote: editedText.trim(), vetFeedback: vetFeedback.trim() || undefined });
       if (result.suggestion) {
         setAppointmentSuggestion(result.suggestion);
+        if (result.medications?.length) setPendingMedications(result.medications);
+        setActing(false);
+      } else if (result.medications?.length) {
+        setPendingMedications(result.medications);
         setActing(false);
       } else {
         onUpdated(); onClose();
@@ -728,6 +739,10 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
                       });
                       if (result.suggestion) {
                         setAppointmentSuggestion(result.suggestion);
+                        if (result.medications?.length) setPendingMedications(result.medications);
+                        setActing(false);
+                      } else if (result.medications?.length) {
+                        setPendingMedications(result.medications);
                         setActing(false);
                       } else {
                         onUpdated();
@@ -840,6 +855,21 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           vetId={note.author?.id ?? ""}
           onClose={() => {
             setAppointmentSuggestion(null);
+            if (!pendingMedications?.length) {
+              onUpdated();
+              onClose();
+            }
+          }}
+        />
+      )}
+      {pendingMedications && !appointmentSuggestion && (
+        <PrescriptionFromNoteModal
+          medications={pendingMedications}
+          petId={note.petId}
+          vetId={note.author?.id ?? ""}
+          clinicalNoteId={note.id}
+          onClose={() => {
+            setPendingMedications(null);
             onUpdated();
             onClose();
           }}
