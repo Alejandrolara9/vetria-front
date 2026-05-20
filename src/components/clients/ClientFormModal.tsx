@@ -20,8 +20,8 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
     email: client?.email ?? "",
   });
   const [showPet, setShowPet] = useState(!client);
-  type PetFormState = { name: string; species: string; breed: string; birthDate: string };
-  const [petForms, setPetForms] = useState<PetFormState[]>([{ name: "", species: "", breed: "", birthDate: "" }]);
+  type PetFormState = { name: string; species: string; breed: string; birthDate: string; sex: string };
+  const [petForms, setPetForms] = useState<PetFormState[]>([{ name: "", species: "", breed: "", birthDate: "", sex: "" }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,6 +42,7 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
                 species: pf.species,
                 breed: pf.breed || undefined,
                 birthDate: pf.birthDate || undefined,
+                sex: pf.sex || undefined,
                 clientId: res.data.id,
               });
             }
@@ -141,6 +142,15 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
                         onChange={(e) => setPetForms(petForms.map((p, i) => i === idx ? { ...p, breed: e.target.value } : p))}
                       />
                     )}
+                    <select
+                      className="w-full px-4 py-2 border border-border rounded-lg text-sm"
+                      value={pf.sex}
+                      onChange={(e) => setPetForms(petForms.map((p, i) => i === idx ? { ...p, sex: e.target.value } : p))}
+                    >
+                      <option value="">Sexo (opcional)</option>
+                      <option value="Macho">Macho</option>
+                      <option value="Hembra">Hembra</option>
+                    </select>
                     <div>
                       <label className="text-xs text-muted-foreground mb-1 block">Fecha de nacimiento (opcional)</label>
                       <input
@@ -155,7 +165,7 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
-                    onClick={() => setPetForms([...petForms, { name: "", species: "", breed: "", birthDate: "" }])}
+                    onClick={() => setPetForms([...petForms, { name: "", species: "", breed: "", birthDate: "", sex: "" }])}
                     className="text-xs text-teal-600 hover:underline"
                   >
                     + Agregar otra mascota

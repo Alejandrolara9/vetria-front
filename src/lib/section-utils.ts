@@ -13,7 +13,7 @@ export const SECTION_ORDER: ReadonlyArray<{ readonly key: string; readonly title
   { key: "lista_de_problemas",       title: "5. Lista de problemas" },
   { key: "diagnostico_diferencial",  title: "6. Diagnóstico diferencial" },
   { key: "plan_diagnostico",         title: "7. Plan diagnóstico" },
-  { key: "plan_terapeutico",         title: "8. Plan terapéutico" },
+  { key: "tratamiento",              title: "8. Tratamiento" },
   { key: "pronostico",               title: "9. Pronóstico" },
   { key: "recomendaciones_al_tutor", title: "10. Recomendaciones al tutor" },
   { key: "proxima_consulta",         title: "11. Próxima consulta" },
@@ -23,7 +23,8 @@ export function initSections(sections: Record<string, string>): SectionState[] {
   return SECTION_ORDER.map(({ key, title }) => ({
     key,
     title,
-    content: sections[key] ?? "",
+    // Compatibilidad con notas antiguas: sección 8 era "plan_terapeutico"
+    content: sections[key] ?? (key === "tratamiento" ? (sections["plan_terapeutico"] ?? "") : ""),
     source: "ai" as const,
   }));
 }
@@ -42,7 +43,9 @@ export function hasPendingSections(sections: SectionState[]): boolean {
 export function hasNewSectionsFormat(sections: Record<string, string> | undefined): boolean {
   if (!sections) return false;
   const keys = Object.keys(sections);
-  return keys.includes("motivo_de_consulta") && keys.includes("plan_terapeutico");
+  // Acepta tanto el key nuevo ("tratamiento") como el antiguo ("plan_terapeutico") para compatibilidad
+  return keys.includes("motivo_de_consulta") &&
+    (keys.includes("tratamiento") || keys.includes("plan_terapeutico"));
 }
 
 export function sectionsToRecord(sections: SectionState[]): Record<string, string> {
