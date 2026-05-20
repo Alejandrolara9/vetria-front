@@ -13,6 +13,7 @@ interface Props {
 }
 
 interface EditableMedication {
+  id: number;
   productId?: string;
   productName: string;
   quantity: string;
@@ -56,6 +57,8 @@ function MedicationRow({
         setResults([]);
       }
     }, 300);
+
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
 
   return (
@@ -132,7 +135,8 @@ function MedicationRow({
 
 export function PrescriptionFromNoteModal({ medications, petId, vetId, clinicalNoteId, onClose }: Props) {
   const [items, setItems] = useState<EditableMedication[]>(
-    medications.map((m) => ({
+    medications.map((m, i) => ({
+      id: i,
       productName: m.name,
       quantity: `${m.dose} ${m.frequency}`,
       instructions: `por ${m.duration}`,
@@ -151,7 +155,7 @@ export function PrescriptionFromNoteModal({ medications, petId, vetId, clinicalN
   }
 
   function handleAdd() {
-    setItems((prev) => [...prev, { productName: "", quantity: "", instructions: "" }]);
+    setItems((prev) => [...prev, { id: Date.now(), productName: "", quantity: "", instructions: "" }]);
   }
 
   async function handleSubmit() {
@@ -169,7 +173,7 @@ export function PrescriptionFromNoteModal({ medications, petId, vetId, clinicalN
         issueDate: new Date().toISOString(),
         notifyClient,
         items: items.map((item, i) => ({
-          productId: item.productId,
+          productId: item.productId || undefined,
           productName: item.productName,
           quantity: item.quantity,
           instructions: item.instructions,
@@ -202,7 +206,7 @@ export function PrescriptionFromNoteModal({ medications, petId, vetId, clinicalN
           )}
 
           {items.map((item, i) => (
-            <MedicationRow key={i} item={item} index={i} onChange={handleChange} onRemove={handleRemove} />
+            <MedicationRow key={item.id} item={item} index={i} onChange={handleChange} onRemove={handleRemove} />
           ))}
 
           <button
