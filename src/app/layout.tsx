@@ -14,8 +14,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vetria - Sistema Veterinario con IA",
-  description: "Plataforma veterinaria SaaS con inteligencia artificial",
+  title: "Vetria — Software Veterinario con IA | Colombia",
+  description:
+    "Historia clínica completa en 4 segundos. Agenda, recordatorios automáticos y gestión para clínicas veterinarias en Colombia. Prueba gratis 7 días.",
+  keywords: [
+    "software veterinario Colombia",
+    "sistema veterinario IA",
+    "historia clínica veterinaria digital",
+    "programa clínica veterinaria",
+    "gestión veterinaria online",
+    "veterinario IA Colombia",
+  ],
+  alternates: {
+    canonical: "https://vetria.cloud",
+  },
+  openGraph: {
+    title: "Vetria — Software Veterinario con IA | Colombia",
+    description:
+      "Historia clínica completa en 4 segundos. Agenda, recordatorios y gestión para clínicas veterinarias en Colombia.",
+    url: "https://vetria.cloud",
+    siteName: "Vetria",
+    locale: "es_CO",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Vetria — Software Veterinario con IA | Colombia",
+    description:
+      "Historia clínica completa en 4 segundos. Agenda, recordatorios y gestión para clínicas veterinarias en Colombia.",
+  },
   icons: {
     icon: "/favicon.png",
     shortcut: "/favicon.png",
