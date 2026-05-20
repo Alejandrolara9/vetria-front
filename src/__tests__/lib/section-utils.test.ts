@@ -12,7 +12,7 @@ describe("SECTION_ORDER", () => {
   it("tiene 11 secciones en orden correcto", () => {
     expect(SECTION_ORDER).toHaveLength(11);
     expect(SECTION_ORDER[0].key).toBe("datos_del_paciente");
-    expect(SECTION_ORDER[7].key).toBe("plan_terapeutico");
+    expect(SECTION_ORDER[7].key).toBe("tratamiento");
     expect(SECTION_ORDER[10].key).toBe("proxima_consulta");
   });
 });
@@ -34,8 +34,14 @@ describe("initSections", () => {
   });
 
   it("devuelve las 11 secciones siempre, independiente del input", () => {
-    const result = initSections({ plan_terapeutico: "Fluidoterapia" });
+    const result = initSections({ tratamiento: "Fluidoterapia" });
     expect(result).toHaveLength(11);
+  });
+
+  it("compatibilidad con notas antiguas: plan_terapeutico se muestra en sección tratamiento", () => {
+    const result = initSections({ plan_terapeutico: "Fluidoterapia IV" });
+    const seccion8 = result.find((s) => s.key === "tratamiento")!;
+    expect(seccion8.content).toBe("Fluidoterapia IV");
   });
 });
 
@@ -87,8 +93,12 @@ describe("hasPendingSections", () => {
 });
 
 describe("hasNewSectionsFormat", () => {
-  it("devuelve true si sections tiene claves del nuevo formato", () => {
+  it("devuelve true si sections tiene claves del nuevo formato (plan_terapeutico, notas antiguas)", () => {
     expect(hasNewSectionsFormat({ motivo_de_consulta: "x", plan_terapeutico: "y" })).toBe(true);
+  });
+
+  it("devuelve true si sections tiene clave tratamiento (notas nuevas)", () => {
+    expect(hasNewSectionsFormat({ motivo_de_consulta: "x", tratamiento: "y" })).toBe(true);
   });
 
   it("devuelve false para sections undefined", () => {
