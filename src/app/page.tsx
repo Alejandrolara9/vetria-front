@@ -167,6 +167,9 @@ const BILLING_OPTIONS: { id: BillingPeriod; label: string; price: string; sub: s
   { id: "ANNUAL",   label: "Anual",      price: "$1M",    sub: "/año COP",      badge: "2 meses gratis" },
 ];
 
+const DEMO_WHATSAPP_URL =
+  "https://wa.me/573102247612?text=Hola%2C%20me%20interesa%20ver%20una%20demo%20de%20Vetria%20para%20mi%20cl%C3%ADnica%20veterinaria.";
+
 const FAQS = [
   {
     q: "¿Vetria funciona en toda Colombia?",
@@ -317,7 +320,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="https://wa.me/573102247612?text=Hola%2C%20me%20interesa%20ver%20una%20demo%20de%20Vetria%20para%20mi%20cl%C3%ADnica%20veterinaria."
+              href={DEMO_WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className={`hidden sm:flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
@@ -382,7 +385,7 @@ export default function LandingPage() {
             </div>
 
             <a
-              href="https://wa.me/573102247612?text=Hola%2C%20me%20interesa%20ver%20una%20demo%20de%20Vetria%20para%20mi%20cl%C3%ADnica%20veterinaria."
+              href={DEMO_WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm text-green-400 hover:text-green-300 transition-colors font-medium mb-8"
