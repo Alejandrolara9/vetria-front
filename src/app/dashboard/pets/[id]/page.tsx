@@ -42,6 +42,7 @@ interface ClinicalNote {
   rawInput: string;
   createdAt: string;
   author: { id: string; name: string } | null;
+  prescriptions?: { id: string }[];
 }
 
 interface Reminder {
@@ -621,6 +622,14 @@ function TabHistorias({ notes }: { notes: ClinicalNote[] }) {
               <p className="text-sm font-medium mb-1">{n.chiefComplaint}</p>
             )}
             <p className="text-sm text-muted-foreground italic line-clamp-2">{n.rawInput}</p>
+            {n.prescriptions && n.prescriptions.length > 0 && (
+              <a
+                href={`/dashboard/prescriptions/${n.prescriptions[0].id}`}
+                className="inline-block mt-1 text-xs text-blue-600 hover:underline"
+              >
+                Ver receta
+              </a>
+            )}
           </CardContent>
         </Card>
       ))}

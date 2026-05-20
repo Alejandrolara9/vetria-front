@@ -854,6 +854,7 @@ export default function AppointmentsPage() {
 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [selectedVetId, setSelectedVetId] = useState<string>("all");
+  const [calendarDate, setCalendarDate] = useState(new Date());
   const [dragError, setDragError] = useState<string | null>(null);
   const [preselectedSlot, setPreselectedSlot] = useState<{
     date: string;
@@ -1100,6 +1101,8 @@ export default function AppointmentsPage() {
           localizer={localizer}
           culture="es"
           events={appointments.map(toCalendarEvent)}
+          date={calendarDate}
+          onNavigate={(date) => setCalendarDate(date)}
           defaultView="week"
           views={["week", "day"]}
           step={30}
