@@ -267,6 +267,37 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-geist-sans, system-ui, sans-serif)" }}>
 
+      {/* ── JSON-LD SCHEMA.ORG ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "Vetria",
+            description:
+              "Software veterinario con IA para clínicas en Colombia. Historia clínica en 4 segundos, agenda inteligente y recordatorios automáticos.",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            url: "https://vetria.cloud",
+            inLanguage: "es-CO",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "COP",
+              description: "7 días de prueba gratuita",
+            },
+            publisher: {
+              "@type": "Organization",
+              name: "Vetria",
+              url: "https://vetria.cloud",
+              logo: "https://vetria.cloud/logo.png",
+              areaServed: "CO",
+            },
+          }),
+        }}
+      />
+
       {/* ── NAVBAR ── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
