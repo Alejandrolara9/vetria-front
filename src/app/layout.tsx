@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Vetria — Software Veterinario con IA | Colombia",
     description:
-      "Historia clínica completa en 4 segundos. Agenda, recordatorios y gestión para clínicas veterinarias en Colombia.",
+      "Historia clínica completa en 4 segundos. Agenda, recordatorios automáticos y gestión para clínicas veterinarias en Colombia.",
     url: "https://vetria.cloud",
     siteName: "Vetria",
     locale: "es_CO",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Vetria — Software Veterinario con IA | Colombia",
     description:
-      "Historia clínica completa en 4 segundos. Agenda, recordatorios y gestión para clínicas veterinarias en Colombia.",
+      "Historia clínica completa en 4 segundos. Agenda, recordatorios automáticos y gestión para clínicas veterinarias en Colombia.",
   },
   icons: {
     icon: "/favicon.png",
