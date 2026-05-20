@@ -69,6 +69,13 @@ export interface AppointmentSuggestion {
   reason: string;
 }
 
+export interface MedicationItem {
+  name: string;
+  dose: string;
+  frequency: string;
+  duration: string;
+}
+
 // ─── Servicio ─────────────────────────────────────────────────────────────────
 
 /**
@@ -96,8 +103,8 @@ export async function generateClinicalNote(id: string): Promise<ClinicalNote> {
 export async function reviewClinicalNote(
   id: string,
   dto: ReviewClinicalNoteDto
-): Promise<ClinicalNote & { suggestion?: AppointmentSuggestion }> {
-  const res = await api.patch<ClinicalNote & { suggestion?: AppointmentSuggestion }>(
+): Promise<ClinicalNote & { suggestion?: AppointmentSuggestion; medications?: MedicationItem[] }> {
+  const res = await api.patch<ClinicalNote & { suggestion?: AppointmentSuggestion; medications?: MedicationItem[] }>(
     `/clinical-notes/${id}/review`,
     dto
   );
