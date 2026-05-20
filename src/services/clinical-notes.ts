@@ -129,9 +129,21 @@ export async function getClinicalNoteById(id: string): Promise<ClinicalNote> {
   return res.data;
 }
 
-/** Realiza soft-delete de una historia clínica. */
+/** Realiza soft-delete de una historia clínica (queda archivada, recuperable). */
 export async function deleteClinicalNote(id: string): Promise<void> {
   await api.delete(`/clinical-notes/${id}`);
+}
+
+/** Lista las historias clínicas archivadas (soft-deleted) del tenant. */
+export async function listArchivedClinicalNotes(): Promise<ClinicalNote[]> {
+  const res = await api.get<ClinicalNote[]>("/clinical-notes/archived");
+  return res.data;
+}
+
+/** Restaura una historia clínica archivada. */
+export async function restoreClinicalNote(id: string): Promise<ClinicalNote> {
+  const res = await api.patch<ClinicalNote>(`/clinical-notes/${id}/restore`);
+  return res.data;
 }
 
 /**

@@ -7,6 +7,8 @@ import { api } from "@/services/api";
 import { AttachmentsPanel } from "@/components/AttachmentsPanel";
 import {
   listClinicalNotes,
+  listArchivedClinicalNotes,
+  restoreClinicalNote,
   createClinicalNote,
   streamClinicalNote,
   reviewClinicalNote,
@@ -637,7 +639,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   }
 
   async function handleDelete() {
-    if (!confirm("¿Eliminar esta historia clínica?")) return;
+    if (!confirm("¿Archivar esta historia clínica? Podrás recuperarla desde 'Ver archivadas'.")) return;
     setActing(true);
     try {
       await deleteClinicalNote(note.id);
@@ -841,8 +843,8 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
 
           <div className="pt-1 border-t border-gray-100">
             <button onClick={handleDelete} disabled={acting}
-              className="text-xs text-gray-400 hover:text-red-600 disabled:opacity-50">
-              Eliminar historia clínica
+              className="text-xs text-gray-400 hover:text-amber-600 disabled:opacity-50">
+              Archivar historia clínica
             </button>
           </div>
         </div>
@@ -889,6 +891,10 @@ export default function ClinicalNotesPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showCreate, setShowCreate] = useState(false);
   const [selectedNote, setSelectedNote] = useState<ClinicalNote | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [archivedNotes, setArchivedNotes] = useState<ClinicalNote[]>([]);
+  const [loadingArchived, setLoadingArchived] = useState(false);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -911,6 +917,25 @@ export default function ClinicalNotesPage() {
     try { setNotes(await listClinicalNotes()); } catch { /* silencioso */ }
   }
 
+  async function handleToggleArchived() {
+    if (!showArchived) {
+      setLoadingArchived(true);
+      try { setArchivedNotes(await listArchivedClinicalNotes()); } catch { /* silencioso */ }
+      finally { setLoadingArchived(false); }
+    }
+    setShowArchived((v) => !v);
+  }
+
+  async function handleRestore(id: string) {
+    setRestoringId(id);
+    try {
+      await restoreClinicalNote(id);
+      setArchivedNotes((prev) => prev.filter((n) => n.id !== id));
+      await refreshNotes();
+    } catch { /* silencioso */ }
+    finally { setRestoringId(null); }
+  }
+
   const filtered = notes.filter((n) => {
     const matchesStatus = statusFilter === "ALL" || n.status === statusFilter;
     const q = search.toLowerCase();
@@ -928,10 +953,20 @@ export default function ClinicalNotesPage() {
           <h1 className="text-2xl font-bold">Historias Clínicas</h1>
           <p className="text-gray-400 text-sm mt-1">{notes.length} registros · asistidas por IA</p>
         </div>
-        <button onClick={() => setShowCreate(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
-          ✨ Nueva Historia con IA
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleToggleArchived}
+            className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+              showArchived
+                ? "bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100"
+                : "border-gray-200 text-gray-500 hover:bg-gray-50"
+            }`}>
+            {showArchived ? "Ver activas" : "Ver archivadas"}
+          </button>
+          <button onClick={() => setShowCreate(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
+            ✨ Nueva Historia con IA
+          </button>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -950,6 +985,59 @@ export default function ClinicalNotesPage() {
           ))}
         </div>
       </div>
+
+      {/* Archivadas */}
+      {showArchived && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-semibold text-amber-700">Historias archivadas</span>
+            <span className="text-xs text-gray-400">({archivedNotes.length})</span>
+          </div>
+          {loadingArchived ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-amber-50 rounded-xl border border-amber-100 p-5 animate-pulse">
+                  <div className="h-4 bg-amber-100 rounded w-3/4 mb-3" />
+                  <div className="h-3 bg-amber-100 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : archivedNotes.length === 0 ? (
+            <p className="text-sm text-gray-400 italic">No hay historias archivadas.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {archivedNotes.map((note) => (
+                <div key={note.id} className="bg-amber-50 rounded-xl border border-amber-100 p-5 opacity-80">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-semibold text-sm text-gray-600">{note.pet?.name ?? "Mascota"}</p>
+                      <p className="text-xs text-gray-400">{note.pet?.species}</p>
+                    </div>
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">Archivada</span>
+                  </div>
+                  {note.chiefComplaint && (
+                    <p className="text-sm text-gray-500 mb-1 line-clamp-1">{note.chiefComplaint}</p>
+                  )}
+                  <p className="text-xs text-gray-400 line-clamp-2 italic mb-3">{note.rawInput}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-300">
+                      {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                    <button
+                      onClick={() => handleRestore(note.id)}
+                      disabled={restoringId === note.id}
+                      className="text-xs text-amber-700 hover:text-amber-900 font-medium border border-amber-300 px-2 py-1 rounded-lg hover:bg-amber-100 disabled:opacity-50 transition-colors"
+                    >
+                      {restoringId === note.id ? "Restaurando..." : "Restaurar"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <hr className="mt-6 border-gray-100" />
+        </div>
+      )}
 
       {/* Lista */}
       {loading ? (
