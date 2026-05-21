@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: https://api.vetria.cloud
-        NEXT_PUBLIC_GOOGLE_CLIENT_ID: 958305458964-i301ken3ttr4n66oa2ldm56cbkm7td4b.apps.googleusercontent.com
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: 958305458964-q49uqmidl8krrcbk170f8237954fim2m.apps.googleusercontent.com
     container_name: vetria_frontend
     ports:
       - "3000:3000"
