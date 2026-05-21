@@ -1,16 +1,12 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { submitFeedback } from "@/services/superadmin.service";
+import NavbarClient from "@/components/landing/NavbarClient";
+import HeroMockup from "@/components/landing/HeroMockup";
+import FaqAccordion from "@/components/landing/FaqAccordion";
+import PricingCard from "@/components/landing/PricingCard";
+import FeedbackForm from "@/components/landing/FeedbackForm";
 
-const TYPING_TEXTS = [
-  "Perro 3 años, vomitando 2 días, temperatura 39.5°C",
-  "Gata castrada, pérdida de peso progresiva, polidipsia",
-  "Labrador 5 años, cojera en pata trasera derecha post-ejercicio",
-  "Cachorro 4 meses, primera consulta, esquema vacunal incompleto",
-];
+const DEMO_WHATSAPP_URL =
+  "https://wa.me/573102247612?text=Hola%2C%20me%20interesa%20ver%20una%20demo%20de%20Vetria%20para%20mi%20cl%C3%ADnica%20veterinaria.";
 
 const FEATURES = [
   {
@@ -135,142 +131,7 @@ const TESTIMONIALS = [
   },
 ];
 
-const PLAN_TRIAL = [
-  "7 días gratis · sin cobro los primeros 7 días",
-  "100 créditos IA incluidos",
-  "Todas las funciones del plan BASIC",
-  "Hasta 8 usuarios",
-  "Hasta 1.000 mascotas",
-  "Historia clínica con IA",
-  "Dictado por voz",
-  "Agenda con invitación de calendario",
-  "Soporte por email",
-];
-
-const PLAN_BASIC = [
-  "100 créditos IA / mes",
-  "Hasta 8 usuarios",
-  "Hasta 1.000 mascotas",
-  "Historia clínica con IA",
-  "Dictado por voz",
-  "Análisis de imágenes y labs con IA",
-  "Agenda + invitaciones al calendario",
-  "Recordatorios automáticos",
-  "Portal del dueño de mascota",
-];
-
-type BillingPeriod = "MONTHLY" | "SEMESTER" | "ANNUAL";
-
-const BILLING_OPTIONS: { id: BillingPeriod; label: string; price: string; sub: string; badge: string | null }[] = [
-  { id: "MONTHLY",  label: "Mensual",    price: "$100k",  sub: "/mes COP",      badge: null },
-  { id: "SEMESTER", label: "Semestral",  price: "$510k",  sub: "/6 meses COP",  badge: "−15%" },
-  { id: "ANNUAL",   label: "Anual",      price: "$1M",    sub: "/año COP",      badge: "2 meses gratis" },
-];
-
-const DEMO_WHATSAPP_URL =
-  "https://wa.me/573102247612?text=Hola%2C%20me%20interesa%20ver%20una%20demo%20de%20Vetria%20para%20mi%20cl%C3%ADnica%20veterinaria.";
-
-const FAQS = [
-  {
-    q: "¿Vetria funciona en toda Colombia?",
-    a: "Sí. Vetria es 100% web y funciona en cualquier ciudad del país — Bogotá, Medellín, Cali, Barranquilla, Bucaramanga, Neiva, Manizales y más. No importa dónde esté tu clínica, solo necesitás un navegador y conexión a internet.",
-  },
-  {
-    q: "¿Necesito instalar algo?",
-    a: "No. Vetria es 100% web. Funciona en cualquier navegador moderno desde computador, tablet o celular. Sin descargas, sin configuraciones.",
-  },
-  {
-    q: "¿Mis datos y los de mis clientes son seguros?",
-    a: "Sí. Todo el tráfico viaja cifrado con HTTPS, los datos se almacenan en AWS con cifrado en reposo y backups automáticos diarios. Tu información nunca se comparte con terceros.",
-  },
-  {
-    q: "¿Qué pasa cuando terminan los 7 días de prueba?",
-    a: "Te avisamos con anticipación. Si decides continuar, activas el plan BASIC. Si no, tus datos se conservan 30 días adicionales para que puedas exportarlos.",
-  },
-  {
-    q: "¿Cuántos usuarios puedo agregar a mi clínica?",
-    a: "Hasta 8 usuarios con el plan BASIC — veterinarios, recepcionistas y asistentes, cada uno con roles y permisos personalizados.",
-  },
-  {
-    q: "¿Los créditos IA no usados se acumulan?",
-    a: "Los créditos del plan se renuevan cada mes y no se acumulan. Sin embargo, los créditos que compras por separado no vencen y puedes usarlos cuando quieras.",
-  },
-  {
-    q: "¿Funciona con cualquier especialidad veterinaria?",
-    a: "Sí. La IA está entrenada para medicina general, exóticos, animales de granja y especialidades. Puedes personalizar los protocolos para tu tipo de clínica.",
-  },
-];
-
 export default function LandingPage() {
-  const [typingIndex, setTypingIndex] = useState(0);
-  const [displayText, setDisplayText] = useState("");
-  const [charIndex, setCharIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showGenerated, setShowGenerated] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("MONTHLY");
-  const [fbName, setFbName] = useState("");
-  const [fbEmail, setFbEmail] = useState("");
-  const [fbMessage, setFbMessage] = useState("");
-  const [fbRating, setFbRating] = useState(5);
-  const [fbLoading, setFbLoading] = useState(false);
-  const [fbSent, setFbSent] = useState(false);
-  const [fbError, setFbError] = useState("");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const currentText = TYPING_TEXTS[typingIndex];
-    const speed = isDeleting ? 25 : 55;
-    const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        if (charIndex < currentText.length) {
-          setDisplayText(currentText.slice(0, charIndex + 1));
-          setCharIndex((c) => c + 1);
-        } else {
-          setShowGenerated(true);
-          setTimeout(() => {
-            setIsDeleting(true);
-            setShowGenerated(false);
-          }, 3200);
-        }
-      } else {
-        if (charIndex > 0) {
-          setDisplayText(currentText.slice(0, charIndex - 1));
-          setCharIndex((c) => c - 1);
-        } else {
-          setIsDeleting(false);
-          setTypingIndex((i) => (i + 1) % TYPING_TEXTS.length);
-        }
-      }
-    }, speed);
-    return () => clearTimeout(timeout);
-  }, [charIndex, isDeleting, typingIndex]);
-
-  async function handleFeedbackSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setFbError("");
-    setFbLoading(true);
-    try {
-      await submitFeedback({ name: fbName, email: fbEmail || undefined, message: fbMessage, rating: fbRating });
-      setFbSent(true);
-      setFbName("");
-      setFbEmail("");
-      setFbMessage("");
-      setFbRating(5);
-    } catch (err) {
-      setFbError(err instanceof Error ? err.message : "Error al enviar. Intenta de nuevo.");
-    } finally {
-      setFbLoading(false);
-    }
-  }
-
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-geist-sans, system-ui, sans-serif)" }}>
 
@@ -306,40 +167,7 @@ export default function LandingPage() {
       />
 
       {/* ── NAVBAR ── */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
-        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg shadow-md shadow-teal-600/40" />
-            <span className={`font-bold text-xl tracking-tight transition-colors ${scrolled ? "text-gray-900" : "text-white"}`}>Vetria</span>
-            <span className={`hidden sm:inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${scrolled ? "bg-teal-100 text-teal-700" : "bg-teal-500/30 text-teal-200"}`}>Colombia</span>
-          </div>
-          <div className="hidden md:flex items-center gap-7">
-            {[["#funciones", "Funciones"], ["#como-funciona", "Cómo funciona"], ["#ia", "IA"], ["#precios", "Precios"]].map(([href, label]) => (
-              <a key={href} href={href} className={`text-sm font-medium transition-colors hover:text-teal-400 ${scrolled ? "text-gray-600" : "text-white/80"}`}>{label}</a>
-            ))}
-          </div>
-          <div className="flex items-center gap-3">
-            <a
-              href={DEMO_WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`hidden sm:flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
-                scrolled
-                  ? "border-gray-300 text-gray-700 hover:bg-gray-50"
-                  : "border-white/25 text-white hover:bg-white/10"
-              }`}
-            >
-              💬 Solicitar demo
-            </a>
-            <Link href="/login" className={`text-sm font-medium transition-colors hidden sm:block ${scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"}`}>
-              Iniciar sesión
-            </Link>
-            <Link href="/register" className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold rounded-lg transition-all shadow-md shadow-teal-600/30">
-              Prueba gratis →
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <NavbarClient />
 
       {/* ── HERO ── */}
       <section className="relative min-h-screen flex items-center bg-gradient-to-br from-gray-950 via-teal-950 to-slate-900 overflow-hidden">
@@ -408,101 +236,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Mockup */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-xl scale-95 pointer-events-none" />
-            <div className="relative bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-2xl overflow-hidden shadow-2xl">
-              <div className="flex items-center gap-2 px-4 py-3 bg-slate-950/80 border-b border-slate-700/60">
-                <div className="w-3 h-3 rounded-full bg-red-500/70" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-                <div className="w-3 h-3 rounded-full bg-green-500/70" />
-                <div className="flex items-center gap-1.5 ml-3">
-                  <div className="w-4 h-4 bg-blue-600 rounded flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </div>
-                  <span className="text-xs text-slate-400 font-medium">Vetria · Historia clínica IA</span>
-                </div>
-              </div>
-
-              <div className="p-5 space-y-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-5 h-5 bg-slate-600 rounded-full flex items-center justify-center">
-                      <span className="text-[9px] text-slate-300 font-bold">Dr</span>
-                    </div>
-                    <p className="text-xs text-slate-400 font-medium">Nota del veterinario</p>
-                    <span className="ml-auto flex items-center gap-1 text-[10px] text-rose-400">
-                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse" />
-                      Dictando...
-                    </span>
-                  </div>
-                  <div className="bg-slate-800 rounded-xl px-4 py-3 border border-slate-700/60 min-h-[52px]">
-                    <span className="text-sm text-slate-200 font-mono">{displayText}</span>
-                    <span className="text-teal-400 font-mono animate-pulse">|</span>
-                  </div>
-                </div>
-
-                <div className={`transition-all duration-700 ${showGenerated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"}`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-5 h-5 bg-teal-600 rounded-full flex items-center justify-center">
-                      <span className="text-[9px] text-white font-bold">IA</span>
-                    </div>
-                    <p className="text-xs text-teal-400 font-semibold">Historia generada · 3.8s</p>
-                    <span className="ml-auto text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium border border-green-500/20">
-                      Lista para revisar
-                    </span>
-                  </div>
-                  <div className="bg-slate-800 rounded-xl p-4 border border-teal-500/20 space-y-2.5 text-xs text-slate-300 leading-relaxed">
-                    <div>
-                      <span className="text-teal-400 font-semibold">Anamnesis: </span>
-                      Paciente canino de 3 años que consulta por cuadro emético de 48 horas de evolución con hiporexia marcada...
-                    </div>
-                    <div>
-                      <span className="text-teal-400 font-semibold">Examen físico: </span>
-                      T°: 39.5°C (febricular leve). Mucosas rosadas, TLC 2s. Hidratación: 5% deshidratación estimada...
-                    </div>
-                    <div>
-                      <span className="text-teal-400 font-semibold">Plan: </span>
-                      Fluidoterapia IV LR 50 mL/kg/día. Metronidazol 25 mg/kg BID IV. Ayuno 12h, dieta blanda...
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-3">
-                    <button className="flex-1 py-2 bg-teal-600 text-white text-xs font-semibold rounded-lg hover:bg-teal-500 transition-colors">
-                      ✓ Aprobar historia
-                    </button>
-                    <button className="px-3 py-2 border border-slate-600 text-slate-400 text-xs rounded-lg hover:bg-slate-700 transition-colors">
-                      Editar
-                    </button>
-                  </div>
-                </div>
-
-                {!showGenerated && (
-                  <div className="space-y-2 opacity-40">
-                    <div className="h-2.5 bg-slate-700 rounded-full w-full animate-pulse" />
-                    <div className="h-2.5 bg-slate-700 rounded-full w-4/5 animate-pulse [animation-delay:200ms]" />
-                    <div className="h-2.5 bg-slate-700 rounded-full w-2/3 animate-pulse [animation-delay:400ms]" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="absolute -top-4 -right-4 hidden sm:flex bg-white rounded-2xl shadow-xl px-3.5 py-2.5 items-center gap-2.5 border border-gray-100">
-              <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-lg">⚡</div>
-              <div>
-                <p className="text-xs font-bold text-gray-900 leading-none">3.8 segundos</p>
-                <p className="text-[10px] text-gray-400 mt-0.5">Historia completa</p>
-              </div>
-            </div>
-            <div className="absolute -bottom-4 -left-4 hidden sm:flex bg-white rounded-2xl shadow-xl px-3.5 py-2.5 items-center gap-2.5 border border-gray-100">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-lg">🎙️</div>
-              <div>
-                <p className="text-xs font-bold text-gray-900 leading-none">Dictado por voz</p>
-                <p className="text-[10px] text-gray-400 mt-0.5">Sin costo adicional</p>
-              </div>
-            </div>
-          </div>
+          <HeroMockup />
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-slate-500">
@@ -731,91 +465,7 @@ export default function LandingPage() {
             <h2 className="text-3xl font-extrabold text-gray-900 mb-3">¿Qué piensas de Vetria?</h2>
             <p className="text-gray-500 text-sm">Cuéntanos tu experiencia — cada opinión nos ayuda a mejorar.</p>
           </div>
-
-          {fbSent ? (
-            <div className="bg-white rounded-2xl border border-green-200 p-10 text-center shadow-sm">
-              <div className="text-5xl mb-4">🐾</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">¡Gracias por tu opinión!</h3>
-              <p className="text-gray-500 text-sm mb-5">Tu feedback ha sido enviado. Nos ayuda a seguir mejorando Vetria.</p>
-              <button
-                onClick={() => setFbSent(false)}
-                className="text-sm text-teal-600 hover:text-teal-500 font-medium transition-colors"
-              >
-                Enviar otro mensaje
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleFeedbackSubmit} className="bg-white rounded-2xl border border-gray-200 p-7 shadow-sm space-y-5">
-              {/* Rating */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Tu calificación</label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setFbRating(star)}
-                      className="text-3xl transition-transform hover:scale-110 focus:outline-none"
-                    >
-                      <span className={star <= fbRating ? "text-amber-400" : "text-gray-200"}>★</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Nombre <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  value={fbName}
-                  onChange={(e) => setFbName(e.target.value)}
-                  placeholder="Dr. Carlos López"
-                  required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 transition-all"
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email <span className="text-gray-400 font-normal">(opcional)</span></label>
-                <input
-                  type="email"
-                  value={fbEmail}
-                  onChange={(e) => setFbEmail(e.target.value)}
-                  placeholder="doctor@clinica.com"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 transition-all"
-                />
-              </div>
-
-              {/* Message */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tu opinión <span className="text-red-500">*</span></label>
-                <textarea
-                  value={fbMessage}
-                  onChange={(e) => setFbMessage(e.target.value)}
-                  placeholder="Cuéntanos qué te parece Vetria, qué mejorarías o qué te ha gustado más..."
-                  required
-                  rows={4}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 transition-all resize-none"
-                />
-              </div>
-
-              {fbError && (
-                <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-lg px-4 py-2">{fbError}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={fbLoading}
-                className="w-full py-3.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all text-sm shadow-md shadow-teal-600/20"
-              >
-                {fbLoading ? "Enviando..." : "Enviar opinión →"}
-              </button>
-
-              <p className="text-center text-xs text-gray-400">Tu opinión es anónima si no dejas tu email.</p>
-            </form>
-          )}
+          <FeedbackForm />
         </div>
       </section>
 
@@ -829,93 +479,7 @@ export default function LandingPage() {
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">7 días gratis. Luego crece sin límites.</h2>
             <p className="text-gray-500 text-lg">Mensual, semestral o anual. Cancela cuando quieras.</p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-
-            {/* Trial */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-7 hover:border-gray-300 transition-colors flex flex-col">
-              <div className="mb-5">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Prueba gratuita</p>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">7 días gratis</h3>
-                <div className="flex items-end gap-1">
-                  <span className="text-5xl font-extrabold text-gray-900">$0</span>
-                  <span className="text-gray-400 mb-2 text-sm">COP</span>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">Sin cobro los primeros 7 días · Sin compromisos</p>
-              </div>
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {PLAN_TRIAL.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600">
-                    <svg className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/register" className="block text-center py-3.5 border-2 border-gray-900 text-gray-900 font-bold rounded-xl hover:bg-gray-900 hover:text-white transition-all text-sm">
-                Empezar prueba gratis
-              </Link>
-            </div>
-
-            {/* Basic — highlighted */}
-            <div className="relative border-2 border-teal-600 rounded-2xl p-7 bg-gradient-to-br from-slate-900 to-teal-950 shadow-2xl shadow-teal-900/30 overflow-hidden flex flex-col">
-              <div className="absolute top-5 right-5 bg-amber-400 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Recomendado
-              </div>
-              <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-              <div className="relative mb-5">
-                <p className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-1">Plan BASIC</p>
-                <h3 className="text-xl font-bold text-white mb-4">Para clínicas que crecen</h3>
-
-                {/* Billing period toggle */}
-                <div className="flex bg-slate-800/70 rounded-xl p-1 gap-0.5 mb-5">
-                  {BILLING_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setBillingPeriod(opt.id)}
-                      className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition-all ${
-                        billingPeriod === opt.id
-                          ? "bg-teal-600 text-white shadow"
-                          : "text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-
-                {BILLING_OPTIONS.filter((o) => o.id === billingPeriod).map((opt) => (
-                  <div key={opt.id}>
-                    <div className="flex items-end gap-1">
-                      <span className="text-5xl font-extrabold text-white">{opt.price}</span>
-                      <span className="text-teal-300 mb-2 text-sm">{opt.sub}</span>
-                    </div>
-                    {opt.badge && (
-                      <span className="inline-block mt-1.5 bg-amber-400/20 text-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-400/30">
-                        {opt.badge}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <ul className="relative space-y-2.5 mb-8 flex-1">
-                {PLAN_BASIC.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-blue-100">
-                    <svg className="w-4 h-4 text-teal-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/register" className="relative block text-center py-3.5 bg-white text-teal-700 font-bold rounded-xl hover:bg-teal-50 transition-all text-sm shadow-lg">
-                Empezar con BASIC →
-              </Link>
-            </div>
-          </div>
-
-          {/* Credits explainer */}
+          <PricingCard />
           <div className="mt-8 max-w-3xl mx-auto">
             <div className="bg-teal-50 border border-teal-100 rounded-xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">IA</div>
@@ -941,29 +505,7 @@ export default function LandingPage() {
             <h2 className="text-3xl font-extrabold text-gray-900 mb-3">Todo lo que necesitas saber</h2>
             <p className="text-gray-500">¿Tienes más dudas? Escríbenos por WhatsApp.</p>
           </div>
-          <div className="space-y-3">
-            {FAQS.map((faq, i) => (
-              <div key={faq.q} className="border border-gray-200 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
-                >
-                  <span className="font-semibold text-gray-900 text-sm pr-4">{faq.q}</span>
-                  <svg
-                    className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {openFaq === i && (
-                  <div className="px-5 pb-4 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <FaqAccordion />
         </div>
       </section>
 
@@ -1003,7 +545,6 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <Image src="/logo.png" alt="Vetria" width={28} height={28} className="rounded-lg" />
                 <span className="font-bold text-white text-lg">Vetria</span>
                 <span className="text-[10px] bg-teal-900 text-teal-300 px-1.5 py-0.5 rounded font-medium">vetria.cloud</span>
               </div>
