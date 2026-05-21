@@ -15,7 +15,7 @@ import { BREEDS } from "@/lib/breeds";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-const SPECIES_OPTIONS = ["Canino", "Felino", "Ave", "Reptil", "Otro"] as const;
+const SPECIES_OPTIONS = ["Canino", "Felino", "Ave", "Reptil", "Roedor", "Otro"] as const;
 
 /** Protocolos predefinidos comunes para prellenar el formulario rápidamente */
 const QUICK_TEMPLATES: Array<{
@@ -149,7 +149,7 @@ function NotificationFlowDiagram({ preReminderDays = 7, postReminderDays = 3 }: 
         </div>
       </div>
       <p className="text-xs text-blue-600 mt-3">
-        El sistema calcula estas fechas automaticamente al registrar un recordatorio de vacuna.
+        El sistema calcula estas fechas automáticamente al registrar una mascota nueva o una atención con fecha de próxima cita.
       </p>
     </div>
   );
@@ -636,7 +636,7 @@ function EmptyState({ onNew }: { onNew: () => void }) {
       <h3 className="text-lg font-semibold mb-2">Sin protocolos configurados</h3>
       <p className="text-muted-foreground text-sm max-w-md mx-auto mb-6">
         Los protocolos definen cuándo y cómo notificar a los tutores. Una vez creados,
-        el sistema los aplica automaticamente al registrar vacunas o tratamientos.
+        el sistema los aplica automáticamente al registrar una mascota nueva o al registrar una atención.
       </p>
 
       {/* Ejemplo visual */}
@@ -977,7 +977,7 @@ export default function ProtocolsPage() {
         <div>
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 mb-5 text-sm text-blue-800">
             <p className="font-semibold mb-1">¿Cómo se generan estas alertas?</p>
-            <p>Al registrar una atención en una cita (Agenda → Registrar atención) con fecha de próxima cita, el sistema crea automáticamente un recordatorio aquí. El correo al cliente se envía según los días de aviso definidos en el protocolo correspondiente.</p>
+            <p>Los recordatorios se generan automáticamente en dos momentos: al <strong>registrar una mascota nueva</strong> (se aplican todos los protocolos activos de su especie) y al <strong>registrar una atención</strong> (Agenda → Registrar atención) con fecha de próxima cita. El correo al cliente se envía según los días de aviso definidos en el protocolo correspondiente.</p>
           </div>
           {loading ? (
             <div className="text-center py-10 text-muted-foreground text-sm">Cargando...</div>
