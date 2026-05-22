@@ -17,6 +17,15 @@ import { BREEDS } from "@/lib/breeds";
 
 const SPECIES_OPTIONS = ["Canino", "Felino", "Ave", "Reptil", "Roedor", "Otro"] as const;
 
+const SPECIES_COLORS: Record<string, string> = {
+  Canino:  "bg-blue-100 text-blue-800 border-blue-200",
+  Felino:  "bg-orange-100 text-orange-800 border-orange-200",
+  Ave:     "bg-green-100 text-green-800 border-green-200",
+  Reptil:  "bg-teal-100 text-teal-800 border-teal-200",
+  Roedor:  "bg-purple-100 text-purple-800 border-purple-200",
+  Otro:    "bg-gray-100 text-gray-600 border-gray-200",
+};
+
 /** Protocolos predefinidos comunes para prellenar el formulario rápidamente */
 const QUICK_TEMPLATES: Array<{
   label: string;
@@ -87,9 +96,9 @@ function formatDays(days: number | null | undefined): string {
 function SkeletonRow() {
   return (
     <tr className="border-b border-border">
-      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-        <td key={i} className="px-4 py-4">
-          <div className="h-4 bg-gray-200 rounded animate-pulse" />
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <td key={i} className="px-5 py-4">
+          <div className="h-4 bg-gray-100 rounded-full animate-pulse" />
         </td>
       ))}
     </tr>
@@ -897,70 +906,168 @@ export default function ProtocolsPage() {
           )}
 
           {(loading || protocols.length > 0) && (
-            <div className="bg-card-bg rounded-xl border border-border overflow-hidden overflow-x-auto">
-              <table className="w-full text-sm min-w-[800px]">
-                <thead className="bg-gray-50 border-b border-border">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo vacuna</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Especie</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Raza</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Recurrencia</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Aviso previo</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Seguimiento</th>
-                    <th className="text-center px-4 py-3 font-medium text-muted-foreground">Estado</th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground">Acciones</th>
+            <>
+            {/* ── Vista móvil: tarjetas ──────────────────────────────────── */}
+            <div className="md:hidden space-y-3">
+              {loading ? (
+                [1,2,3].map((i) => (
+                  <div key={i} className="bg-white rounded-xl border border-border p-4 space-y-3 animate-pulse">
+                    <div className="h-4 bg-gray-100 rounded-full w-2/3" />
+                    <div className="h-3 bg-gray-100 rounded-full w-1/2" />
+                    <div className="flex gap-2">
+                      <div className="h-6 bg-gray-100 rounded-full w-20" />
+                      <div className="h-6 bg-gray-100 rounded-full w-16" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                protocols.map((protocol) => (
+                  <div key={protocol.id} className="bg-white rounded-xl border border-border p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-gray-900 text-sm">{protocol.name}</p>
+                          {protocol.tenantId === null && (
+                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Global</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">{protocol.vaccineType}{protocol.breed ? ` · ${protocol.breed}` : ""}</p>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${protocol.active ? "bg-green-50 text-green-700 border border-green-200" : "bg-gray-100 text-gray-400 border border-gray-200"}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${protocol.active ? "bg-green-500" : "bg-gray-400"}`} />
+                        {protocol.active ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${SPECIES_COLORS[protocol.species] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                        {protocol.species}
+                      </span>
+                      <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{formatDays(protocol.intervalDays)}</span>
+                      <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-medium">▲ {protocol.preReminderDays}d antes</span>
+                      <span className="text-xs bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded-full font-medium">▼ +{protocol.postReminderDays}d después</span>
+                    </div>
+                    <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                      <button onClick={() => openEdit(protocol)} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-primary border border-primary/30 rounded-lg hover:bg-blue-50 transition-colors">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        Editar
+                      </button>
+                      {protocol.tenantId !== null ? (
+                        confirmDeleteId === protocol.id ? (
+                          <div className="flex-1 flex items-center gap-1.5">
+                            <span className="text-xs text-red-700 font-semibold">¿Eliminar?</span>
+                            <button onClick={() => handleDelete(protocol.id)} className="flex-1 py-2 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold">Sí</button>
+                            <button onClick={() => setConfirmDeleteId(null)} className="flex-1 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-semibold">No</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => { setConfirmDeleteId(protocol.id); setDeleteError(null); }} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            Eliminar
+                          </button>
+                        )
+                      ) : (
+                        <span className="flex-1 text-center text-xs text-gray-400 italic">Solo lectura</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* ── Vista desktop: tabla ───────────────────────────────────── */}
+            <div className="hidden md:block rounded-xl border border-border overflow-hidden shadow-sm">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-border">
+                    <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Protocolo</th>
+                    <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Especie</th>
+                    <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Recurrencia</th>
+                    <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Notificaciones</th>
+                    <th className="text-center px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Estado</th>
+                    <th className="text-right px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Acciones</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white divide-y divide-gray-100">
                   {loading ? (
                     <><SkeletonRow /><SkeletonRow /><SkeletonRow /></>
                   ) : (
                     protocols.map((protocol) => (
-                      <tr key={protocol.id} className="border-b border-border last:border-0 hover:bg-gray-50">
-                        <td className="px-4 py-4">
-                          <p className="font-medium">{protocol.name}</p>
-                          {protocol.tenantId === null && (
-                            <span className="text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5 inline-block">Global</span>
-                          )}
+                      <tr key={protocol.id} className="hover:bg-gray-50/70 transition-colors">
+                        {/* Nombre */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-start gap-2.5">
+                            <div>
+                              <p className="font-semibold text-gray-900 leading-tight">{protocol.name}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">{protocol.vaccineType}{protocol.breed ? ` · ${protocol.breed}` : ""}</p>
+                            </div>
+                            {protocol.tenantId === null && (
+                              <span className="shrink-0 mt-0.5 text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                                Global
+                              </span>
+                            )}
+                          </div>
                         </td>
-                        <td className="px-4 py-4 text-muted-foreground">{protocol.vaccineType}</td>
-                        <td className="px-4 py-4">
-                          <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">{protocol.species}</span>
+                        {/* Especie */}
+                        <td className="px-5 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${SPECIES_COLORS[protocol.species] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                            {protocol.species}
+                          </span>
                         </td>
-                        <td className="px-4 py-4 text-muted-foreground">{protocol.breed ?? <span className="italic text-xs">Todas</span>}</td>
-                        <td className="px-4 py-4 font-medium">{formatDays(protocol.intervalDays)}</td>
-                        <td className="px-4 py-4"><span className="text-amber-700">{protocol.preReminderDays}d antes</span></td>
-                        <td className="px-4 py-4"><span className="text-rose-600">+{protocol.postReminderDays}d despues</span></td>
-                        <td className="px-4 py-4 text-center">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${protocol.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                        {/* Recurrencia */}
+                        <td className="px-5 py-4">
+                          <span className="font-semibold text-gray-800">{formatDays(protocol.intervalDays)}</span>
+                        </td>
+                        {/* Notificaciones (pre + post combinados) */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
+                              <span>▲</span>{protocol.preReminderDays}d antes
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-xs bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded-full font-medium">
+                              <span>▼</span>+{protocol.postReminderDays}d después
+                            </span>
+                          </div>
+                        </td>
+                        {/* Estado */}
+                        <td className="px-5 py-4 text-center">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${protocol.active ? "bg-green-50 text-green-700 border border-green-200" : "bg-gray-100 text-gray-400 border border-gray-200"}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${protocol.active ? "bg-green-500" : "bg-gray-400"}`} />
                             {protocol.active ? "Activo" : "Inactivo"}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-right">
-                          <button onClick={() => openEdit(protocol)} className="text-primary hover:underline mr-4">Editar</button>
-                          {protocol.tenantId !== null ? (
-                            confirmDeleteId === protocol.id ? (
-                              <span className="inline-flex items-center gap-1">
-                                <span className="text-xs text-red-700 font-medium">¿Eliminar?</span>
+                        {/* Acciones */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => openEdit(protocol)}
+                              title="Editar"
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-blue-50 transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            {protocol.tenantId !== null ? (
+                              confirmDeleteId === protocol.id ? (
+                                <span className="inline-flex items-center gap-1 ml-1">
+                                  <span className="text-xs text-red-700 font-semibold">¿Eliminar?</span>
+                                  <button onClick={() => handleDelete(protocol.id)} className="text-xs px-2 py-0.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Sí</button>
+                                  <button onClick={() => setConfirmDeleteId(null)} className="text-xs px-2 py-0.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">No</button>
+                                </span>
+                              ) : (
                                 <button
-                                  onClick={() => handleDelete(protocol.id)}
-                                  className="text-xs px-2 py-0.5 bg-red-600 text-white rounded hover:bg-red-700"
-                                >Sí</button>
-                                <button
-                                  onClick={() => setConfirmDeleteId(null)}
-                                  className="text-xs px-2 py-0.5 border rounded hover:bg-gray-50"
-                                >No</button>
-                              </span>
+                                  onClick={() => { setConfirmDeleteId(protocol.id); setDeleteError(null); }}
+                                  title="Eliminar"
+                                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                >
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              )
                             ) : (
-                              <button
-                                onClick={() => { setConfirmDeleteId(protocol.id); setDeleteError(null); }}
-                                className="text-danger hover:underline"
-                              >Eliminar</button>
-                            )
-                          ) : (
-                            <span className="text-muted-foreground text-xs italic">Solo lectura</span>
-                          )}
+                              <span className="text-[11px] text-gray-400 italic ml-1">Solo lectura</span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -968,6 +1075,7 @@ export default function ProtocolsPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </>
       )}
