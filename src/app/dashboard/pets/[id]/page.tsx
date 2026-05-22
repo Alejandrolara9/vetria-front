@@ -334,7 +334,7 @@ export default function PetProfilePage() {
       {/* Contenido */}
       {tab === "resumen" && <TabResumen pet={pet} />}
       {tab === "citas" && <TabCitas appointments={pet.appointments} />}
-      {tab === "eventos" && <TabEventos events={pet.clinicalEvents} />}
+      {tab === "eventos" && <TabEventos events={pet.clinicalEvents} petId={pet.id} />}
       {tab === "historias" && <TabHistorias notes={pet.clinicalNotes} />}
       {tab === "recordatorios" && <TabRecordatorios reminders={pet.reminders} />}
       {tab === "attachments" && (
@@ -545,42 +545,220 @@ function TabCitas({ appointments }: { appointments: Appointment[] }) {
 
 // ─── Tab Eventos ──────────────────────────────────────────────────────────────
 
-function TabEventos({ events }: { events: ClinicalEvent[] }) {
-  if (events.length === 0)
-    return <EmptyState text="No hay eventos clínicos registrados." />;
+const EVENT_TYPE_OPTIONS = [
+  { value: "VACCINE",      label: "Vacuna" },
+  { value: "DEWORMING",    label: "Desparasitación" },
+  { value: "ANTIPARASITIC",label: "Antiparasitario" },
+  { value: "CHECKUP",      label: "Control" },
+  { value: "OTHER",        label: "Otro" },
+];
+
+const EVENT_COLORS: Record<string, string> = {
+  VACCINE:       "bg-blue-50 text-blue-700 border-blue-200",
+  DEWORMING:     "bg-orange-50 text-orange-700 border-orange-200",
+  ANTIPARASITIC: "bg-purple-50 text-purple-700 border-purple-200",
+  CHECKUP:       "bg-green-50 text-green-700 border-green-200",
+  OTHER:         "bg-gray-100 text-gray-600 border-gray-200",
+};
+
+function TabEventos({ events: initialEvents, petId }: { events: ClinicalEvent[]; petId: string }) {
+  const [events, setEvents] = useState<ClinicalEvent[]>(initialEvents);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [form, setForm] = useState({
+    type: "VACCINE",
+    title: "",
+    appliedDate: new Date().toISOString().slice(0, 10),
+    nextDueDate: "",
+    description: "",
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setFormError("");
+    if (!form.title.trim()) { setFormError("El nombre es obligatorio"); return; }
+    try {
+      setSaving(true);
+      const res = await api.post<ClinicalEvent>("/clinical-events", {
+        petId,
+        type: form.type,
+        title: form.title.trim(),
+        appliedDate: form.appliedDate,
+        nextDueDate: form.nextDueDate || undefined,
+        description: form.description.trim() || undefined,
+      });
+      if (form.nextDueDate) {
+        await api.post("/reminders", {
+          petId,
+          eventType: form.type,
+          calculatedDueDate: new Date(form.nextDueDate).toISOString(),
+          clinicalEventId: res.data.id,
+        });
+      }
+      setEvents((prev) => [res.data, ...prev]);
+      setForm({ type: "VACCINE", title: "", appliedDate: new Date().toISOString().slice(0, 10), nextDueDate: "", description: "" });
+      setShowForm(false);
+    } catch {
+      setFormError("No se pudo guardar el evento. Intenta de nuevo.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
-    <Card>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Descripción</TableHead>
-            <TableHead>Aplicado</TableHead>
-            <TableHead>Próximo</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {events.map((e) => (
-            <TableRow key={e.id}>
-              <TableCell>
-                <Badge variant={eventBadgeVariant(e.type)} className="text-xs">
-                  {EVENT_LABELS[e.type] ?? e.type}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <p className="font-medium">{e.title}</p>
-                {e.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{e.description}</p>}
-              </TableCell>
-              <TableCell className="whitespace-nowrap text-muted-foreground">{formatDate(e.appliedDate)}</TableCell>
-              <TableCell className="whitespace-nowrap">
-                {e.nextDueDate ? <DaysChip dueDate={e.nextDueDate} /> : <span className="text-muted-foreground">—</span>}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Card>
+    <div className="space-y-4">
+      {/* Botón + formulario */}
+      {!showForm ? (
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowForm(true)}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
+          >
+            + Registrar del carnet
+          </button>
+        </div>
+      ) : (
+        <Card className="border-primary/30 shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold">Registrar evento del carnet</CardTitle>
+              <button onClick={() => { setShowForm(false); setFormError(""); }} className="text-muted-foreground hover:text-foreground text-lg leading-none">&times;</button>
+            </div>
+            <p className="text-xs text-muted-foreground">Ingresa las vacunas o desparasitaciones del carnet físico. Si pones fecha próxima, se crea el recordatorio automáticamente.</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {formError && (
+                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{formError}</p>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Tipo */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Tipo <span className="text-red-500">*</span></label>
+                  <select
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    value={form.type}
+                    onChange={(e) => setForm({ ...form, type: e.target.value })}
+                  >
+                    {EVENT_TYPE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+                {/* Nombre */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Nombre / vacuna <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej: Antirrábica, Multivalente..."
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  />
+                </div>
+                {/* Fecha aplicada */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Fecha aplicada <span className="text-red-500">*</span></label>
+                  <input
+                    type="date"
+                    required
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    value={form.appliedDate}
+                    onChange={(e) => setForm({ ...form, appliedDate: e.target.value })}
+                  />
+                </div>
+                {/* Próxima dosis */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Próxima dosis <span className="text-gray-400 font-normal">(opcional — crea recordatorio)</span>
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    value={form.nextDueDate}
+                    onChange={(e) => setForm({ ...form, nextDueDate: e.target.value })}
+                  />
+                </div>
+              </div>
+              {/* Descripción */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Notas adicionales <span className="text-gray-400 font-normal">(opcional)</span></label>
+                <input
+                  type="text"
+                  placeholder="Ej: Lote 4521, laboratorio MSD..."
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                >
+                  {saving ? "Guardando..." : "Guardar evento"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowForm(false); setFormError(""); }}
+                  className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Lista de eventos */}
+      {events.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-4xl mb-3">💉</p>
+            <p className="text-sm font-medium text-gray-700 mb-1">Sin eventos registrados</p>
+            <p className="text-xs text-muted-foreground">Usa el botón de arriba para ingresar el carnet del paciente.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Descripción</TableHead>
+                <TableHead>Aplicado</TableHead>
+                <TableHead>Próxima dosis</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {events.map((e) => (
+                <TableRow key={e.id}>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${EVENT_COLORS[e.type] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                      {EVENT_LABELS[e.type] ?? e.type}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <p className="font-medium text-sm">{e.title}</p>
+                    {e.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{e.description}</p>}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{formatDate(e.appliedDate)}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {e.nextDueDate
+                      ? <span className="flex items-center gap-1.5 text-sm"><DaysChip dueDate={e.nextDueDate} /><span className="text-xs text-muted-foreground">{formatDate(e.nextDueDate)}</span></span>
+                      : <span className="text-muted-foreground text-sm">—</span>}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
+    </div>
   );
 }
 
