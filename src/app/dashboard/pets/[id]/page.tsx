@@ -580,8 +580,7 @@ function TabEventos({ events: initialEvents, petId }: { events: ClinicalEvent[];
     if (!form.title.trim()) { setFormError("El nombre es obligatorio"); return; }
     try {
       setSaving(true);
-      const res = await api.post<ClinicalEvent>("/clinical-events", {
-        petId,
+      const res = await api.post<ClinicalEvent>(`/pets/${petId}/events`, {
         type: form.type,
         title: form.title.trim(),
         appliedDate: form.appliedDate,
