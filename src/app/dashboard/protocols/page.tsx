@@ -906,8 +906,76 @@ export default function ProtocolsPage() {
           )}
 
           {(loading || protocols.length > 0) && (
-            <div className="rounded-xl border border-border overflow-hidden overflow-x-auto shadow-sm">
-              <table className="w-full text-sm min-w-[700px]">
+            <>
+            {/* ── Vista móvil: tarjetas ──────────────────────────────────── */}
+            <div className="md:hidden space-y-3">
+              {loading ? (
+                [1,2,3].map((i) => (
+                  <div key={i} className="bg-white rounded-xl border border-border p-4 space-y-3 animate-pulse">
+                    <div className="h-4 bg-gray-100 rounded-full w-2/3" />
+                    <div className="h-3 bg-gray-100 rounded-full w-1/2" />
+                    <div className="flex gap-2">
+                      <div className="h-6 bg-gray-100 rounded-full w-20" />
+                      <div className="h-6 bg-gray-100 rounded-full w-16" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                protocols.map((protocol) => (
+                  <div key={protocol.id} className="bg-white rounded-xl border border-border p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-gray-900 text-sm">{protocol.name}</p>
+                          {protocol.tenantId === null && (
+                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Global</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">{protocol.vaccineType}{protocol.breed ? ` · ${protocol.breed}` : ""}</p>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${protocol.active ? "bg-green-50 text-green-700 border border-green-200" : "bg-gray-100 text-gray-400 border border-gray-200"}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${protocol.active ? "bg-green-500" : "bg-gray-400"}`} />
+                        {protocol.active ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${SPECIES_COLORS[protocol.species] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                        {protocol.species}
+                      </span>
+                      <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{formatDays(protocol.intervalDays)}</span>
+                      <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-medium">▲ {protocol.preReminderDays}d antes</span>
+                      <span className="text-xs bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded-full font-medium">▼ +{protocol.postReminderDays}d después</span>
+                    </div>
+                    <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                      <button onClick={() => openEdit(protocol)} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-primary border border-primary/30 rounded-lg hover:bg-blue-50 transition-colors">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        Editar
+                      </button>
+                      {protocol.tenantId !== null ? (
+                        confirmDeleteId === protocol.id ? (
+                          <div className="flex-1 flex items-center gap-1.5">
+                            <span className="text-xs text-red-700 font-semibold">¿Eliminar?</span>
+                            <button onClick={() => handleDelete(protocol.id)} className="flex-1 py-2 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold">Sí</button>
+                            <button onClick={() => setConfirmDeleteId(null)} className="flex-1 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-semibold">No</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => { setConfirmDeleteId(protocol.id); setDeleteError(null); }} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            Eliminar
+                          </button>
+                        )
+                      ) : (
+                        <span className="flex-1 text-center text-xs text-gray-400 italic">Solo lectura</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* ── Vista desktop: tabla ───────────────────────────────────── */}
+            <div className="hidden md:block rounded-xl border border-border overflow-hidden shadow-sm">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 border-b border-border">
                     <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Protocolo</th>
@@ -1007,6 +1075,7 @@ export default function ProtocolsPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </>
       )}
