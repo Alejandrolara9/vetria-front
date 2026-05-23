@@ -364,11 +364,21 @@ export default function SuperAdminDashboard() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    t.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                  }`}>
-                    {t.active ? "Activa" : "Inactiva"}
-                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium w-fit ${
+                      t.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                    }`}>
+                      {t.active ? "Activa" : "Inactiva"}
+                    </span>
+                    {t.gracePeriodEndsAt && (() => {
+                      const days = Math.ceil((new Date(t.gracePeriodEndsAt).getTime() - Date.now()) / 86400000);
+                      return days > 0 ? (
+                        <span className="text-xs text-amber-600 font-medium">
+                          vence en {days} días
+                        </span>
+                      ) : null;
+                    })()}
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <span className={`font-medium ${
@@ -528,11 +538,15 @@ export default function SuperAdminDashboard() {
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Período de gracia
-                  {editTarget.gracePeriodEndsAt && (
-                    <span className="text-xs text-amber-600 font-normal ml-2">
-                      activo hasta {new Date(editTarget.gracePeriodEndsAt).toLocaleDateString("es-CO")}
-                    </span>
-                  )}
+                  {editTarget.gracePeriodEndsAt && (() => {
+                    const days = Math.ceil((new Date(editTarget.gracePeriodEndsAt).getTime() - Date.now()) / 86400000);
+                    return (
+                      <span className="text-xs text-amber-600 font-normal ml-2">
+                        activo hasta {new Date(editTarget.gracePeriodEndsAt).toLocaleDateString("es-CO")}
+                        {days > 0 && ` · ${days} días restantes`}
+                      </span>
+                    );
+                  })()}
                 </label>
                 <div className="flex gap-2">
                   <input
