@@ -122,6 +122,8 @@ export default function SuperAdminDashboard() {
     setEditError("");
     setEditCredits("");
     setEditGraceDays("");
+    setReactivateDays(14);
+    setReactivateError("");
   }
 
   async function handleEditSubmit(e: React.FormEvent) {
