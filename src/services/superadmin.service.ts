@@ -130,6 +130,17 @@ export async function setGracePeriod(tenantId: string, days: number): Promise<Te
   return res.data;
 }
 
+export async function reactivateTenant(
+  id: string,
+  days: 7 | 14 | 30
+): Promise<TenantSummary> {
+  const res = await superAdminApi.post(
+    `/superadmin/tenants/${id}/reactivate`,
+    { days }
+  );
+  return res.data;
+}
+
 export interface FeedbackItem {
   id: string;
   name: string;
