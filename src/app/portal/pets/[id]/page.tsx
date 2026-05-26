@@ -293,19 +293,19 @@ export default function PortalPetDetailPage() {
           {/* ─── Clinical History ───────────────────────────────────────── */}
           {section === "history" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white">Historial clínico</h2>
+              <h2 className="text-lg font-bold text-gray-900">Historial clínico</h2>
 
               {notes.length === 0 ? (
-                <p className="text-slate-500 text-sm">Sin historias clínicas aprobadas.</p>
+                <p className="text-gray-400 text-sm">Sin historias clínicas aprobadas.</p>
               ) : (
                 <div className="space-y-3">
                   {notes.map((note) => (
-                    <div key={note.id} className="bg-white/5 border border-white/10 rounded-xl px-5 py-4">
+                    <div key={note.id} className="bg-white border border-gray-200 rounded-xl px-5 py-4">
                       <div className="flex items-start justify-between gap-2 mb-3">
-                        <p className="font-semibold text-white text-sm">
+                        <p className="font-semibold text-gray-900 text-sm">
                           {note.chiefComplaint ?? "Consulta general"}
                         </p>
-                        <p className="text-slate-500 text-xs whitespace-nowrap shrink-0">
+                        <p className="text-gray-400 text-xs whitespace-nowrap shrink-0">
                           {note.approvedAt
                             ? new Date(note.approvedAt).toLocaleDateString("es-CO")
                             : ""}
@@ -319,31 +319,31 @@ export default function PortalPetDetailPage() {
                             if (!text) return null;
                             if (highlight) {
                               return (
-                                <div key={key} className="bg-teal-600/10 border border-teal-500/30 rounded-xl px-4 py-3">
-                                  <p className="text-xs font-bold text-teal-400 uppercase tracking-wide mb-1">
+                                <div key={key} className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl px-4 py-3">
+                                  <p className="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">
                                     {label}
                                   </p>
-                                  <p className="text-white font-semibold text-sm leading-relaxed">{text}</p>
+                                  <p className="text-gray-900 font-semibold text-sm leading-relaxed">{text}</p>
                                 </div>
                               );
                             }
                             return (
                               <div key={key}>
-                                <p className="text-xs font-semibold text-teal-400 uppercase tracking-wide mb-1">
+                                <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
                                   {label}
                                 </p>
-                                <p className="text-slate-300 text-sm leading-relaxed">{text}</p>
+                                <p className="text-gray-700 text-sm leading-relaxed">{text}</p>
                               </div>
                             );
                           })}
                         </div>
                       ) : (
-                        <p className="text-slate-500 text-sm italic">
+                        <p className="text-gray-400 text-sm italic">
                           El veterinario registró esta consulta sin observaciones adicionales para el tutor.
                         </p>
                       )}
 
-                      <p className="text-slate-600 text-xs mt-3">{note.tenant.name}</p>
+                      <p className="text-gray-400 text-xs mt-3">{note.tenant.name}</p>
                     </div>
                   ))}
                 </div>
