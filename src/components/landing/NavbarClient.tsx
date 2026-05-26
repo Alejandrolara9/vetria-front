@@ -9,6 +9,7 @@ const DEMO_WHATSAPP_URL =
 
 export default function NavbarClient() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -16,6 +17,11 @@ export default function NavbarClient() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
@@ -67,8 +73,66 @@ export default function NavbarClient() {
           >
             Prueba gratis →
           </Link>
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className={`md:hidden p-1.5 text-xl leading-none transition-colors ${
+              scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/70 hover:text-white"
+            }`}
+            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu panel */}
+      {menuOpen && (
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-[#0f172a] border-t border-white/10 shadow-2xl">
+          <div className="px-4 pt-3 pb-2">
+            {[
+              ["#funciones", "Funciones"],
+              ["#como-funciona", "Cómo funciona"],
+              ["#ia", "IA"],
+              ["#precios", "Precios"],
+            ].map(([href, label]) => (
+              <a
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="block px-3 py-3 text-sm text-slate-400 hover:text-white border-b border-white/5 transition-colors"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+          <div className="px-4 pt-3 pb-6 space-y-2">
+            <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest px-3 mb-3">
+              Acceso
+            </p>
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 text-sm text-slate-300 hover:text-white transition-colors"
+            >
+              <span>🏥</span> Iniciar sesión (clínica)
+            </Link>
+            <Link
+              href="/portal/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 px-3 py-3 rounded-xl bg-teal-500/10 border border-teal-500/20 text-sm text-teal-300 hover:text-teal-200 transition-colors"
+            >
+              <span>🐾</span> Portal tutores
+            </Link>
+            <Link
+              href="/register"
+              onClick={() => setMenuOpen(false)}
+              className="block text-center px-4 py-3 bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold rounded-xl transition-all mt-3"
+            >
+              Prueba gratis — 7 días →
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
