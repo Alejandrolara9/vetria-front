@@ -43,10 +43,28 @@ export default function NavbarClient() {
           >
             💬 Solicitar demo
           </a>
-          <Link href="/login" className={`text-sm font-medium transition-colors hidden sm:block ${scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"}`}>
+          <Link
+            href="/login"
+            className={`text-sm font-medium transition-colors hidden sm:block ${
+              scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
+            }`}
+          >
             Iniciar sesión
           </Link>
-          <Link href="/register" className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold rounded-lg transition-all shadow-md shadow-teal-600/30">
+          <Link
+            href="/portal/login"
+            className={`hidden sm:flex items-center gap-1 text-sm font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+              scrolled
+                ? "border-teal-300 text-teal-600 hover:bg-teal-50"
+                : "border-teal-400/35 text-teal-300 hover:bg-teal-400/10"
+            }`}
+          >
+            🐾 Portal tutores
+          </Link>
+          <Link
+            href="/register"
+            className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold rounded-lg transition-all shadow-md shadow-teal-600/30"
+          >
             Prueba gratis →
           </Link>
         </div>
