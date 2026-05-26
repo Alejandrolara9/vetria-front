@@ -36,6 +36,7 @@ export interface PetNote {
   chiefComplaint: string | null;
   finalNote: string | null;
   approvedAt: string | null;
+  sections: Record<string, string> | null;
   tenant: { name: string };
 }
 
