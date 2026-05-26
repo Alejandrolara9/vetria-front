@@ -139,13 +139,18 @@ export default function PortalPetDetailPage() {
   const pendingCount = accessRequests.filter((r) => r.status === "PENDING").length;
 
   const availableYears = Array.from(
-    new Set(notes.map((n) => new Date(n.approvedAt ?? "").getFullYear()))
+    new Set(
+      notes
+        .filter((n) => n.approvedAt != null)
+        .map((n) => new Date(n.approvedAt!).getFullYear())
+    )
   ).sort((a, b) => b - a);
 
   const filteredNotes = notes.filter((note) => {
     const matchesYear =
       historyYear === null ||
-      new Date(note.approvedAt ?? "").getFullYear() === historyYear;
+      (note.approvedAt != null &&
+        new Date(note.approvedAt).getFullYear() === historyYear);
     const q = historySearch.toLowerCase();
     const matchesSearch =
       q === "" ||
@@ -195,7 +200,7 @@ export default function PortalPetDetailPage() {
           {navItems.map((item) => (
             <button
               key={item.key}
-              onClick={() => setSection(item.key)}
+              onClick={() => { setSection(item.key); setExpandedNoteId(null); }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 section === item.key
                   ? "bg-white border border-[#bbf7d0] text-green-700"
@@ -374,7 +379,9 @@ export default function PortalPetDetailPage() {
               )}
               {notes.length > 0 && filteredNotes.length === 0 && (
                 <p className="text-gray-400 text-sm">
-                  Sin resultados para &ldquo;{historySearch}&rdquo;.
+                  {historySearch
+                    ? `Sin resultados para "${historySearch}".`
+                    : "Sin historias clínicas para el año seleccionado."}
                 </p>
               )}
 
@@ -592,7 +599,7 @@ export default function PortalPetDetailPage() {
           {navItems.map((item) => (
             <button
               key={item.key}
-              onClick={() => setSection(item.key)}
+              onClick={() => { setSection(item.key); setExpandedNoteId(null); }}
               className={`flex-1 flex flex-col items-center gap-0.5 py-3 text-xs font-medium transition-colors relative ${
                 section === item.key ? "text-green-600" : "text-gray-400"
               }`}
