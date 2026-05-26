@@ -137,8 +137,8 @@ export default function PortalPetDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-slate-400">Cargando...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-400">Cargando...</p>
       </div>
     );
   }
@@ -146,27 +146,27 @@ export default function PortalPetDetailPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6">
-        <p className="text-red-400">{error}</p>
+        <p className="text-red-600">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gray-50">
       {/* ─── Sidebar (desktop only) ─────────────────────────────────────────── */}
-      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-white/10 h-screen sticky top-0">
-        <div className="p-5 border-b border-white/10">
+      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-[#dcfce7] h-screen sticky top-0 bg-[#f0fdf4]">
+        <div className="p-5 border-b border-[#dcfce7]">
           <div className="w-14 h-14 relative mb-3">
             <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
           </div>
-          <p className="font-bold text-white text-base leading-tight">{pet?.name}</p>
-          <p className="text-slate-400 text-xs mt-0.5">
+          <p className="font-bold text-gray-900 text-base leading-tight">{pet?.name}</p>
+          <p className="text-gray-500 text-xs mt-0.5">
             {pet?.species}{pet?.breed ? ` · ${pet.breed}` : ""}
           </p>
           {pet?.birthDate && (
-            <p className="text-slate-500 text-xs">{petAge(pet.birthDate)}</p>
+            <p className="text-gray-400 text-xs">{petAge(pet.birthDate)}</p>
           )}
-          <p className="text-slate-500 text-xs mt-0.5">{pet?.tenant.name}</p>
+          <p className="text-gray-400 text-xs mt-0.5">{pet?.tenant.name}</p>
         </div>
 
         <nav className="flex-1 p-3 space-y-0.5">
@@ -176,8 +176,8 @@ export default function PortalPetDetailPage() {
               onClick={() => setSection(item.key)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 section === item.key
-                  ? "bg-teal-600/20 text-teal-400"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-white border border-[#bbf7d0] text-green-700"
+                  : "text-gray-500 hover:text-gray-900 hover:bg-white"
               }`}
             >
               <span className="text-base">{item.icon}</span>
@@ -191,10 +191,10 @@ export default function PortalPetDetailPage() {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-white/10">
+        <div className="p-3 border-t border-[#dcfce7]">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-gray-900 hover:bg-white transition-all"
           >
             <span>→</span> Cerrar sesión
           </button>
@@ -204,12 +204,12 @@ export default function PortalPetDetailPage() {
       {/* ─── Main content ────────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
         {/* Mobile header */}
-        <header className="md:hidden border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 bg-[#0f172a] z-10">
+        <header className="md:hidden border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 bg-white z-10">
           <div>
-            <p className="font-bold text-white text-sm">{pet?.name}</p>
-            <p className="text-slate-500 text-xs">{pet?.tenant.name}</p>
+            <p className="font-bold text-gray-900 text-sm">{pet?.name}</p>
+            <p className="text-gray-400 text-xs">{pet?.tenant.name}</p>
           </div>
-          <button onClick={handleLogout} className="text-xs text-slate-400 hover:text-white">
+          <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-900">
             Salir
           </button>
         </header>
@@ -218,7 +218,7 @@ export default function PortalPetDetailPage() {
           {/* ─── Vaccines ──────────────────────────────────────────────── */}
           {section === "vaccines" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white">Vacunas</h2>
+              <h2 className="text-lg font-bold text-gray-900">Vacunas</h2>
 
               {nextVaccine?.nextDueDate && (() => {
                 const days = daysUntil(nextVaccine.nextDueDate);
@@ -226,28 +226,28 @@ export default function PortalPetDetailPage() {
                 const urgent = days >= 0 && days <= 7;
                 return (
                   <div className={`rounded-xl p-4 border ${
-                    overdue  ? "bg-red-500/10 border-red-500/30" :
-                    urgent   ? "bg-orange-500/10 border-orange-500/30" :
-                               "bg-teal-600/10 border-teal-500/30"
+                    overdue  ? "bg-red-50 border-red-200" :
+                    urgent   ? "bg-orange-50 border-orange-200" :
+                               "bg-[#f0fdf4] border-[#bbf7d0]"
                   }`}>
                     <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${
-                      overdue ? "text-red-400" : urgent ? "text-orange-400" : "text-teal-400"
+                      overdue ? "text-red-600" : urgent ? "text-orange-600" : "text-green-700"
                     }`}>
                       {overdue ? "Vacuna vencida" : "Próxima vacuna"}
                     </p>
                     <div className="flex items-center justify-between">
-                      <p className="font-semibold text-white text-sm">{nextVaccine.title}</p>
+                      <p className="font-semibold text-gray-900 text-sm">{nextVaccine.title}</p>
                       <div className={`rounded-lg px-3 py-1 text-center ${
-                        overdue ? "bg-red-500/20" : urgent ? "bg-orange-500/20" : "bg-teal-600/20"
+                        overdue ? "bg-red-100" : urgent ? "bg-orange-100" : "bg-[#dcfce7]"
                       }`}>
                         {overdue ? (
-                          <p className="text-red-400 text-xs font-bold">Vencida</p>
+                          <p className="text-red-600 text-xs font-bold">Vencida</p>
                         ) : (
                           <>
-                            <p className={`text-xl font-extrabold leading-tight ${urgent ? "text-orange-400" : "text-white"}`}>
+                            <p className={`text-xl font-extrabold leading-tight ${urgent ? "text-orange-600" : "text-green-600"}`}>
                               {days}
                             </p>
-                            <p className={`text-[10px] ${urgent ? "text-orange-300" : "text-teal-300"}`}>días</p>
+                            <p className={`text-[10px] ${urgent ? "text-orange-500" : "text-green-600"}`}>días</p>
                           </>
                         )}
                       </div>
@@ -257,29 +257,29 @@ export default function PortalPetDetailPage() {
               })()}
 
               {vaccines.length === 0 ? (
-                <p className="text-slate-500 text-sm">
+                <p className="text-gray-400 text-sm">
                   Tu veterinaria aún no ha registrado vacunas para esta mascota.
                 </p>
               ) : (
                 <div className="space-y-2">
                   {vaccines.map((ev) => (
-                    <div key={ev.id} className="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+                    <div key={ev.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-green-400 text-xs font-semibold">✓ Aplicada</span>
+                            <span className="text-green-600 text-xs font-semibold">✓ Aplicada</span>
                           </div>
-                          <p className="font-medium text-white text-sm mt-0.5 truncate">{ev.title}</p>
+                          <p className="font-medium text-gray-900 text-sm mt-0.5 truncate">{ev.title}</p>
                           {ev.description && (
-                            <p className="text-slate-400 text-xs mt-0.5">{ev.description}</p>
+                            <p className="text-gray-500 text-xs mt-0.5">{ev.description}</p>
                           )}
                         </div>
-                        <p className="text-slate-500 text-xs whitespace-nowrap shrink-0">
+                        <p className="text-gray-400 text-xs whitespace-nowrap shrink-0">
                           {new Date(ev.appliedDate).toLocaleDateString("es-CO")}
                         </p>
                       </div>
                       {ev.nextDueDate && (
-                        <p className="text-slate-500 text-xs mt-1.5">
+                        <p className="text-gray-400 text-xs mt-1.5">
                           Próxima: {new Date(ev.nextDueDate).toLocaleDateString("es-CO")}
                         </p>
                       )}
@@ -354,31 +354,31 @@ export default function PortalPetDetailPage() {
           {/* ─── Reminders ─────────────────────────────────────────────── */}
           {section === "reminders" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white">Recordatorios</h2>
+              <h2 className="text-lg font-bold text-gray-900">Recordatorios</h2>
 
               {reminders.length === 0 ? (
-                <p className="text-slate-500 text-sm">Sin recordatorios próximos.</p>
+                <p className="text-gray-400 text-sm">Sin recordatorios próximos.</p>
               ) : (
                 <div className="space-y-2">
                   {reminders.map((rem) => {
                     const days = daysUntil(rem.calculatedDueDate);
                     const overdue = days < 0;
                     return (
-                      <div key={rem.id} className="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+                      <div key={rem.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3">
                         <div className="flex items-center justify-between gap-2">
                           <div>
-                            <p className="font-medium text-white text-sm">
+                            <p className="font-medium text-gray-900 text-sm">
                               {translateEventType(rem.eventType)}
                             </p>
                             {rem.notes && (
-                              <p className="text-slate-400 text-xs mt-0.5">{rem.notes}</p>
+                              <p className="text-gray-400 text-xs mt-0.5">{rem.notes}</p>
                             )}
                           </div>
                           <div className="text-right shrink-0">
-                            <p className={`text-xs font-semibold ${overdue ? "text-red-400" : days <= 7 ? "text-orange-400" : "text-slate-300"}`}>
+                            <p className={`text-xs font-semibold ${overdue ? "text-red-600" : days <= 7 ? "text-orange-600" : "text-gray-600"}`}>
                               {overdue ? `Hace ${Math.abs(days)} días` : days === 0 ? "Hoy" : `En ${days} días`}
                             </p>
-                            <p className="text-slate-500 text-xs">
+                            <p className="text-gray-400 text-xs">
                               {new Date(rem.calculatedDueDate).toLocaleDateString("es-CO")}
                             </p>
                           </div>
@@ -394,29 +394,29 @@ export default function PortalPetDetailPage() {
           {/* ─── Clinic Access ──────────────────────────────────────────── */}
           {section === "access" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white">Clínicas con acceso</h2>
+              <h2 className="text-lg font-bold text-gray-900">Clínicas con acceso</h2>
 
               {accessRequests.length === 0 ? (
-                <div className="bg-white/5 border border-white/10 rounded-xl px-5 py-6 text-center">
-                  <p className="text-slate-400 text-sm">
+                <div className="bg-white border border-gray-200 rounded-xl px-5 py-6 text-center">
+                  <p className="text-gray-400 text-sm">
                     Ninguna clínica externa tiene acceso al historial de {pet?.name}.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {accessRequests.map((req) => (
-                    <div key={req.id} className="bg-white/5 border border-white/10 rounded-xl px-4 py-4">
+                    <div key={req.id} className="bg-white border border-gray-200 rounded-xl px-4 py-4">
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div>
-                          <p className="font-semibold text-white text-sm">{req.requestingTenant.name}</p>
-                          <p className="text-slate-500 text-xs mt-0.5">
+                          <p className="font-semibold text-gray-900 text-sm">{req.requestingTenant.name}</p>
+                          <p className="text-gray-400 text-xs mt-0.5">
                             Solicitud: {new Date(req.createdAt).toLocaleDateString("es-CO")}
                           </p>
                         </div>
                         <span className={`text-[11px] font-bold px-2 py-1 rounded-full ${
-                          req.status === "APPROVED" ? "bg-green-500/20 text-green-400" :
-                          req.status === "PENDING"  ? "bg-orange-500/20 text-orange-400" :
-                                                      "bg-slate-500/20 text-slate-400"
+                          req.status === "APPROVED" ? "bg-green-100 text-green-700" :
+                          req.status === "PENDING"  ? "bg-orange-100 text-orange-700" :
+                                                      "bg-gray-100 text-gray-500"
                         }`}>
                           {req.status === "APPROVED" ? "Acceso activo" :
                            req.status === "PENDING"  ? "Pendiente" : "Revocado"}
@@ -428,14 +428,14 @@ export default function PortalPetDetailPage() {
                           <button
                             onClick={() => handleApprove(req.id)}
                             disabled={accessLoading === req.id}
-                            className="flex-1 py-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all"
+                            className="flex-1 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all"
                           >
                             {accessLoading === req.id ? "..." : "Aprobar"}
                           </button>
                           <button
                             onClick={() => handleReject(req.id)}
                             disabled={accessLoading === req.id}
-                            className="flex-1 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 text-slate-300 text-xs font-semibold rounded-lg transition-all"
+                            className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 text-xs font-semibold rounded-lg transition-all"
                           >
                             {accessLoading === req.id ? "..." : "Rechazar"}
                           </button>
@@ -446,7 +446,7 @@ export default function PortalPetDetailPage() {
                         <button
                           onClick={() => handleRevoke(req.id)}
                           disabled={accessLoading === req.id}
-                          className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 text-red-400 text-xs font-semibold rounded-lg border border-red-500/20 transition-all"
+                          className="w-full py-2 bg-red-50 hover:bg-red-100 disabled:opacity-50 text-red-600 text-xs font-semibold rounded-lg border border-red-200 transition-all"
                         >
                           {accessLoading === req.id ? "..." : "Revocar acceso"}
                         </button>
@@ -461,14 +461,14 @@ export default function PortalPetDetailPage() {
       </main>
 
       {/* ─── Mobile bottom nav ──────────────────────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0f172a] border-t border-white/10 z-20">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-20">
         <div className="flex">
           {navItems.map((item) => (
             <button
               key={item.key}
               onClick={() => setSection(item.key)}
               className={`flex-1 flex flex-col items-center gap-0.5 py-3 text-xs font-medium transition-colors relative ${
-                section === item.key ? "text-teal-400" : "text-slate-500"
+                section === item.key ? "text-green-600" : "text-gray-400"
               }`}
             >
               <span className="text-lg leading-none">{item.icon}</span>
