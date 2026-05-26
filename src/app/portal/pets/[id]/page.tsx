@@ -325,11 +325,13 @@ export default function PortalPetDetailPage() {
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
                   placeholder="Buscar por motivo o tratamiento…"
+                  aria-label="Buscar en historial clínico"
                   className="flex-1 text-sm text-gray-700 placeholder-gray-400 bg-transparent outline-none"
                 />
                 {historySearch && (
                   <button
                     onClick={() => setHistorySearch("")}
+                    aria-label="Limpiar búsqueda"
                     className="text-gray-400 hover:text-gray-600 text-xs"
                   >
                     ✕
