@@ -39,6 +39,17 @@ function petAge(birthDate: string | null): string {
   return years === 1 ? "1 año" : `${years} años`;
 }
 
+const TUTOR_SECTIONS = [
+  { key: "tratamiento",             label: "Tratamiento",      highlight: false },
+  { key: "recomendaciones_al_tutor", label: "Recomendaciones", highlight: false },
+  { key: "proxima_consulta",        label: "Próxima consulta", highlight: true },
+] as const;
+
+function hasTutorContent(sections: Record<string, string> | null): boolean {
+  if (!sections) return false;
+  return TUTOR_SECTIONS.some(({ key }) => !!sections[key]?.trim());
+}
+
 export default function PortalPetDetailPage() {
   const router = useRouter();
   const { id: petId } = useParams<{ id: string }>();
@@ -50,7 +61,6 @@ export default function PortalPetDetailPage() {
   const [accessRequests, setAccessRequests] = useState<ClinicAccessRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
   const [accessLoading, setAccessLoading] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,13 +93,6 @@ export default function PortalPetDetailPage() {
   }, [petId, router]);
 
   const handleLogout = () => { clearOwnerToken(); router.push("/portal/login"); };
-
-  const toggleNote = (id: string) =>
-    setExpandedNotes((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
-      return next;
-    });
 
   const handleApprove = async (requestId: string) => {
     setAccessLoading(requestId);
@@ -296,42 +299,53 @@ export default function PortalPetDetailPage() {
                 <p className="text-slate-500 text-sm">Sin historias clínicas aprobadas.</p>
               ) : (
                 <div className="space-y-3">
-                  {notes.map((note) => {
-                    const isLong = (note.finalNote?.length ?? 0) > 400;
-                    const isExpanded = expandedNotes.has(note.id);
-                    return (
-                      <div key={note.id} className="bg-white/5 border border-white/10 rounded-xl px-5 py-4">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <p className="font-semibold text-white text-sm">
-                            {note.chiefComplaint ?? "Consulta general"}
-                          </p>
-                          <p className="text-slate-500 text-xs whitespace-nowrap shrink-0">
-                            {note.approvedAt
-                              ? new Date(note.approvedAt).toLocaleDateString("es-CO")
-                              : ""}
-                          </p>
-                        </div>
-                        {note.finalNote && (
-                          <>
-                            <p className="text-slate-300 text-sm leading-relaxed">
-                              {isLong && !isExpanded
-                                ? note.finalNote.slice(0, 400) + "…"
-                                : note.finalNote}
-                            </p>
-                            {isLong && (
-                              <button
-                                onClick={() => toggleNote(note.id)}
-                                className="text-teal-400 text-xs mt-1 hover:text-teal-300 transition-colors"
-                              >
-                                {isExpanded ? "Ver menos" : "Ver más"}
-                              </button>
-                            )}
-                          </>
-                        )}
-                        <p className="text-slate-500 text-xs mt-2">{note.tenant.name}</p>
+                  {notes.map((note) => (
+                    <div key={note.id} className="bg-white/5 border border-white/10 rounded-xl px-5 py-4">
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <p className="font-semibold text-white text-sm">
+                          {note.chiefComplaint ?? "Consulta general"}
+                        </p>
+                        <p className="text-slate-500 text-xs whitespace-nowrap shrink-0">
+                          {note.approvedAt
+                            ? new Date(note.approvedAt).toLocaleDateString("es-CO")
+                            : ""}
+                        </p>
                       </div>
-                    );
-                  })}
+
+                      {hasTutorContent(note.sections) ? (
+                        <div className="space-y-3">
+                          {TUTOR_SECTIONS.map(({ key, label, highlight }) => {
+                            const text = note.sections?.[key]?.trim();
+                            if (!text) return null;
+                            if (highlight) {
+                              return (
+                                <div key={key} className="bg-teal-600/10 border border-teal-500/30 rounded-xl px-4 py-3">
+                                  <p className="text-xs font-bold text-teal-400 uppercase tracking-wide mb-1">
+                                    {label}
+                                  </p>
+                                  <p className="text-white font-semibold text-sm leading-relaxed">{text}</p>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div key={key}>
+                                <p className="text-xs font-semibold text-teal-400 uppercase tracking-wide mb-1">
+                                  {label}
+                                </p>
+                                <p className="text-slate-300 text-sm leading-relaxed">{text}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-slate-500 text-sm italic">
+                          El veterinario registró esta consulta sin observaciones adicionales para el tutor.
+                        </p>
+                      )}
+
+                      <p className="text-slate-600 text-xs mt-3">{note.tenant.name}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
