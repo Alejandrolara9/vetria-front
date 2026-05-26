@@ -52,6 +52,7 @@ const noteFixture: PetNote = {
   chiefComplaint: "Vómito recurrente",
   finalNote: "Gastritis leve. Tratamiento con omeprazol.",
   approvedAt: "2026-02-01T10:00:00Z",
+  sections: { "1_motivo_consulta": "Vómito recurrente", "2_diagnostico": "Gastritis leve" },
   tenant: { name: "Clínica Vet Test" },
 };
 
