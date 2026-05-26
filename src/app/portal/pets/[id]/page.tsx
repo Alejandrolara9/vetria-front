@@ -62,6 +62,9 @@ export default function PortalPetDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [accessLoading, setAccessLoading] = useState<string | null>(null);
+  const [historySearch, setHistorySearch] = useState("");
+  const [historyYear, setHistoryYear] = useState<number | null>(null);
+  const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getOwnerToken()) { router.push("/portal/login"); return; }
@@ -134,6 +137,25 @@ export default function PortalPetDetailPage() {
   ];
 
   const pendingCount = accessRequests.filter((r) => r.status === "PENDING").length;
+
+  const availableYears = Array.from(
+    new Set(notes.map((n) => new Date(n.approvedAt ?? "").getFullYear()))
+  ).sort((a, b) => b - a);
+
+  const filteredNotes = notes.filter((note) => {
+    const matchesYear =
+      historyYear === null ||
+      new Date(note.approvedAt ?? "").getFullYear() === historyYear;
+    const q = historySearch.toLowerCase();
+    const matchesSearch =
+      q === "" ||
+      [
+        note.chiefComplaint ?? "",
+        note.sections?.tratamiento ?? "",
+        note.sections?.recomendaciones_al_tutor ?? "",
+      ].some((field) => field.toLowerCase().includes(q));
+    return matchesYear && matchesSearch;
+  });
 
   if (loading) {
     return (
@@ -295,57 +317,159 @@ export default function PortalPetDetailPage() {
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-gray-900">Historial clínico</h2>
 
-              {notes.length === 0 ? (
-                <p className="text-gray-400 text-sm">Sin historias clínicas aprobadas.</p>
-              ) : (
-                <div className="space-y-3">
-                  {notes.map((note) => (
-                    <div key={note.id} className="bg-white border border-gray-200 rounded-xl px-5 py-4">
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        <p className="font-semibold text-gray-900 text-sm">
-                          {note.chiefComplaint ?? "Consulta general"}
-                        </p>
-                        <p className="text-gray-400 text-xs whitespace-nowrap shrink-0">
-                          {note.approvedAt
-                            ? new Date(note.approvedAt).toLocaleDateString("es-CO")
-                            : ""}
-                        </p>
-                      </div>
+              {/* Buscador */}
+              <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+                <span className="text-gray-400 text-sm">🔍</span>
+                <input
+                  type="text"
+                  value={historySearch}
+                  onChange={(e) => setHistorySearch(e.target.value)}
+                  placeholder="Buscar por motivo o tratamiento…"
+                  className="flex-1 text-sm text-gray-700 placeholder-gray-400 bg-transparent outline-none"
+                />
+                {historySearch && (
+                  <button
+                    onClick={() => setHistorySearch("")}
+                    className="text-gray-400 hover:text-gray-600 text-xs"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
 
-                      {hasTutorContent(note.sections) ? (
-                        <div className="space-y-3">
-                          {TUTOR_SECTIONS.map(({ key, label, highlight }) => {
-                            const text = note.sections?.[key]?.trim();
-                            if (!text) return null;
-                            if (highlight) {
-                              return (
-                                <div key={key} className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl px-4 py-3">
-                                  <p className="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">
-                                    {label}
-                                  </p>
-                                  <p className="text-gray-900 font-semibold text-sm leading-relaxed">{text}</p>
-                                </div>
-                              );
-                            }
-                            return (
-                              <div key={key}>
-                                <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
-                                  {label}
-                                </p>
-                                <p className="text-gray-700 text-sm leading-relaxed">{text}</p>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <p className="text-gray-400 text-sm italic">
-                          El veterinario registró esta consulta sin observaciones adicionales para el tutor.
-                        </p>
-                      )}
-
-                      <p className="text-gray-400 text-xs mt-3">{note.tenant.name}</p>
-                    </div>
+              {/* Filtros de año */}
+              {availableYears.length > 1 && (
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setHistoryYear(null)}
+                    className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                      historyYear === null
+                        ? "bg-[#f0fdf4] border-[#bbf7d0] text-green-700 font-semibold"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {availableYears.map((year) => (
+                    <button
+                      key={year}
+                      onClick={() => setHistoryYear(year)}
+                      className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                        historyYear === year
+                          ? "bg-[#f0fdf4] border-[#bbf7d0] text-green-700 font-semibold"
+                          : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      }`}
+                    >
+                      {year}
+                    </button>
                   ))}
+                </div>
+              )}
+
+              {/* Estados vacíos */}
+              {notes.length === 0 && (
+                <p className="text-gray-400 text-sm">Sin historias clínicas aprobadas.</p>
+              )}
+              {notes.length > 0 && filteredNotes.length === 0 && (
+                <p className="text-gray-400 text-sm">
+                  Sin resultados para &ldquo;{historySearch}&rdquo;.
+                </p>
+              )}
+
+              {/* Timeline */}
+              {filteredNotes.length > 0 && (
+                <div className="relative pl-5">
+                  <div className="absolute left-[7px] top-0 bottom-0 w-px bg-[#bbf7d0]" />
+                  <div className="space-y-3">
+                    {filteredNotes.map((note) => {
+                      const isExpanded = expandedNoteId === note.id;
+                      return (
+                        <div key={note.id} className="relative">
+                          <div className="absolute -left-5 top-3.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />
+                          <div
+                            className={`bg-white border rounded-xl overflow-hidden transition-all ${
+                              isExpanded ? "border-[#bbf7d0]" : "border-gray-200"
+                            }`}
+                          >
+                            {/* Header — siempre visible */}
+                            <button
+                              onClick={() =>
+                                setExpandedNoteId(isExpanded ? null : note.id)
+                              }
+                              className="w-full flex items-center justify-between px-4 py-3 text-left"
+                            >
+                              <div>
+                                <p className="font-semibold text-gray-900 text-sm">
+                                  {note.chiefComplaint ?? "Consulta general"}
+                                </p>
+                                <p className="text-gray-400 text-xs mt-0.5">
+                                  {note.approvedAt
+                                    ? new Date(note.approvedAt).toLocaleDateString(
+                                        "es-CO",
+                                        { day: "numeric", month: "long", year: "numeric" }
+                                      )
+                                    : ""}
+                                  {" · "}
+                                  {note.tenant.name}
+                                </p>
+                              </div>
+                              <span
+                                className={`text-gray-400 text-xs transition-transform duration-200 ${
+                                  isExpanded ? "rotate-180" : ""
+                                }`}
+                              >
+                                ▾
+                              </span>
+                            </button>
+
+                            {/* Contenido expandido */}
+                            {isExpanded && (
+                              <div className="px-4 pb-4 border-t border-gray-100 pt-3 space-y-3">
+                                {hasTutorContent(note.sections) ? (
+                                  <>
+                                    {TUTOR_SECTIONS.map(({ key, label, highlight }) => {
+                                      const text = note.sections?.[key]?.trim();
+                                      if (!text) return null;
+                                      if (highlight) {
+                                        return (
+                                          <div
+                                            key={key}
+                                            className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl px-4 py-3"
+                                          >
+                                            <p className="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">
+                                              {label}
+                                            </p>
+                                            <p className="text-gray-900 font-semibold text-sm leading-relaxed">
+                                              {text}
+                                            </p>
+                                          </div>
+                                        );
+                                      }
+                                      return (
+                                        <div key={key}>
+                                          <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
+                                            {label}
+                                          </p>
+                                          <p className="text-gray-700 text-sm leading-relaxed">
+                                            {text}
+                                          </p>
+                                        </div>
+                                      );
+                                    })}
+                                  </>
+                                ) : (
+                                  <p className="text-gray-400 text-sm italic">
+                                    El veterinario registró esta consulta sin observaciones
+                                    adicionales para el tutor.
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
