@@ -54,4 +54,15 @@ describe("uploadPetPhotoOwner", () => {
       expect.objectContaining({ method: "PATCH" })
     );
   });
+
+  it("throws server error message when response is not ok", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ message: "No tienes permiso para cambiar esta foto" }),
+    } as Response);
+    const file = makeFile("photo.png", "image/png", 100);
+    await expect(uploadPetPhotoOwner("pet-2", file)).rejects.toThrow(
+      "No tienes permiso para cambiar esta foto"
+    );
+  });
 });
