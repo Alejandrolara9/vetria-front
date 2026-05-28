@@ -190,19 +190,8 @@ export default function PortalPetDetailPage() {
       {/* ─── Sidebar (desktop only) ─────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-[#dcfce7] h-screen sticky top-0 bg-[#f0fdf4]">
         <div className="p-5 border-b border-[#dcfce7]">
-          <div className="mb-3">
-            {pet ? (
-              <PetPhotoAvatar
-                photoUrl={pet.photoUrl}
-                fallbackEmoji={SPECIES_EMOJI[pet.species] ?? "🐾"}
-                uploadFn={(file) => uploadPetPhotoOwner(pet.id, file)}
-                onUploaded={(newUrl) => setPet((p) => p ? { ...p, photoUrl: newUrl } : p)}
-              />
-            ) : (
-              <div className="w-14 h-14 relative">
-                <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
-              </div>
-            )}
+          <div className="w-14 h-14 relative mb-3">
+            <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
           </div>
           <p className="font-bold text-gray-900 text-base leading-tight">{pet?.name}</p>
           <p className="text-gray-500 text-xs mt-0.5">
@@ -260,6 +249,27 @@ export default function PortalPetDetailPage() {
         </header>
 
         <div className="px-4 md:px-8 py-6 max-w-3xl mx-auto">
+          {/* ─── Pet profile header ─────────────────────────────────────── */}
+          {pet && (
+            <div className="flex items-center gap-4 mb-6 bg-white border border-gray-200 rounded-2xl px-5 py-4">
+              <PetPhotoAvatar
+                photoUrl={pet.photoUrl}
+                fallbackEmoji={SPECIES_EMOJI[pet.species] ?? "🐾"}
+                uploadFn={(file) => uploadPetPhotoOwner(pet.id, file)}
+                onUploaded={(newUrl) => setPet((p) => p ? { ...p, photoUrl: newUrl } : p)}
+              />
+              <div>
+                <p className="font-bold text-gray-900 text-lg leading-tight">{pet.name}</p>
+                <p className="text-gray-500 text-sm mt-0.5">
+                  {pet.species}{pet.breed ? ` · ${pet.breed}` : ""}
+                </p>
+                {pet.birthDate && (
+                  <p className="text-gray-400 text-xs mt-0.5">{petAge(pet.birthDate)}</p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* ─── Vaccines ──────────────────────────────────────────────── */}
           {section === "vaccines" && (
             <div className="space-y-4">
