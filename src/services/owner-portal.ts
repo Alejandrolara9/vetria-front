@@ -19,6 +19,7 @@ export interface OwnerPet {
   species: string;
   breed: string | null;
   birthDate: string | null;
+  photoUrl: string | null;
   tenant: { name: string };
 }
 

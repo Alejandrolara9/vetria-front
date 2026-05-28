@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
+import { PetPhotoAvatar } from "@/components/PetPhotoAvatar";
+import { uploadPetPhotoOwner } from "@/services/pet-photo";
 import {
   getOwnerToken,
   clearOwnerToken,
@@ -21,6 +23,11 @@ import {
   type PetReminder,
   type ClinicAccessRequest,
 } from "@/services/owner-portal";
+
+const SPECIES_EMOJI: Record<string, string> = {
+  Canino: "🐕", Felino: "🐈", Ave: "🦜", Reptil: "🦎",
+  Conejo: "🐇", Cobayo: "🐹", Hámster: "🐹", Pez: "🐟",
+};
 
 type Section = "vaccines" | "history" | "reminders" | "access";
 
@@ -183,8 +190,19 @@ export default function PortalPetDetailPage() {
       {/* ─── Sidebar (desktop only) ─────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-[#dcfce7] h-screen sticky top-0 bg-[#f0fdf4]">
         <div className="p-5 border-b border-[#dcfce7]">
-          <div className="w-14 h-14 relative mb-3">
-            <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
+          <div className="mb-3">
+            {pet ? (
+              <PetPhotoAvatar
+                photoUrl={pet.photoUrl}
+                fallbackEmoji={SPECIES_EMOJI[pet.species] ?? "🐾"}
+                uploadFn={(file) => uploadPetPhotoOwner(pet.id, file)}
+                onUploaded={(newUrl) => setPet((p) => p ? { ...p, photoUrl: newUrl } : p)}
+              />
+            ) : (
+              <div className="w-14 h-14 relative">
+                <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
+              </div>
+            )}
           </div>
           <p className="font-bold text-gray-900 text-base leading-tight">{pet?.name}</p>
           <p className="text-gray-500 text-xs mt-0.5">

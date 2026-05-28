@@ -35,6 +35,7 @@ const petFixture: OwnerPet = {
   species: "Canino",
   breed: "Labrador",
   birthDate: "2020-03-15",
+  photoUrl: null,
   tenant: { name: "Clínica Vet Test" },
 };
 

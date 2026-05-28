@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/services/api";
+import { PetPhotoAvatar } from "@/components/PetPhotoAvatar";
+import { uploadPetPhotoVet } from "@/services/pet-photo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AttachmentsPanel } from "@/components/AttachmentsPanel";
 import { listAttachments, type Attachment } from "@/services/attachments";
@@ -59,6 +61,7 @@ interface PetProfile {
   species: string;
   breed: string | null;
   sex: string;
+  photoUrl: string | null;
   birthDate: string | null;
   client: { id: string; name: string; phone: string; email: string };
   clinicalEvents: ClinicalEvent[];
@@ -255,9 +258,12 @@ export default function PetProfilePage() {
       <Card>
         <CardContent className="p-6">
           <div className="flex items-start gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-muted flex items-center justify-center text-4xl flex-shrink-0 select-none">
-              {SPECIES_EMOJI[pet.species] ?? "🐾"}
-            </div>
+            <PetPhotoAvatar
+              photoUrl={pet.photoUrl}
+              fallbackEmoji={SPECIES_EMOJI[pet.species] ?? "🐾"}
+              uploadFn={(file) => uploadPetPhotoVet(pet.id, file)}
+              onUploaded={(newUrl) => setPet((p) => p ? { ...p, photoUrl: newUrl } : p)}
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-4">
                 <div>
