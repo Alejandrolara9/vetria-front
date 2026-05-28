@@ -60,27 +60,33 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvite
 
   return (
     <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-white">
-      <div className="flex items-center justify-between px-4 py-3 gap-2">
-        <button
-          className="flex items-center gap-3 flex-1 text-left min-w-0"
-          onClick={() => setExpanded((e) => !e)}
-        >
-          <div className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center text-base flex-shrink-0">
+      <div className="px-4 py-3">
+        {/* Fila principal: avatar + info + expand */}
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center text-base flex-shrink-0 mt-0.5">
             👤
           </div>
-          <div className="min-w-0">
+          <button
+            className="flex-1 text-left min-w-0"
+            onClick={() => setExpanded((e) => !e)}
+          >
             <p className="font-semibold text-sm truncate">{client.name}</p>
+            <p className="text-xs text-muted-foreground truncate">📞 {client.phone}</p>
+            <p className="text-xs text-muted-foreground truncate">✉️ {client.email}</p>
             <p className="text-xs text-muted-foreground">
-              📞 {client.phone} · ✉️ {client.email} · {client.pets.length}{" "}
-              {client.pets.length === 1 ? "mascota" : "mascotas"}
+              🐾 {client.pets.length} {client.pets.length === 1 ? "mascota" : "mascotas"}
             </p>
-          </div>
-          <span className="ml-2 text-muted-foreground text-xs flex-shrink-0">
+          </button>
+          <button
+            onClick={() => setExpanded((e) => !e)}
+            className="text-muted-foreground text-xs flex-shrink-0 mt-1 px-1"
+          >
             {expanded ? "▼" : "▶"}
-          </span>
-        </button>
+          </button>
+        </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Fila de acciones */}
+        <div className="flex items-center gap-2 mt-2.5 ml-12 flex-wrap">
           <button
             onClick={() => onEditClient(client)}
             className="text-xs px-3 py-1.5 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 text-muted-foreground"
@@ -89,7 +95,7 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvite
           </button>
 
           {client.portalStatus === "NOT_INVITED" && (
-            <div className="flex flex-col items-end">
+            <>
               <button
                 onClick={() => handleInvite(false)}
                 disabled={inviting}
@@ -98,13 +104,13 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvite
                 {inviting ? "Enviando…" : "✉️ Invitar al portal"}
               </button>
               {inviteError && (
-                <p className="text-xs text-red-500 mt-1">{inviteError}</p>
+                <p className="text-xs text-red-500 w-full">{inviteError}</p>
               )}
-            </div>
+            </>
           )}
 
           {client.portalStatus === "INVITED" && (
-            <div className="flex items-center gap-2">
+            <>
               <span className="text-xs px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg text-amber-700">
                 🕐 Invitación enviada
               </span>
@@ -119,7 +125,7 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvite
                   {inviting ? "…" : "Reenviar"}
                 </button>
               )}
-            </div>
+            </>
           )}
 
           {client.portalStatus === "ACTIVE" && (
