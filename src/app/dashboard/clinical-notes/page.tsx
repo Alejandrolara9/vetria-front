@@ -116,11 +116,12 @@ interface CreateModalProps {
 }
 
 // Minimal type for Web Speech API (not fully typed in all TS versions)
+type SpeechRecResult = { isFinal: boolean; [i: number]: { transcript: string } };
 type SpeechRec = {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
-  onresult: ((e: { results: { [i: number]: { [i: number]: { transcript: string } }; length: number } }) => void) | null;
+  onresult: ((e: { results: { [i: number]: SpeechRecResult; length: number } }) => void) | null;
   onend: (() => void) | null;
   onerror: ((e: { error: string }) => void) | null;
   start(): void;
@@ -165,8 +166,17 @@ function useVoiceInput(onTranscript: (text: string) => void) {
     recognition.interimResults = true;
 
     recognition.onresult = (e) => {
-      const transcript = Array.from({ length: e.results.length }, (_, i) => e.results[i][0].transcript).join(" ");
-      onTranscript(transcript);
+      let final = "";
+      let interim = "";
+      for (let i = 0; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) {
+          final += r[0].transcript;
+        } else {
+          interim += r[0].transcript;
+        }
+      }
+      onTranscript((final + interim).trim());
     };
 
     recognition.onerror = (e) => {
