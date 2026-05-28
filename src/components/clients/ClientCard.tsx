@@ -61,29 +61,29 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvite
   return (
     <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-white">
       <div className="px-4 py-3">
-        {/* Fila principal: avatar + info + expand */}
-        <div className="flex items-start gap-3">
+        {/* Fila principal — toda clickeable para expandir */}
+        <button
+          className="w-full flex items-start gap-3 text-left group"
+          onClick={() => setExpanded((e) => !e)}
+        >
           <div className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center text-base flex-shrink-0 mt-0.5">
             👤
           </div>
-          <button
-            className="flex-1 text-left min-w-0"
-            onClick={() => setExpanded((e) => !e)}
-          >
+          <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm truncate">{client.name}</p>
             <p className="text-xs text-muted-foreground truncate">📞 {client.phone}</p>
             <p className="text-xs text-muted-foreground truncate">✉️ {client.email}</p>
-            <p className="text-xs text-muted-foreground">
-              🐾 {client.pets.length} {client.pets.length === 1 ? "mascota" : "mascotas"}
-            </p>
-          </button>
-          <button
-            onClick={() => setExpanded((e) => !e)}
-            className="text-muted-foreground text-xs flex-shrink-0 mt-1 px-1"
-          >
-            {expanded ? "▼" : "▶"}
-          </button>
-        </div>
+          </div>
+          {/* Chip de mascotas — affordance visual clara */}
+          <span className={`flex-shrink-0 flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full border transition-colors mt-0.5 ${
+            expanded
+              ? "bg-teal-50 border-teal-200 text-teal-700"
+              : "bg-gray-100 border-gray-200 text-gray-600 group-hover:bg-teal-50 group-hover:border-teal-200 group-hover:text-teal-700"
+          }`}>
+            🐾 {client.pets.length} {client.pets.length === 1 ? "mascota" : "mascotas"}
+            <span className="text-[10px] ml-0.5">{expanded ? "▲" : "▼"}</span>
+          </span>
+        </button>
 
         {/* Fila de acciones */}
         <div className="flex items-center gap-2 mt-2.5 ml-12 flex-wrap">
