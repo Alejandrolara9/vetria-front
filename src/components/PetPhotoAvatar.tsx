@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 
 interface PetPhotoAvatarProps {
-  petId: string;
   photoUrl: string | null;
   fallbackEmoji: string;
   uploadFn: (file: File) => Promise<string>;
@@ -31,7 +30,7 @@ export function PetPhotoAvatar({
       setCurrentUrl(newUrl);
       onUploaded(newUrl);
     } catch (err) {
-      setError((err as Error).message ?? "Error al subir la foto");
+      setError(typeof err === "string" ? err : (err as Error).message ?? "Error al subir la foto");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -59,7 +58,7 @@ export function PetPhotoAvatar({
         )}
 
         {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className={`absolute inset-0 bg-black/50 flex flex-col items-center justify-center transition-opacity ${uploading ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
           {uploading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
