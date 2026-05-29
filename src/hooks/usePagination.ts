@@ -72,16 +72,18 @@ export function usePagination<T>({
         setData(res.data);
         setTotal(res.total);
         setTotalPages(res.totalPages);
+        setLoading(false);
       })
       .catch((err) => {
         // Ignoramos errores por cancelación (AbortController o Axios CanceledError)
+        // No actualizamos loading para evitar flicker en UI
         if (err?.name !== "CanceledError" && err?.name !== "AbortError") {
           setData([]);
           setTotal(0);
           setTotalPages(0);
+          setLoading(false);
         }
-      })
-      .finally(() => setLoading(false));
+      });
 
     return () => controller.abort();
   }, [page, limit, debouncedSearch, fetchFn]);

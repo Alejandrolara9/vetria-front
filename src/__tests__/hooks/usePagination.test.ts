@@ -47,4 +47,21 @@ describe("usePagination", () => {
     act(() => { jest.advanceTimersByTime(300); });
     await waitFor(() => expect(fetchFn.mock.calls.length).toBeGreaterThan(callsBefore));
   });
+
+  it("silently ignores aborted requests without flickering loading state", async () => {
+    const abortError = Object.assign(new Error("aborted"), { name: "AbortError" });
+    const fetchFn = jest.fn().mockRejectedValue(abortError);
+    const { result } = renderHook(() => usePagination({ fetchFn }));
+
+    // Should initially be loading
+    expect(result.current.loading).toBe(true);
+
+    // After abort error, loading should stay true (no setLoading(false) on abort)
+    // so it doesn't flicker to false
+    act(() => { jest.advanceTimersByTime(10); });
+
+    // Data should remain empty (abort error is silently ignored)
+    expect(result.current.data).toEqual([]);
+    expect(result.current.total).toBe(0);
+  });
 });
