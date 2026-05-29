@@ -3,10 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "@/services/api";
 import {
-  listReminders,
   getReminderStats,
-  getUpcomingReminders,
-  getOverdueReminders,
   createReminder,
   type Reminder,
   type ReminderStats,
@@ -14,6 +11,10 @@ import {
   type ReminderStatus,
   type CreateReminderDto,
 } from "@/services/reminders";
+import { usePagination } from "@/hooks/usePagination";
+import { SearchInput } from "@/components/SearchInput";
+import { PaginationBar } from "@/components/PaginationBar";
+import type { PaginatedResponse } from "@/types/pagination";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -202,6 +203,18 @@ function ReminderCard({ reminder, showOverdueBadge, onResent }: ReminderCardProp
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Skeleton card ────────────────────────────────────────────────────────────
+
+function SkeletonCard() {
+  return (
+    <div className="bg-card-bg rounded-xl border border-border p-4 animate-pulse">
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
     </div>
   );
 }
@@ -405,175 +418,123 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
   );
 }
 
-// ─── Tabla de todos los recordatorios ────────────────────────────────────────
-
-function AllRemindersTable({ reminders }: { reminders: Reminder[] }) {
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-
-  const filtered = reminders.filter(
-    (r) => statusFilter === "ALL" || r.status === statusFilter
-  );
-
-  const allStatuses: { value: string; label: string }[] = [
-    { value: "ALL", label: "Todos" },
-    { value: "SCHEDULED", label: "Programados" },
-    { value: "SENT", label: "Enviados" },
-    { value: "CONFIRMED", label: "Confirmados" },
-    { value: "EXPIRED", label: "Vencidos" },
-    { value: "CANCELLED", label: "Cancelados" },
-  ];
-
-  return (
-    <div>
-      {/* Filtros de estado */}
-      <div className="flex gap-2 flex-wrap mb-4">
-        {allStatuses.map((s) => (
-          <button
-            key={s.value}
-            onClick={() => setStatusFilter(s.value)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-              statusFilter === s.value
-                ? "bg-primary text-white border-primary"
-                : "border-border text-muted-foreground hover:bg-gray-50"
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="text-center py-10 text-muted-foreground text-sm">
-          No hay recordatorios con este estado.
-        </div>
-      ) : (
-        <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-border">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vencimiento</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dias</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Notif.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r) => {
-                const days = getDaysRemaining(r.calculatedDueDate);
-                const eventType = r.eventType as ReminderEventType;
-                const status = r.status as ReminderStatus;
-                const notifSent = (r.notifications ?? []).filter(
-                  (n) => n.status === "SENT" || n.status === "OPENED" || n.status === "CONFIRMED"
-                ).length;
-
-                return (
-                  <tr key={r.id} className="border-b border-border last:border-0 hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <p className="font-medium">{r.pet?.name ?? "—"}</p>
-                      <p className="text-xs text-muted-foreground">{r.pet?.species}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EVENT_TYPE_BADGE[eventType]}`}
-                      >
-                        {EVENT_TYPE_LABELS[eventType]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatDate(r.calculatedDueDate)}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`text-xs font-medium ${
-                          days < 0
-                            ? "text-red-600"
-                            : days <= 3
-                            ? "text-orange-600"
-                            : "text-green-700"
-                        }`}
-                      >
-                        {days === 0 ? "Hoy" : days > 0 ? `+${days}d` : `${days}d`}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[status]}`}>
-                        {STATUS_LABELS[status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{notifSent}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function RemindersPage() {
   const [activeTab, setActiveTab] = useState<TabId>("upcoming");
   const [pets, setPets] = useState<Pet[]>([]);
   const [stats, setStats] = useState<ReminderStats | null>(null);
-  const [upcoming, setUpcoming] = useState<Reminder[]>([]);
-  const [overdue, setOverdue] = useState<Reminder[]>([]);
-  const [all, setAll] = useState<Reminder[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [loadingList, setLoadingList] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [sending, setSending] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const loadStats = useCallback(async () => {
-    try {
-      const data = await getReminderStats();
-      setStats(data);
-    } catch {
-      setStats({ total: 0, upcoming: 0, overdue: 0, notificationsSentToday: 0 });
-    } finally {
-      setLoadingStats(false);
-    }
-  }, []);
+  // Status filter for the "all" tab
+  const [allStatusFilter, setAllStatusFilter] = useState<string>("ALL");
 
-  const loadLists = useCallback(async () => {
-    setLoadingList(true);
-    setListError(null);
-    try {
-      const [upcomingData, overdueData, allData, petsData] = await Promise.all([
-        getUpcomingReminders(7),
-        getOverdueReminders(),
-        listReminders(),
-        api.get<Pet[]>("/pets").then((r) => r.data).catch(() => []),
-      ]);
-      setUpcoming(upcomingData);
-      setOverdue(overdueData);
-      setAll(allData);
-      setPets(petsData);
-    } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      setListError(axiosErr.response?.data?.message ?? "Error al cargar recordatorios. Intenta de nuevo.");
-    } finally {
-      setLoadingList(false);
-    }
-  }, []);
+  // ── fetchFn: Próximos 7 días ──
+  const fetchUpcoming = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        days: "7",
+        ...(srch ? { search: srch } : {}),
+      });
+      const res = await api.get<PaginatedResponse<Reminder>>(`/reminders/upcoming?${params}`, { signal });
+      return res.data;
+    },
+    [refreshKey] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // ── fetchFn: Vencidos ──
+  const fetchOverdue = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+      });
+      const res = await api.get<PaginatedResponse<Reminder>>(`/reminders/overdue?${params}`, { signal });
+      return res.data;
+    },
+    [refreshKey] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // ── fetchFn: Todos ──
+  const fetchAll = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+        ...(allStatusFilter !== "ALL" ? { status: allStatusFilter } : {}),
+      });
+      const res = await api.get<PaginatedResponse<Reminder>>(`/reminders?${params}`, { signal });
+      return res.data;
+    },
+    [allStatusFilter, refreshKey] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // ── Instancias de paginación por tab ──
+  const {
+    data: upcomingReminders,
+    total: upcomingTotal,
+    page: upcomingPage,
+    totalPages: upcomingTotalPages,
+    search: upcomingSearch,
+    loading: upcomingLoading,
+    setSearch: setUpcomingSearch,
+    setPage: setUpcomingPage,
+  } = usePagination<Reminder>({ fetchFn: fetchUpcoming });
+
+  const {
+    data: overdueReminders,
+    total: overdueTotal,
+    page: overduePage,
+    totalPages: overdueTotalPages,
+    search: overdueSearch,
+    loading: overdueLoading,
+    setSearch: setOverdueSearch,
+    setPage: setOverduePage,
+  } = usePagination<Reminder>({ fetchFn: fetchOverdue });
+
+  const {
+    data: allReminders,
+    total: allTotal,
+    page: allPage,
+    totalPages: allTotalPages,
+    search: allSearch,
+    loading: allLoading,
+    setSearch: setAllSearch,
+    setPage: setAllPage,
+  } = usePagination<Reminder>({ fetchFn: fetchAll });
+
+  // ── Stats y mascotas al montar ──
+  useEffect(() => {
+    setLoadingStats(true);
+    getReminderStats()
+      .then(setStats)
+      .catch(() => setStats({ total: 0, upcoming: 0, overdue: 0, notificationsSentToday: 0 }))
+      .finally(() => setLoadingStats(false));
+  }, [refreshKey]);
 
   useEffect(() => {
-    loadStats();
-    loadLists();
-  }, [loadStats, loadLists]);
+    api
+      .get<Pet[]>("/pets")
+      .then((r) => setPets(r.data))
+      .catch(() => setPets([]));
+  }, []);
 
-  async function handleAfterCreate() {
-    await Promise.all([loadStats(), loadLists()]);
+  function handleRefresh() {
+    setRefreshKey((k) => k + 1);
   }
 
   async function handleSendNow() {
     setSending(true);
     try {
       await api.post("/reminders/scheduler/process-pending");
-      await Promise.all([loadStats(), loadLists()]);
+      handleRefresh();
       alert("Notificaciones procesadas. Revisa tu correo.");
     } catch {
       alert("Error al procesar notificaciones.");
@@ -583,9 +544,18 @@ export default function RemindersPage() {
   }
 
   const tabs: { id: TabId; label: string; count?: number }[] = [
-    { id: "upcoming", label: "Proximos 7 dias", count: upcoming.length },
-    { id: "overdue", label: "Vencidos", count: overdue.length },
-    { id: "all", label: "Todos", count: all.length },
+    { id: "upcoming", label: "Proximos 7 dias", count: upcomingTotal },
+    { id: "overdue", label: "Vencidos", count: overdueTotal },
+    { id: "all", label: "Todos", count: allTotal },
+  ];
+
+  const allStatuses: { value: string; label: string }[] = [
+    { value: "ALL", label: "Todos" },
+    { value: "SCHEDULED", label: "Programados" },
+    { value: "SENT", label: "Enviados" },
+    { value: "CONFIRMED", label: "Confirmados" },
+    { value: "EXPIRED", label: "Vencidos" },
+    { value: "CANCELLED", label: "Cancelados" },
   ];
 
   return (
@@ -615,19 +585,6 @@ export default function RemindersPage() {
           </button>
         </div>
       </div>
-
-      {/* Error al cargar listas */}
-      {listError && (
-        <div className="mb-4 flex items-center justify-between gap-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-          <span>{listError}</span>
-          <button
-            onClick={loadLists}
-            className="text-xs px-3 py-1.5 border border-red-300 rounded-lg hover:bg-red-100 transition-colors font-medium flex-shrink-0"
-          >
-            Reintentar
-          </button>
-        </div>
-      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -685,72 +642,216 @@ export default function RemindersPage() {
         ))}
       </div>
 
-      {/* Contenido de tabs */}
-      {loadingList ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-card-bg rounded-xl border border-border p-4 animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+      {/* ── Tab: Próximos 7 días ── */}
+      {activeTab === "upcoming" && (
+        <div>
+          <div className="mb-4">
+            <SearchInput
+              value={upcomingSearch}
+              onChange={setUpcomingSearch}
+              placeholder="Buscar mascota o tutor..."
+              disabled={upcomingLoading}
+            />
+          </div>
+          {upcomingLoading && upcomingReminders.length === 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
-          ))}
+          ) : upcomingReminders.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <p>
+                {upcomingSearch
+                  ? "No se encontraron recordatorios con esa búsqueda"
+                  : "No hay recordatorios para los proximos 7 dias"}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {upcomingReminders
+                .sort(
+                  (a, b) =>
+                    new Date(a.calculatedDueDate).getTime() -
+                    new Date(b.calculatedDueDate).getTime()
+                )
+                .map((r) => (
+                  <ReminderCard key={r.id} reminder={r} onResent={handleRefresh} />
+                ))}
+            </div>
+          )}
+          <PaginationBar
+            page={upcomingPage}
+            totalPages={upcomingTotalPages}
+            total={upcomingTotal}
+            onPageChange={setUpcomingPage}
+            loading={upcomingLoading}
+          />
         </div>
-      ) : (
-        <>
-          {activeTab === "upcoming" && (
-            <div>
-              {upcoming.length === 0 ? (
-                <div className="text-center py-16 text-muted-foreground">
-                  <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                  <p>No hay recordatorios para los proximos 7 dias</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {upcoming
-                    .sort(
-                      (a, b) =>
-                        new Date(a.calculatedDueDate).getTime() -
-                        new Date(b.calculatedDueDate).getTime()
-                    )
-                    .map((r) => (
-                      <ReminderCard key={r.id} reminder={r} onResent={handleAfterCreate} />
-                    ))}
-                </div>
+      )}
+
+      {/* ── Tab: Vencidos ── */}
+      {activeTab === "overdue" && (
+        <div>
+          <div className="mb-4">
+            <SearchInput
+              value={overdueSearch}
+              onChange={setOverdueSearch}
+              placeholder="Buscar mascota o tutor..."
+              disabled={overdueLoading}
+            />
+          </div>
+          {overdueLoading && overdueReminders.length === 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : overdueReminders.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <svg className="w-12 h-12 mx-auto mb-3 opacity-30 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-green-600 font-medium">
+                {overdueSearch ? "No se encontraron recordatorios vencidos con esa búsqueda" : "Sin recordatorios vencidos"}
+              </p>
+              {!overdueSearch && (
+                <p className="text-xs text-muted-foreground mt-1">Todos los recordatorios estan al dia</p>
               )}
             </div>
-          )}
-
-          {activeTab === "overdue" && (
-            <div>
-              {overdue.length === 0 ? (
-                <div className="text-center py-16 text-muted-foreground">
-                  <svg className="w-12 h-12 mx-auto mb-3 opacity-30 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-green-600 font-medium">Sin recordatorios vencidos</p>
-                  <p className="text-xs text-muted-foreground mt-1">Todos los recordatorios estan al dia</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {overdue
-                    .sort(
-                      (a, b) =>
-                        new Date(a.calculatedDueDate).getTime() -
-                        new Date(b.calculatedDueDate).getTime()
-                    )
-                    .map((r) => (
-                      <ReminderCard key={r.id} reminder={r} showOverdueBadge onResent={handleAfterCreate} />
-                    ))}
-                </div>
-              )}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {overdueReminders
+                .sort(
+                  (a, b) =>
+                    new Date(a.calculatedDueDate).getTime() -
+                    new Date(b.calculatedDueDate).getTime()
+                )
+                .map((r) => (
+                  <ReminderCard key={r.id} reminder={r} showOverdueBadge onResent={handleRefresh} />
+                ))}
             </div>
           )}
+          <PaginationBar
+            page={overduePage}
+            totalPages={overdueTotalPages}
+            total={overdueTotal}
+            onPageChange={setOverduePage}
+            loading={overdueLoading}
+          />
+        </div>
+      )}
 
-          {activeTab === "all" && <AllRemindersTable reminders={all} />}
-        </>
+      {/* ── Tab: Todos ── */}
+      {activeTab === "all" && (
+        <div>
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <SearchInput
+              value={allSearch}
+              onChange={setAllSearch}
+              placeholder="Buscar mascota o tutor..."
+              disabled={allLoading}
+            />
+            <div className="flex gap-2 flex-wrap">
+              {allStatuses.map((s) => (
+                <button
+                  key={s.value}
+                  onClick={() => {
+                    setAllStatusFilter(s.value);
+                    setAllPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                    allStatusFilter === s.value
+                      ? "bg-primary text-white border-primary"
+                      : "border-border text-muted-foreground hover:bg-gray-50"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {allLoading && allReminders.length === 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : allReminders.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground text-sm">
+              {allSearch || allStatusFilter !== "ALL"
+                ? "No hay recordatorios con este filtro."
+                : "No hay recordatorios registrados."}
+            </div>
+          ) : (
+            <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b border-border">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vencimiento</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dias</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Notif.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allReminders.map((r) => {
+                    const days = getDaysRemaining(r.calculatedDueDate);
+                    const eventType = r.eventType as ReminderEventType;
+                    const status = r.status as ReminderStatus;
+                    const notifSent = (r.notifications ?? []).filter(
+                      (n) => n.status === "SENT" || n.status === "OPENED" || n.status === "CONFIRMED"
+                    ).length;
+
+                    return (
+                      <tr key={r.id} className="border-b border-border last:border-0 hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <p className="font-medium">{r.pet?.name ?? "—"}</p>
+                          <p className="text-xs text-muted-foreground">{r.pet?.species}</p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EVENT_TYPE_BADGE[eventType]}`}
+                          >
+                            {EVENT_TYPE_LABELS[eventType]}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">{formatDate(r.calculatedDueDate)}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`text-xs font-medium ${
+                              days < 0
+                                ? "text-red-600"
+                                : days <= 3
+                                ? "text-orange-600"
+                                : "text-green-700"
+                            }`}
+                          >
+                            {days === 0 ? "Hoy" : days > 0 ? `+${days}d` : `${days}d`}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[status]}`}>
+                            {STATUS_LABELS[status]}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground text-xs">{notifSent}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <PaginationBar
+            page={allPage}
+            totalPages={allTotalPages}
+            total={allTotal}
+            onPageChange={setAllPage}
+            loading={allLoading}
+          />
+        </div>
       )}
 
       {/* Modal de creación */}
@@ -758,7 +859,7 @@ export default function RemindersPage() {
         <CreateReminderModal
           pets={pets}
           onClose={() => setShowCreate(false)}
-          onCreated={handleAfterCreate}
+          onCreated={handleRefresh}
         />
       )}
     </div>

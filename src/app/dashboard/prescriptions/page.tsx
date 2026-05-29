@@ -1,8 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
-import { listPrescriptions, deletePrescription, type Prescription, type PrescriptionStatus } from "@/services/prescriptions";
+import { api } from "@/services/api";
+import { usePagination } from "@/hooks/usePagination";
+import { SearchInput } from "@/components/SearchInput";
+import { PaginationBar } from "@/components/PaginationBar";
+import type { PaginatedResponse } from "@/types/pagination";
+import { deletePrescription, type Prescription, type PrescriptionStatus } from "@/services/prescriptions";
 
 const STATUS_LABEL: Record<PrescriptionStatus, string> = {
   DRAFT: "Borrador",
@@ -21,44 +26,44 @@ function formatDate(iso: string) {
 }
 
 export default function PrescriptionsPage() {
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<PrescriptionStatus | "ALL">("ALL");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await listPrescriptions(
-        statusFilter !== "ALL" ? { status: statusFilter } : undefined
+  const fetchPrescriptions = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+        ...(statusFilter !== "ALL" ? { status: statusFilter } : {}),
+      });
+      const res = await api.get<PaginatedResponse<Prescription>>(
+        `/prescriptions?${params}`,
+        { signal }
       );
-      setPrescriptions(data);
-    } catch {
-      setPrescriptions([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter]);
+      return res.data;
+    },
+    [statusFilter, refreshKey]
+  );
 
-  useEffect(() => { load(); }, [load]);
-
-  const filtered = prescriptions.filter((p) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      p.pet.name.toLowerCase().includes(q) ||
-      p.pet.client.name.toLowerCase().includes(q) ||
-      p.vet.name.toLowerCase().includes(q)
-    );
-  });
+  const {
+    data: prescriptions,
+    total,
+    page,
+    totalPages,
+    search,
+    loading,
+    setSearch,
+    setPage,
+  } = usePagination<Prescription>({ fetchFn: fetchPrescriptions });
 
   async function handleDelete(p: Prescription) {
     if (!confirm(`¿Eliminar la fórmula de ${p.pet.name}?`)) return;
     setDeletingId(p.id);
     try {
       await deletePrescription(p.id);
-      setPrescriptions((prev) => prev.filter((x) => x.id !== p.id));
+      setRefreshKey((k) => k + 1);
     } catch {
       alert("No se pudo eliminar la fórmula");
     } finally {
@@ -82,16 +87,15 @@ export default function PrescriptionsPage() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <input
-          type="text"
+        <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={setSearch}
           placeholder="Buscar paciente, propietario o veterinario..."
-          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary w-72"
+          disabled={loading}
         />
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as PrescriptionStatus | "ALL")}
+          onChange={(e) => { setStatusFilter(e.target.value as PrescriptionStatus | "ALL"); setPage(1); }}
           className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="ALL">Todos los estados</option>
@@ -101,18 +105,24 @@ export default function PrescriptionsPage() {
         </select>
       </div>
 
-      {loading ? (
+      {loading && prescriptions.length === 0 ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-14 bg-gray-100 rounded-lg animate-pulse" />
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : prescriptions.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
-          <p className="text-lg">No hay fórmulas médicas</p>
-          <Link href="/dashboard/prescriptions/new" className="text-sm text-primary hover:underline mt-2 inline-block">
-            Crear la primera fórmula
-          </Link>
+          <p className="text-lg">
+            {search || statusFilter !== "ALL"
+              ? "No se encontraron fórmulas con ese criterio."
+              : "No hay fórmulas médicas registradas."}
+          </p>
+          {!search && statusFilter === "ALL" && (
+            <Link href="/dashboard/prescriptions/new" className="text-sm text-primary hover:underline mt-2 inline-block">
+              Crear la primera fórmula
+            </Link>
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-xl border overflow-hidden">
@@ -128,7 +138,7 @@ export default function PrescriptionsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map((p) => (
+              {prescriptions.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-medium">{p.pet.name}</td>
                   <td className="px-4 py-3 text-gray-600">{p.pet.client.name}</td>
@@ -164,6 +174,13 @@ export default function PrescriptionsPage() {
           </table>
         </div>
       )}
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+      />
     </div>
   );
 }

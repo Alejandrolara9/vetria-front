@@ -1,70 +1,43 @@
 // src/app/dashboard/clients/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { api } from "@/services/api";
 import { ClientCard, type ClientWithPets } from "@/components/clients/ClientCard";
 import { ClientFormModal } from "@/components/clients/ClientFormModal";
 import { PetFormModal } from "@/components/clients/PetFormModal";
-import { filterClients, type PortalStatus } from "@/lib/filterClients";
+import { usePagination } from "@/hooks/usePagination";
+import { SearchInput } from "@/components/SearchInput";
+import { PaginationBar } from "@/components/PaginationBar";
+import type { PaginatedResponse } from "@/types/pagination";
 import type { Pet } from "@/components/clients/PetCard";
 
-interface RawClient {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  createdAt: string;
-  portalStatus: PortalStatus;
-}
-
-interface RawPet extends Pet {
-  client: { id: string };
-}
-
 export default function ClientsPage() {
-  const [clients, setClients] = useState<ClientWithPets[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  // refreshKey: incrementar fuerza un re-fetch sin cambiar búsqueda ni página
+  const [refreshKey, setRefreshKey] = useState(0);
 
+  const fetchClients = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+      });
+      const res = await api.get<PaginatedResponse<ClientWithPets>>(`/clients?${params}`, { signal });
+      return res.data;
+    },
+    [refreshKey]
+  );
+
+  const { data: clients, total, page, totalPages, search, loading, setSearch, setPage } =
+    usePagination<ClientWithPets>({ fetchFn: fetchClients });
+
+  // Modal state — se preserva exactamente igual que antes
   const [showClientModal, setShowClientModal] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientWithPets | null>(null);
   const [showPetModal, setShowPetModal] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [targetClientId, setTargetClientId] = useState("");
-
-  useEffect(() => {
-    const controller = new AbortController();
-    loadData(controller.signal);
-    return () => controller.abort();
-  }, []);
-
-  async function loadData(signal?: AbortSignal) {
-    setLoading(true);
-    try {
-      const [clientsRes, petsRes] = await Promise.all([
-        api.get<RawClient[]>("/clients", { signal }),
-        api.get<RawPet[]>("/pets", { signal }),
-      ]);
-      const petsByClientId = petsRes.data.reduce<Record<string, Pet[]>>((acc, { client, ...pet }) => {
-        acc[client.id] = [...(acc[client.id] ?? []), pet];
-        return acc;
-      }, {});
-      setClients(
-        clientsRes.data.map((c) => ({
-          ...c,
-          portalStatus: c.portalStatus ?? "NOT_INVITED",
-          pets: petsByClientId[c.id] ?? [],
-        }))
-      );
-    } catch (err: unknown) {
-      if ((err as { name?: string })?.name !== "CanceledError" && (err as { name?: string })?.name !== "AbortError") {
-        setClients([]);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function openNewClient() {
     setEditingClient(null);
@@ -88,28 +61,26 @@ export default function ClientsPage() {
     setShowPetModal(true);
   }
 
+  // Cierra el modal y re-fetcha para reflejar el cliente/mascota guardado
   function handleSaved() {
     setShowClientModal(false);
     setShowPetModal(false);
     setEditingClient(null);
     setEditingPet(null);
-    loadData();
+    setRefreshKey((k) => k + 1);
   }
 
-  function handleInvited(clientId: string) {
-    setClients((prev) =>
-      prev.map((c) => (c.id === clientId ? { ...c, portalStatus: "INVITED" } : c))
-    );
+  // Re-fetcha para que el portalStatus actualizado venga del servidor
+  function handleInvited(_clientId: string) {
+    setRefreshKey((k) => k + 1);
   }
-
-  const filtered = filterClients(clients, search);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Clientes y Mascotas</h1>
-          <p className="text-muted-foreground text-sm mt-1">{clients.length} clientes registrados</p>
+          <p className="text-muted-foreground text-sm mt-1">{total} clientes registrados</p>
         </div>
         <button
           onClick={openNewClient}
@@ -120,26 +91,27 @@ export default function ClientsPage() {
       </div>
 
       <div className="mb-4">
-        <input
-          type="text"
-          placeholder="🔍 Buscar por cliente, teléfono, mascota, raza o especie..."
-          className="w-full max-w-lg px-4 py-2 border border-border rounded-lg text-sm"
+        <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={setSearch}
+          placeholder="Buscar por cliente, teléfono, email o mascota…"
+          disabled={loading}
         />
       </div>
 
-      {loading ? (
-        <div className="text-center py-12 text-muted-foreground">Cargando...</div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          {search
-            ? "No se encontraron clientes ni mascotas con ese criterio."
-            : "No hay clientes registrados."}
+      {loading && clients.length === 0 ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-20 bg-gray-100 rounded-xl animate-pulse" />
+          ))}
         </div>
+      ) : clients.length === 0 ? (
+        <p className="text-center text-muted-foreground py-8">
+          {search ? "No se encontraron clientes con ese criterio." : "No hay clientes registrados."}
+        </p>
       ) : (
         <div className="flex flex-col gap-2">
-          {filtered.map((client) => (
+          {clients.map((client) => (
             <ClientCard
               key={client.id}
               client={client}
@@ -151,6 +123,14 @@ export default function ClientsPage() {
           ))}
         </div>
       )}
+
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+      />
 
       {showClientModal && (
         <ClientFormModal

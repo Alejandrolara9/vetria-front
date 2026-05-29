@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
+import { api } from "@/services/api";
 import {
-  getServices,
   createService,
   updateService,
   deleteService,
   type Service,
   type CreateServiceDto,
 } from "@/services/catalog";
+import { usePagination } from "@/hooks/usePagination";
+import { SearchInput } from "@/components/SearchInput";
+import { PaginationBar } from "@/components/PaginationBar";
+import type { PaginatedResponse } from "@/types/pagination";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -227,32 +231,46 @@ function ServiceModal({
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function ServicesPage() {
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | undefined>(undefined);
+  const [refreshKey, setRefreshKey] = useState(0);
+  // undefined = todos, true = activos, false = inactivos
+  const [showActive, setShowActive] = useState<boolean | undefined>(undefined);
 
-  async function loadServices() {
-    try {
-      setLoading(true);
-      const data = await getServices(search || undefined);
-      setServices(data);
-    } finally {
-      setLoading(false);
-    }
+  const fetchServices = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+        ...(showActive !== undefined ? { active: String(showActive) } : {}),
+      });
+      const res = await api.get<PaginatedResponse<Service>>(`/services?${params}`, { signal });
+      return res.data;
+    },
+    [showActive, refreshKey] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const {
+    data: services,
+    total,
+    page,
+    totalPages,
+    search,
+    loading,
+    setSearch,
+    setPage,
+  } = usePagination<Service>({ fetchFn: fetchServices });
+
+  function handleRefresh() {
+    setRefreshKey((k) => k + 1);
   }
-
-  useEffect(() => {
-    loadServices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
 
   async function handleDelete(svc: Service) {
     if (!confirm(`Eliminar el servicio "${svc.name}"? Esta accion no se puede deshacer.`)) return;
     try {
       await deleteService(svc.id);
-      loadServices();
+      handleRefresh();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       alert(msg ?? "Error al eliminar el servicio");
@@ -276,7 +294,7 @@ export default function ServicesPage() {
         <div>
           <h1 className="text-2xl font-bold">Catalogo de Servicios</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {services.length} servicio{services.length !== 1 ? "s" : ""} registrado{services.length !== 1 ? "s" : ""}
+            {total} servicio{total !== 1 ? "s" : ""} registrado{total !== 1 ? "s" : ""}
           </p>
         </div>
         <button
@@ -287,15 +305,27 @@ export default function ServicesPage() {
         </button>
       </div>
 
-      {/* Buscador */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Buscar servicio por nombre..."
-          className="w-full max-w-sm px-4 py-2 border border-border rounded-lg text-sm"
+      {/* Filtros + búsqueda */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={setSearch}
+          placeholder="Buscar servicio por nombre..."
+          disabled={loading}
         />
+        <select
+          className="px-4 py-2 border border-border rounded-lg text-sm bg-white"
+          value={showActive === undefined ? "" : String(showActive)}
+          onChange={(e) => {
+            const val = e.target.value;
+            setShowActive(val === "" ? undefined : val === "true");
+            setPage(1);
+          }}
+        >
+          <option value="">Todos</option>
+          <option value="true">Activos</option>
+          <option value="false">Inactivos</option>
+        </select>
       </div>
 
       {/* Tabla */}
@@ -311,7 +341,7 @@ export default function ServicesPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {loading && services.length === 0 ? (
               <>
                 <SkeletonRow />
                 <SkeletonRow />
@@ -320,8 +350,8 @@ export default function ServicesPage() {
             ) : services.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center py-12 text-muted-foreground">
-                  {search
-                    ? "No se encontraron servicios con ese nombre"
+                  {search || showActive !== undefined
+                    ? "No se encontraron servicios con ese filtro"
                     : "No hay servicios registrados. Crea el primero."}
                 </td>
               </tr>
@@ -377,12 +407,21 @@ export default function ServicesPage() {
         </table>
       </div>
 
+      {/* Paginación */}
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       {/* Modal */}
       {showModal && (
         <ServiceModal
           initial={editingService}
           onClose={() => setShowModal(false)}
-          onSaved={loadServices}
+          onSaved={handleRefresh}
         />
       )}
     </div>
