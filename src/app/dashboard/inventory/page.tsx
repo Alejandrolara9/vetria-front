@@ -832,29 +832,88 @@ export default function InventoryPage() {
         </button>
       </div>
 
-      {/* Tabla de productos */}
-      <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
+      {/* Mobile: cards */}
+      {loading && products.length === 0 ? (
+        <div className="md:hidden space-y-3">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-36 bg-gray-100 rounded-xl animate-pulse" />)}
+        </div>
+      ) : products.length === 0 ? (
+        <div className="md:hidden text-center py-12 text-muted-foreground">
+          {search || categoryFilter || onlyLowStock
+            ? "No se encontraron productos con ese criterio."
+            : "No hay productos registrados."}
+        </div>
+      ) : (
+        <div className="md:hidden space-y-3">
+          {products.map((product) => {
+            const isLow = product.stock <= product.minStock;
+            return (
+              <div key={product.id} className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
+                <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-900 text-base leading-snug">{product.name}</p>
+                    {product.description && (
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">{product.description}</p>
+                    )}
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full font-semibold flex-shrink-0 mt-0.5 ${CATEGORY_COLORS[product.category]}`}>
+                    {CATEGORY_LABELS[product.category]}
+                  </span>
+                </div>
+                <div className="px-4 pb-4">
+                  <div className="grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1.5 text-sm">
+                    <span className="text-gray-400 font-medium">Stock</span>
+                    <span className={`font-semibold ${isLow ? "text-red-600" : "text-gray-900"}`}>
+                      {product.stock} {product.unit}
+                      {isLow && <span className="text-xs font-normal ml-1 text-red-500">(min: {product.minStock})</span>}
+                    </span>
+                    <span className="text-gray-400 font-medium">Precio</span>
+                    <span className="text-gray-900 font-medium">{formatCurrency(product.salePrice)}</span>
+                    {product.sku && (
+                      <>
+                        <span className="text-gray-400 font-medium">SKU</span>
+                        <span className="text-gray-700 font-mono text-xs">{product.sku}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="px-4 py-3 bg-gray-50 border-t border-border flex gap-2">
+                  <button
+                    onClick={() => setMovementProduct(product)}
+                    className="flex-1 inline-flex items-center justify-center text-sm px-2 py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium transition-colors"
+                  >
+                    Movimiento
+                  </button>
+                  <button
+                    onClick={() => setEditingProduct(product)}
+                    className="flex-1 inline-flex items-center justify-center text-sm px-2 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product)}
+                    className="flex-1 inline-flex items-center justify-center text-sm px-2 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-medium transition-colors"
+                  >
+                    Desactivar
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Desktop: tabla */}
+      <div className="hidden md:block bg-card-bg rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-border">
             <tr>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">
-                Producto
-              </th>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">
-                Categoria
-              </th>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">
-                SKU
-              </th>
-              <th className="text-right px-6 py-3 font-medium text-muted-foreground">
-                Stock
-              </th>
-              <th className="text-right px-6 py-3 font-medium text-muted-foreground">
-                Precio Venta
-              </th>
-              <th className="text-right px-6 py-3 font-medium text-muted-foreground">
-                Acciones
-              </th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Producto</th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Categoria</th>
+              <th className="text-left px-6 py-3 font-medium text-muted-foreground">SKU</th>
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Stock</th>
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Precio Venta</th>
+              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -877,79 +936,29 @@ export default function InventoryPage() {
               products.map((product) => {
                 const isLow = product.stock <= product.minStock;
                 return (
-                  <tr
-                    key={product.id}
-                    className="border-b border-border last:border-0 hover:bg-gray-50"
-                  >
-                    {/* Nombre */}
+                  <tr key={product.id} className="border-b border-border last:border-0 hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <p className="font-medium">{product.name}</p>
                       {product.description && (
-                        <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xs">
-                          {product.description}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xs">{product.description}</p>
                       )}
                     </td>
-
-                    {/* Categoria badge */}
                     <td className="px-6 py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          CATEGORY_COLORS[product.category]
-                        }`}
-                      >
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${CATEGORY_COLORS[product.category]}`}>
                         {CATEGORY_LABELS[product.category]}
                       </span>
                     </td>
-
-                    {/* SKU */}
-                    <td className="px-6 py-4 text-muted-foreground font-mono text-xs">
-                      {product.sku ?? "—"}
-                    </td>
-
-                    {/* Stock con indicador de alerta */}
+                    <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{product.sku ?? "—"}</td>
                     <td className="px-6 py-4 text-right">
-                      <span
-                        className={`font-semibold ${
-                          isLow ? "text-red-600" : "text-foreground"
-                        }`}
-                      >
-                        {product.stock}
-                      </span>
-                      <span className="text-muted-foreground text-xs ml-1">
-                        {product.unit}
-                      </span>
-                      {isLow && (
-                        <span className="ml-2 text-xs text-red-500">(min: {product.minStock})</span>
-                      )}
+                      <span className={`font-semibold ${isLow ? "text-red-600" : "text-foreground"}`}>{product.stock}</span>
+                      <span className="text-muted-foreground text-xs ml-1">{product.unit}</span>
+                      {isLow && <span className="ml-2 text-xs text-red-500">(min: {product.minStock})</span>}
                     </td>
-
-                    {/* Precio de venta */}
-                    <td className="px-6 py-4 text-right font-medium">
-                      {formatCurrency(product.salePrice)}
-                    </td>
-
-                    {/* Acciones */}
+                    <td className="px-6 py-4 text-right font-medium">{formatCurrency(product.salePrice)}</td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => setMovementProduct(product)}
-                        className="text-primary hover:underline mr-3 text-xs"
-                        title="Registrar movimiento de stock"
-                      >
-                        Movimiento
-                      </button>
-                      <button
-                        onClick={() => setEditingProduct(product)}
-                        className="text-muted-foreground hover:text-foreground hover:underline mr-3 text-xs"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product)}
-                        className="text-danger hover:underline text-xs"
-                      >
-                        Desactivar
-                      </button>
+                      <button onClick={() => setMovementProduct(product)} className="text-primary hover:underline mr-3 text-xs" title="Registrar movimiento de stock">Movimiento</button>
+                      <button onClick={() => setEditingProduct(product)} className="text-muted-foreground hover:text-foreground hover:underline mr-3 text-xs">Editar</button>
+                      <button onClick={() => handleDelete(product)} className="text-danger hover:underline text-xs">Desactivar</button>
                     </td>
                   </tr>
                 );

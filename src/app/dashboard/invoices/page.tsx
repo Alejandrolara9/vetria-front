@@ -1016,8 +1016,68 @@ export default function InvoicesPage() {
         </select>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
+      {/* Mobile: cards */}
+      {loading && invoices.length === 0 ? (
+        <div className="md:hidden space-y-3">
+          {[1, 2, 3].map((i) => <div key={i} className="h-36 bg-gray-100 rounded-xl animate-pulse" />)}
+        </div>
+      ) : invoices.length === 0 ? (
+        <div className="md:hidden text-center py-12 text-muted-foreground">
+          {search || statusFilter
+            ? "No se encontraron facturas con ese filtro"
+            : "No hay facturas registradas"}
+        </div>
+      ) : (
+        <div className="md:hidden space-y-3">
+          {invoices.map((inv) => (
+            <div key={inv.id} className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
+              <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-mono font-bold text-primary text-base leading-snug">{inv.number}</p>
+                  <p className="text-sm font-medium text-gray-900 mt-0.5">{inv.client.name}</p>
+                  {inv.pet && <p className="text-xs text-gray-400 mt-0.5">{inv.pet.name}</p>}
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="font-bold text-gray-900 text-base">{formatCurrency(inv.total)}</p>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-semibold mt-1 inline-block ${STATUS_COLORS[inv.status]}`}>
+                    {STATUS_LABELS[inv.status]}
+                  </span>
+                </div>
+              </div>
+              <div className="px-4 pb-3">
+                <p className="text-xs text-gray-400">{formatDate(inv.issuedAt)}</p>
+              </div>
+              <div className="px-4 py-3 bg-gray-50 border-t border-border flex gap-2">
+                <button
+                  onClick={() => setSelectedInvoice(inv)}
+                  className="flex-1 inline-flex items-center justify-center text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
+                >
+                  Ver detalle
+                </button>
+                {inv.status === "ISSUED" && (
+                  <button
+                    onClick={() => handleMarkPaid(inv)}
+                    className="flex-1 inline-flex items-center justify-center text-sm px-3 py-2 rounded-lg border border-green-200 bg-green-50 hover:bg-green-100 text-green-700 font-medium transition-colors"
+                  >
+                    Marcar pagada
+                  </button>
+                )}
+                {inv.status === "DRAFT" && (
+                  <button
+                    onClick={() => handleDelete(inv)}
+                    className="flex-1 inline-flex items-center justify-center text-sm px-3 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-medium transition-colors"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Desktop: tabla */}
+      <div className="hidden md:block bg-card-bg rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-border">
             <tr>
@@ -1047,52 +1107,24 @@ export default function InvoicesPage() {
               </tr>
             ) : (
               invoices.map((inv) => (
-                <tr
-                  key={inv.id}
-                  className="border-b border-border last:border-0 hover:bg-gray-50"
-                >
-                  <td className="px-6 py-4 font-mono font-semibold text-primary">
-                    {inv.number}
-                  </td>
+                <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-gray-50">
+                  <td className="px-6 py-4 font-mono font-semibold text-primary">{inv.number}</td>
                   <td className="px-6 py-4 font-medium">{inv.client.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground">
-                    {inv.pet ? inv.pet.name : "—"}
-                  </td>
-                  <td className="px-6 py-4 text-right font-semibold">
-                    {formatCurrency(inv.total)}
-                  </td>
+                  <td className="px-6 py-4 text-muted-foreground">{inv.pet ? inv.pet.name : "—"}</td>
+                  <td className="px-6 py-4 text-right font-semibold">{formatCurrency(inv.total)}</td>
                   <td className="px-6 py-4 text-center">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[inv.status]}`}
-                    >
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[inv.status]}`}>
                       {STATUS_LABELS[inv.status]}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground">
-                    {formatDate(inv.issuedAt)}
-                  </td>
+                  <td className="px-6 py-4 text-muted-foreground">{formatDate(inv.issuedAt)}</td>
                   <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => setSelectedInvoice(inv)}
-                      className="text-primary hover:underline mr-3"
-                    >
-                      Ver
-                    </button>
+                    <button onClick={() => setSelectedInvoice(inv)} className="text-primary hover:underline mr-3">Ver</button>
                     {inv.status === "ISSUED" && (
-                      <button
-                        onClick={() => handleMarkPaid(inv)}
-                        className="text-green-600 hover:underline mr-3"
-                      >
-                        Pagar
-                      </button>
+                      <button onClick={() => handleMarkPaid(inv)} className="text-green-600 hover:underline mr-3">Pagar</button>
                     )}
                     {inv.status === "DRAFT" && (
-                      <button
-                        onClick={() => handleDelete(inv)}
-                        className="text-danger hover:underline"
-                      >
-                        Eliminar
-                      </button>
+                      <button onClick={() => handleDelete(inv)} className="text-danger hover:underline">Eliminar</button>
                     )}
                   </td>
                 </tr>
