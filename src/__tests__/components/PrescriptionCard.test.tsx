@@ -5,9 +5,10 @@ import { PrescriptionCard } from "@/components/prescriptions/PrescriptionCard";
 import type { Prescription } from "@/services/prescriptions";
 
 jest.mock("next/link", () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  );
+  function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
+    return <a href={href}>{children}</a>;
+  }
+  return MockLink;
 });
 
 function makePrescription(overrides: Partial<Prescription> = {}): Prescription {
