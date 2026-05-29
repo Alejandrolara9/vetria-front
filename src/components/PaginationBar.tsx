@@ -37,8 +37,9 @@ export function PaginationBar({ page, totalPages, total, onPageChange, loading }
               <span key={`dots-${i}`} className="px-2 text-xs text-muted-foreground">…</span>
             ) : (
               <button
-                key={p}
+                key={`page-${p}-${i}`}
                 onClick={() => onPageChange(p as number)}
+                aria-current={p === page ? "page" : undefined}
                 className={`w-8 h-8 text-xs rounded-lg border transition-colors ${
                   p === page
                     ? "bg-primary text-primary-foreground border-primary font-semibold"
@@ -53,7 +54,7 @@ export function PaginationBar({ page, totalPages, total, onPageChange, loading }
 
         {/* Position — mobile only */}
         <span className="sm:hidden text-xs px-3 py-1.5 border border-border rounded-lg">
-          {page} / {totalPages}
+          Pág. {page} de {totalPages}
         </span>
 
         {/* Next */}

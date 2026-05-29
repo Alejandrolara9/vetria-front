@@ -19,7 +19,7 @@ export function SearchInput({ value, onChange, placeholder = "Buscar…", disabl
         disabled={disabled}
         className="w-full pl-9 pr-8 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
       />
-      {value && (
+      {value && !disabled && (
         <button
           type="button"
           onClick={() => onChange("")}
