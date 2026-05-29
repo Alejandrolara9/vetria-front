@@ -60,74 +60,78 @@ export function ClientCard({ client, onEditClient, onEditPet, onAddPet, onInvite
 
   return (
     <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-white">
-      <div className="flex items-center justify-between px-4 py-3 gap-2">
+      {/* Fila principal: avatar + info + botones */}
+      <div className="flex items-start gap-3 px-4 py-3">
+        {/* Botón expandir ocupa todo el ancho disponible */}
         <button
-          className="flex items-center gap-3 flex-1 text-left min-w-0"
+          className="flex items-start gap-3 flex-1 text-left min-w-0"
           onClick={() => setExpanded((e) => !e)}
         >
-          <div className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center text-base flex-shrink-0">
+          <div className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center text-base flex-shrink-0 mt-0.5">
             👤
           </div>
-          <div className="min-w-0">
-            <p className="font-semibold text-sm truncate">{client.name}</p>
-            <p className="text-xs text-muted-foreground">
-              📞 {client.phone} · ✉️ {client.email} · {client.pets.length}{" "}
-              {client.pets.length === 1 ? "mascota" : "mascotas"}
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-sm leading-snug break-words">{client.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">📞 {client.phone}</p>
+            <p className="text-xs text-muted-foreground truncate">✉️ {client.email}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {client.pets.length}{" "}{client.pets.length === 1 ? "mascota" : "mascotas"}
             </p>
           </div>
-          <span className="ml-2 text-muted-foreground text-xs flex-shrink-0">
+          <span className="text-muted-foreground text-xs flex-shrink-0 mt-1">
             {expanded ? "▼" : "▶"}
           </span>
         </button>
+      </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={() => onEditClient(client)}
-            className="text-xs px-3 py-1.5 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 text-muted-foreground"
-          >
-            ✏️ Editar
-          </button>
+      {/* Fila de acciones — siempre visible, separada */}
+      <div className="flex items-center gap-2 px-4 pb-3 flex-wrap">
+        <button
+          onClick={() => onEditClient(client)}
+          className="text-xs px-3 py-1.5 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 text-muted-foreground"
+        >
+          ✏️ Editar
+        </button>
 
-          {client.portalStatus === "NOT_INVITED" && (
-            <div className="flex flex-col items-end">
-              <button
-                onClick={() => handleInvite(false)}
-                disabled={inviting}
-                className="text-xs px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 text-teal-700 disabled:opacity-50"
-              >
-                {inviting ? "Enviando…" : "✉️ Invitar al portal"}
-              </button>
-              {inviteError && (
-                <p className="text-xs text-red-500 mt-1">{inviteError}</p>
-              )}
-            </div>
-          )}
+        {client.portalStatus === "NOT_INVITED" && (
+          <div className="flex flex-col">
+            <button
+              onClick={() => handleInvite(false)}
+              disabled={inviting}
+              className="text-xs px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 text-teal-700 disabled:opacity-50"
+            >
+              {inviting ? "Enviando…" : "✉️ Invitar al portal"}
+            </button>
+            {inviteError && (
+              <p className="text-xs text-red-500 mt-1">{inviteError}</p>
+            )}
+          </div>
+        )}
 
-          {client.portalStatus === "INVITED" && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg text-amber-700">
-                🕐 Invitación enviada
-              </span>
-              {resentFeedback ? (
-                <span className="text-xs text-teal-600">✓ Reenviado</span>
-              ) : (
-                <button
-                  onClick={() => handleInvite(true)}
-                  disabled={inviting}
-                  className="text-xs text-muted-foreground hover:underline disabled:opacity-50"
-                >
-                  {inviting ? "…" : "Reenviar"}
-                </button>
-              )}
-            </div>
-          )}
-
-          {client.portalStatus === "ACTIVE" && (
-            <span className="text-xs px-2 py-1 bg-green-50 border border-green-200 rounded-lg text-green-700">
-              🟢 Portal activo
+        {client.portalStatus === "INVITED" && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg text-amber-700">
+              🕐 Pendiente
             </span>
-          )}
-        </div>
+            {resentFeedback ? (
+              <span className="text-xs text-teal-600">✓ Reenviado</span>
+            ) : (
+              <button
+                onClick={() => handleInvite(true)}
+                disabled={inviting}
+                className="text-xs text-muted-foreground hover:underline disabled:opacity-50"
+              >
+                {inviting ? "…" : "Reenviar"}
+              </button>
+            )}
+          </div>
+        )}
+
+        {client.portalStatus === "ACTIVE" && (
+          <span className="text-xs px-2 py-1 bg-green-50 border border-green-200 rounded-lg text-green-700">
+            🟢 Portal activo
+          </span>
+        )}
       </div>
 
       {expanded && (
