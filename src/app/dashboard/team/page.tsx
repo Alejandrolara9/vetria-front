@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
 import { api } from "@/services/api";
 import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/PasswordStrengthChecklist";
+import { usePagination } from "@/hooks/usePagination";
+import { SearchInput } from "@/components/SearchInput";
+import { PaginationBar } from "@/components/PaginationBar";
+import type { PaginatedResponse } from "@/types/pagination";
 
 type Role = "ADMIN" | "VET" | "RECEPTIONIST";
 
@@ -26,25 +30,39 @@ const ROLE_COLORS: Record<Role, string> = {
 };
 
 export default function TeamPage() {
-  const [members, setMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "VET" as Role });
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", password: "", role: "VET" as Role });
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  useEffect(() => { loadTeam(); }, []);
+  const fetchTeam = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+      });
+      const res = await api.get<PaginatedResponse<TeamMember>>(`/users?${params}`, { signal });
+      return res.data;
+    },
+    [refreshKey] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
-  async function loadTeam() {
-    try {
-      const res = await api.get("/users");
-      setMembers(res.data);
-    } catch {
-      setMembers([]);
-    } finally {
-      setLoading(false);
-    }
+  const {
+    data: members,
+    total,
+    page,
+    totalPages,
+    search,
+    loading,
+    setSearch,
+    setPage,
+  } = usePagination<TeamMember>({ fetchFn: fetchTeam });
+
+  function handleRefresh() {
+    setRefreshKey((k) => k + 1);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -54,7 +72,7 @@ export default function TeamPage() {
       await api.post("/users", form);
       setForm({ name: "", email: "", password: "", role: "VET" });
       setShowForm(false);
-      loadTeam();
+      handleRefresh();
     } catch (error: unknown) {
       const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
       alert(msg ?? "Error al crear usuario");
@@ -81,7 +99,7 @@ export default function TeamPage() {
       if (editForm.password) payload.password = editForm.password;
       await api.patch(`/users/${editingMember.id}`, payload);
       setEditingMember(null);
-      loadTeam();
+      handleRefresh();
     } catch (error: unknown) {
       const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
       alert(msg ?? "Error al actualizar usuario");
@@ -94,7 +112,7 @@ export default function TeamPage() {
     if (!confirm(`¿Eliminar a ${name}?`)) return;
     try {
       await api.delete(`/users/${id}`);
-      loadTeam();
+      handleRefresh();
     } catch (error: unknown) {
       const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
       alert(msg ?? "Error al eliminar");
@@ -106,7 +124,7 @@ export default function TeamPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Equipo</h1>
-          <p className="text-muted-foreground text-sm mt-1">{members.length} usuarios registrados</p>
+          <p className="text-muted-foreground text-sm mt-1">{total} usuarios registrados</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
@@ -117,6 +135,16 @@ export default function TeamPage() {
           </svg>
           Nuevo usuario
         </button>
+      </div>
+
+      {/* Búsqueda */}
+      <div className="mb-4">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nombre o email..."
+          disabled={loading}
+        />
       </div>
 
       {/* Modal de creación */}
@@ -293,7 +321,7 @@ export default function TeamPage() {
       )}
 
       {/* Lista */}
-      {loading ? (
+      {loading && members.length === 0 ? (
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
@@ -304,7 +332,7 @@ export default function TeamPage() {
           <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <p>No hay usuarios registrados</p>
+          <p>{search ? "No se encontraron usuarios con esa búsqueda" : "No hay usuarios registrados"}</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border divide-y">
@@ -346,6 +374,15 @@ export default function TeamPage() {
           ))}
         </div>
       )}
+
+      {/* Paginación */}
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+      />
     </div>
   );
 }
