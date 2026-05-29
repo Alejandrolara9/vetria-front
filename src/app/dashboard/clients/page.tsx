@@ -16,25 +16,21 @@ export default function ClientsPage() {
   // refreshKey: incrementar fuerza un re-fetch sin cambiar búsqueda ni página
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const fetchClients = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+      });
+      const res = await api.get<PaginatedResponse<ClientWithPets>>(`/clients?${params}`, { signal });
+      return res.data;
+    },
+    [refreshKey]
+  );
+
   const { data: clients, total, page, totalPages, search, loading, setSearch, setPage } =
-    usePagination<ClientWithPets>({
-      fetchFn: useCallback(
-        async (pg, lim, srch, signal) => {
-          const params = new URLSearchParams({
-            page: String(pg),
-            limit: String(lim),
-            ...(srch ? { search: srch } : {}),
-          });
-          const res = await api.get<PaginatedResponse<ClientWithPets>>(
-            `/clients?${params}`,
-            { signal }
-          );
-          return res.data;
-        },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [refreshKey]
-      ),
-    });
+    usePagination<ClientWithPets>({ fetchFn: fetchClients });
 
   // Modal state — se preserva exactamente igual que antes
   const [showClientModal, setShowClientModal] = useState(false);
@@ -110,7 +106,9 @@ export default function ClientsPage() {
           ))}
         </div>
       ) : clients.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">Sin resultados</p>
+        <p className="text-center text-muted-foreground py-8">
+          {search ? "No se encontraron clientes con ese criterio." : "No hay clientes registrados."}
+        </p>
       ) : (
         <div className="flex flex-col gap-2">
           {clients.map((client) => (

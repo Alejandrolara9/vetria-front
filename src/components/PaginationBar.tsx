@@ -7,7 +7,7 @@ interface PaginationBarProps {
 }
 
 export function PaginationBar({ page, totalPages, total, onPageChange, loading }: PaginationBarProps) {
-  if (totalPages <= 1 && total === 0) return null;
+  if (totalPages <= 1) return null;
 
   const pages = buildPageNumbers(page, totalPages);
 
