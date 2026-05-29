@@ -3,6 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/services/api";
+import { usePagination } from "@/hooks/usePagination";
+import { SearchInput } from "@/components/SearchInput";
+import { PaginationBar } from "@/components/PaginationBar";
+import type { PaginatedResponse } from "@/types/pagination";
 import {
   listAppointments,
   getAppointmentStatsToday,
@@ -862,6 +866,42 @@ export default function AppointmentsPage() {
     endTime: string;
   } | null>(null);
 
+  // ─── Tabla paginada (filtros independientes del calendario) ───────────────
+  const [tableDate, setTableDate] = useState("");
+  const [tableVet, setTableVet] = useState("");
+  const [tableStatus, setTableStatus] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const fetchAppointments = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+        ...(tableDate ? { date: tableDate } : {}),
+        ...(tableVet ? { vetId: tableVet } : {}),
+        ...(tableStatus ? { status: tableStatus } : {}),
+      });
+      const res = await api.get<PaginatedResponse<Appointment>>(
+        `/appointments?${params}`,
+        { signal }
+      );
+      return res.data;
+    },
+    [tableDate, tableVet, tableStatus, refreshKey]
+  );
+
+  const {
+    data: tableAppointments,
+    total: tableTotal,
+    page: tablePage,
+    totalPages: tableTotalPages,
+    search: tableSearch,
+    loading: tableLoading,
+    setSearch: setTableSearch,
+    setPage: setTablePage,
+  } = usePagination<Appointment>({ fetchFn: fetchAppointments });
+
   // Abrir modal de creacion si viene ?action=new desde el dashboard
   useEffect(() => {
     if (searchParams.get("action") === "new") {
@@ -953,10 +993,6 @@ export default function AppointmentsPage() {
     const timer = setTimeout(() => setDragError(null), 4000);
     return () => clearTimeout(timer);
   }, [dragError]);
-
-  const visibleAppointments = appointments
-    .slice()
-    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
   async function applyReschedule(
     eventId: string,
@@ -1130,25 +1166,80 @@ export default function AppointmentsPage() {
         />
       </div>
 
-      {/* Resumen de citas cargadas */}
-      {visibleAppointments.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-base font-semibold mb-3">
-            Citas cargadas ({visibleAppointments.length})
-          </h2>
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-sm min-w-[560px] bg-card-bg">
-              <thead className="bg-gray-50 border-b border-border">
+      {/* Tabla paginada de citas */}
+      <div className="mt-6">
+        <h2 className="text-base font-semibold mb-3">Listado de citas</h2>
+
+        {/* Filtros de la tabla */}
+        <div className="flex flex-wrap gap-3 mb-3">
+          <SearchInput
+            value={tableSearch}
+            onChange={setTableSearch}
+            placeholder="Buscar por mascota o veterinario..."
+            disabled={tableLoading}
+          />
+          <input
+            type="date"
+            value={tableDate}
+            onChange={(e) => { setTableDate(e.target.value); setTablePage(1); }}
+            className="px-3 py-2 border border-border rounded-lg text-sm bg-white"
+          />
+          <select
+            value={tableVet}
+            onChange={(e) => { setTableVet(e.target.value); setTablePage(1); }}
+            className="px-3 py-2 border border-border rounded-lg text-sm bg-white"
+          >
+            <option value="">Todos los veterinarios</option>
+            {vets.map((v) => (
+              <option key={v.id} value={v.id}>{v.name}</option>
+            ))}
+          </select>
+          <select
+            value={tableStatus}
+            onChange={(e) => { setTableStatus(e.target.value); setTablePage(1); }}
+            className="px-3 py-2 border border-border rounded-lg text-sm bg-white"
+          >
+            <option value="">Todos los estados</option>
+            {Object.entries(STATUS_LABELS).map(([val, label]) => (
+              <option key={val} value={val}>{label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-sm min-w-[560px] bg-card-bg">
+            <thead className="bg-gray-50 border-b border-border">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Veterinario</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fecha y hora</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableLoading && tableAppointments.length === 0 ? (
+                <>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b border-border">
+                      {[1, 2, 3, 4, 5].map((c) => (
+                        <td key={c} className="px-4 py-3">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </>
+              ) : tableAppointments.length === 0 ? (
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Veterinario</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fecha y hora</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+                  <td colSpan={5} className="text-center py-12 text-muted-foreground">
+                    {tableSearch || tableDate || tableVet || tableStatus
+                      ? "No se encontraron citas con ese criterio."
+                      : "No hay citas registradas."}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {visibleAppointments.map((appt) => (
+              ) : (
+                tableAppointments.map((appt) => (
                   <tr
                     key={appt.id}
                     onClick={() => setSelectedAppointment(appt)}
@@ -1173,12 +1264,20 @@ export default function AppointmentsPage() {
                       </span>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        <PaginationBar
+          page={tablePage}
+          totalPages={tableTotalPages}
+          total={tableTotal}
+          onPageChange={setTablePage}
+          loading={tableLoading}
+        />
+      </div>
 
       {/* Modales */}
       {showCreate && (
@@ -1203,6 +1302,7 @@ export default function AppointmentsPage() {
             setPreselectedSlot(null);
             loadCalendar();
             loadStats();
+            setRefreshKey((k) => k + 1);
           }}
         />
       )}
@@ -1214,6 +1314,7 @@ export default function AppointmentsPage() {
           onUpdated={() => {
             loadCalendar();
             loadStats();
+            setRefreshKey((k) => k + 1);
           }}
         />
       )}
