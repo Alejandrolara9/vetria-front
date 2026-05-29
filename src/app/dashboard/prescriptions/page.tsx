@@ -125,65 +125,62 @@ export default function PrescriptionsPage() {
           )}
         </div>
       ) : (
-        <>
-          <div className="bg-white rounded-xl border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                <tr>
-                  <th className="px-4 py-3 text-left">Paciente</th>
-                  <th className="px-4 py-3 text-left">Propietario</th>
-                  <th className="px-4 py-3 text-left">Veterinario</th>
-                  <th className="px-4 py-3 text-left">Fecha emisión</th>
-                  <th className="px-4 py-3 text-left">Estado</th>
-                  <th className="px-4 py-3 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {prescriptions.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium">{p.pet.name}</td>
-                    <td className="px-4 py-3 text-gray-600">{p.pet.client.name}</td>
-                    <td className="px-4 py-3 text-gray-600">{p.vet.name}</td>
-                    <td className="px-4 py-3 text-gray-500">{formatDate(p.issueDate)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLOR[p.status]}`}>
-                        {STATUS_LABEL[p.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/dashboard/prescriptions/${p.id}`}
-                          className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+        <div className="bg-white rounded-xl border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <tr>
+                <th className="px-4 py-3 text-left">Paciente</th>
+                <th className="px-4 py-3 text-left">Propietario</th>
+                <th className="px-4 py-3 text-left">Veterinario</th>
+                <th className="px-4 py-3 text-left">Fecha emisión</th>
+                <th className="px-4 py-3 text-left">Estado</th>
+                <th className="px-4 py-3 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {prescriptions.map((p) => (
+                <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 font-medium">{p.pet.name}</td>
+                  <td className="px-4 py-3 text-gray-600">{p.pet.client.name}</td>
+                  <td className="px-4 py-3 text-gray-600">{p.vet.name}</td>
+                  <td className="px-4 py-3 text-gray-500">{formatDate(p.issueDate)}</td>
+                  <td className="px-4 py-3">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLOR[p.status]}`}>
+                      {STATUS_LABEL[p.status]}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/dashboard/prescriptions/${p.id}`}
+                        className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      >
+                        Ver
+                      </Link>
+                      {p.status === "DRAFT" && (
+                        <button
+                          onClick={() => handleDelete(p)}
+                          disabled={deletingId === p.id}
+                          className="text-xs px-2 py-1 rounded bg-red-50 hover:bg-red-100 text-red-600 disabled:opacity-50"
                         >
-                          Ver
-                        </Link>
-                        {p.status === "DRAFT" && (
-                          <button
-                            onClick={() => handleDelete(p)}
-                            disabled={deletingId === p.id}
-                            className="text-xs px-2 py-1 rounded bg-red-50 hover:bg-red-100 text-red-600 disabled:opacity-50"
-                          >
-                            {deletingId === p.id ? "..." : "Eliminar"}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <PaginationBar
-            page={page}
-            totalPages={totalPages}
-            total={total}
-            onPageChange={setPage}
-            loading={loading}
-          />
-        </>
+                          {deletingId === p.id ? "..." : "Eliminar"}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+      />
     </div>
   );
 }
