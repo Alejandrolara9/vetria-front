@@ -39,26 +39,26 @@ export function usePagination<T>({
   const [data, setData] = useState<T[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [page, setPageState] = useState(1);
-  const [search, setSearchState] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentSearch, setCurrentSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Debounce: actualiza debouncedSearch 300ms después del último cambio en search
+  // Debounce: actualiza debouncedSearch 300ms después del último cambio en currentSearch
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    const timer = setTimeout(() => setDebouncedSearch(currentSearch), 300);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [currentSearch]);
 
   // Cuando la búsqueda cambia, volvemos a la página 1 para no mostrar resultados
   // de una página que puede no existir en el nuevo conjunto filtrado
   const setSearch = useCallback((s: string) => {
-    setSearchState(s);
-    setPageState(1);
+    setCurrentSearch(s);
+    setCurrentPage(1);
   }, []);
 
   const setPage = useCallback((p: number) => {
-    setPageState(p);
+    setCurrentPage(p);
   }, []);
 
   // Efecto principal: dispara la petición al backend cada vez que cambia
@@ -67,7 +67,7 @@ export function usePagination<T>({
     const controller = new AbortController();
     setLoading(true);
 
-    fetchFn(page, limit, debouncedSearch, controller.signal)
+    fetchFn(currentPage, limit, debouncedSearch, controller.signal)
       .then((res) => {
         setData(res.data);
         setTotal(res.total);
@@ -86,7 +86,7 @@ export function usePagination<T>({
       });
 
     return () => controller.abort();
-  }, [page, limit, debouncedSearch, fetchFn]);
+  }, [currentPage, limit, debouncedSearch, fetchFn]);
 
-  return { data, total, page, totalPages, search, loading, setSearch, setPage };
+  return { data, total, page: currentPage, totalPages, search: currentSearch, loading, setSearch, setPage };
 }

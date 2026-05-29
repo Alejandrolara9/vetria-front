@@ -35,16 +35,16 @@ describe("createReminder", () => {
 
 describe("listReminders", () => {
   it("GETs /reminders without params when no status", async () => {
-    mock.onGet("/reminders").reply(200, [reminder]);
+    mock.onGet("/reminders").reply(200, { data: [reminder] });
     const result = await listReminders();
     expect(result).toEqual([reminder]);
-    expect(mock.history.get[0].params).toEqual({});
+    expect(mock.history.get[0].params).toEqual({ limit: 9999 });
   });
 
   it("GETs /reminders with status param", async () => {
-    mock.onGet("/reminders").reply(200, [reminder]);
+    mock.onGet("/reminders").reply(200, { data: [reminder] });
     await listReminders("SCHEDULED");
-    expect(mock.history.get[0].params).toEqual({ status: "SCHEDULED" });
+    expect(mock.history.get[0].params).toEqual({ limit: 9999, status: "SCHEDULED" });
   });
 });
 

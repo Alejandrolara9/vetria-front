@@ -48,16 +48,17 @@ describe("createAppointment", () => {
 
 describe("listAppointments", () => {
   it("GETs /appointments without params", async () => {
-    mock.onGet("/appointments").reply(200, [appt]);
+    mock.onGet("/appointments").reply(200, { data: [appt] });
     const result = await listAppointments();
     expect(result).toEqual([appt]);
+    expect(mock.history.get[0].params).toEqual({ limit: 9999 });
   });
 
   it("GETs /appointments with query params", async () => {
-    mock.onGet("/appointments").reply(200, [appt]);
+    mock.onGet("/appointments").reply(200, { data: [appt] });
     const result = await listAppointments({ date: "2026-05-01", status: "SCHEDULED" });
     expect(result).toEqual([appt]);
-    expect(mock.history.get[0].params).toEqual({ date: "2026-05-01", status: "SCHEDULED" });
+    expect(mock.history.get[0].params).toEqual({ limit: 9999, date: "2026-05-01", status: "SCHEDULED" });
   });
 });
 
