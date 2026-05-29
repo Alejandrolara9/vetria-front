@@ -783,66 +783,66 @@ export default function RemindersPage() {
                 : "No hay recordatorios registrados."}
             </div>
           ) : (
-            <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-border">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vencimiento</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dias</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Notif.</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allReminders.map((r) => {
-                    const days = getDaysRemaining(r.calculatedDueDate);
-                    const eventType = r.eventType as ReminderEventType;
-                    const status = r.status as ReminderStatus;
-                    const notifSent = (r.notifications ?? []).filter(
-                      (n) => n.status === "SENT" || n.status === "OPENED" || n.status === "CONFIRMED"
-                    ).length;
+            <>
+              {/* Mobile: cards (reutiliza ReminderCard) */}
+              <div className="md:hidden grid grid-cols-1 gap-3">
+                {allReminders.map((r) => (
+                  <ReminderCard key={r.id} reminder={r} onResent={handleRefresh} />
+                ))}
+              </div>
 
-                    return (
-                      <tr key={r.id} className="border-b border-border last:border-0 hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <p className="font-medium">{r.pet?.name ?? "—"}</p>
-                          <p className="text-xs text-muted-foreground">{r.pet?.species}</p>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EVENT_TYPE_BADGE[eventType]}`}
-                          >
-                            {EVENT_TYPE_LABELS[eventType]}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">{formatDate(r.calculatedDueDate)}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`text-xs font-medium ${
-                              days < 0
-                                ? "text-red-600"
-                                : days <= 3
-                                ? "text-orange-600"
-                                : "text-green-700"
-                            }`}
-                          >
-                            {days === 0 ? "Hoy" : days > 0 ? `+${days}d` : `${days}d`}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[status]}`}>
-                            {STATUS_LABELS[status]}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground text-xs">{notifSent}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+              {/* Desktop: tabla */}
+              <div className="hidden md:block bg-card-bg rounded-xl border border-border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-border">
+                    <tr>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vencimiento</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dias</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Notif.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allReminders.map((r) => {
+                      const days = getDaysRemaining(r.calculatedDueDate);
+                      const eventType = r.eventType as ReminderEventType;
+                      const status = r.status as ReminderStatus;
+                      const notifSent = (r.notifications ?? []).filter(
+                        (n) => n.status === "SENT" || n.status === "OPENED" || n.status === "CONFIRMED"
+                      ).length;
+
+                      return (
+                        <tr key={r.id} className="border-b border-border last:border-0 hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <p className="font-medium">{r.pet?.name ?? "—"}</p>
+                            <p className="text-xs text-muted-foreground">{r.pet?.species}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EVENT_TYPE_BADGE[eventType]}`}>
+                              {EVENT_TYPE_LABELS[eventType]}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{formatDate(r.calculatedDueDate)}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs font-medium ${days < 0 ? "text-red-600" : days <= 3 ? "text-orange-600" : "text-green-700"}`}>
+                              {days === 0 ? "Hoy" : days > 0 ? `+${days}d` : `${days}d`}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[status]}`}>
+                              {STATUS_LABELS[status]}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{notifSent}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
           <PaginationBar
             page={allPage}
