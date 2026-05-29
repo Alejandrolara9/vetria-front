@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { api } from "@/services/api";
 import {
-  getInvoices,
   getInvoiceStats,
   createInvoice,
   updateInvoice,
@@ -14,6 +13,10 @@ import {
   type CreateInvoiceItemDto,
 } from "@/services/invoices";
 import { searchCatalog, type CatalogItem } from "@/services/catalog";
+import { usePagination } from "@/hooks/usePagination";
+import { SearchInput } from "@/components/SearchInput";
+import { PaginationBar } from "@/components/PaginationBar";
+import type { PaginatedResponse } from "@/types/pagination";
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
@@ -869,30 +872,46 @@ function InvoiceDetailModal({
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function InvoicesPage() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [stats, setStats] = useState<InvoiceStats | null>(null);
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [pets, setPets] = useState<PetOption[]>([]);
-  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "">("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [invoiceList, invoiceStats] = await Promise.all([
-        getInvoices(statusFilter ? { status: statusFilter } : undefined),
-        getInvoiceStats(),
-      ]);
-      setInvoices(invoiceList);
-      setStats(invoiceStats);
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter]);
+  const fetchInvoices = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+        ...(statusFilter ? { status: statusFilter } : {}),
+      });
+      const res = await api.get<PaginatedResponse<Invoice>>(`/invoices?${params}`, { signal });
+      return res.data;
+    },
+    [statusFilter, refreshKey] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
-  // Carga clientes y mascotas al montar (para el modal de creación)
+  const {
+    data: invoices,
+    total,
+    page,
+    totalPages,
+    search,
+    loading,
+    setSearch,
+    setPage,
+  } = usePagination<Invoice>({ fetchFn: fetchInvoices });
+
+  // Carga stats y catálogos al montar
+  useEffect(() => {
+    getInvoiceStats()
+      .then(setStats)
+      .catch(() => setStats(null));
+  }, [refreshKey]);
+
   useEffect(() => {
     async function loadCatalogues() {
       const [clientsRes, petsRes] = await Promise.all([
@@ -905,15 +924,15 @@ export default function InvoicesPage() {
     loadCatalogues();
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  function handleRefresh() {
+    setRefreshKey((k) => k + 1);
+  }
 
   async function handleMarkPaid(invoice: Invoice) {
     if (!confirm(`Marcar ${invoice.number} como pagada?`)) return;
     try {
       await updateInvoice(invoice.id, { status: "PAID" });
-      loadData();
+      handleRefresh();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       alert(msg ?? "Error al actualizar");
@@ -924,7 +943,7 @@ export default function InvoicesPage() {
     if (!confirm(`Eliminar la factura ${invoice.number}? Esta accion no se puede deshacer.`)) return;
     try {
       await deleteInvoice(invoice.id);
-      loadData();
+      handleRefresh();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       alert(msg ?? "Error al eliminar");
@@ -974,12 +993,20 @@ export default function InvoicesPage() {
         />
       </div>
 
-      {/* Filtros */}
-      <div className="flex gap-3 mb-4">
+      {/* Filtros + búsqueda */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por número o cliente..."
+        />
         <select
           className="px-4 py-2 border border-border rounded-lg text-sm bg-white"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as InvoiceStatus | "")}
+          onChange={(e) => {
+            setStatusFilter(e.target.value as InvoiceStatus | "");
+            setPage(1);
+          }}
         >
           <option value="">Todos los estados</option>
           <option value="DRAFT">Borradores</option>
@@ -1004,7 +1031,7 @@ export default function InvoicesPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {loading && invoices.length === 0 ? (
               <>
                 <SkeletonRow />
                 <SkeletonRow />
@@ -1013,7 +1040,9 @@ export default function InvoicesPage() {
             ) : invoices.length === 0 ? (
               <tr>
                 <td colSpan={7} className="text-center py-12 text-muted-foreground">
-                  No se encontraron facturas
+                  {search || statusFilter
+                    ? "No se encontraron facturas con ese filtro"
+                    : "No hay facturas registradas"}
                 </td>
               </tr>
             ) : (
@@ -1073,13 +1102,22 @@ export default function InvoicesPage() {
         </table>
       </div>
 
+      {/* Paginación */}
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       {/* Modales */}
       {showCreateModal && (
         <CreateInvoiceModal
           clients={clients}
           pets={pets}
           onClose={() => setShowCreateModal(false)}
-          onCreated={loadData}
+          onCreated={handleRefresh}
         />
       )}
 
@@ -1087,7 +1125,7 @@ export default function InvoicesPage() {
         <InvoiceDetailModal
           invoice={selectedInvoice}
           onClose={() => setSelectedInvoice(null)}
-          onUpdated={loadData}
+          onUpdated={handleRefresh}
         />
       )}
     </div>

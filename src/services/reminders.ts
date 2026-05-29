@@ -82,9 +82,9 @@ export async function createReminder(dto: CreateReminderDto): Promise<Reminder> 
 
 /** Lista todos los recordatorios, opcionalmente filtrados por status. */
 export async function listReminders(status?: ReminderStatus): Promise<Reminder[]> {
-  const params = status ? { status } : {};
-  const res = await api.get<Reminder[]>("/reminders", { params });
-  return res.data;
+  const params = { limit: 9999, ...(status ? { status } : {}) };
+  const res = await api.get<{ data: Reminder[] }>("/reminders", { params });
+  return res.data.data;
 }
 
 /** Estadísticas generales de recordatorios del tenant. */
