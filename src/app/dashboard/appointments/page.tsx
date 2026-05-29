@@ -931,10 +931,11 @@ export default function AppointmentsPage() {
       try {
         const [petsRes, usersRes] = await Promise.all([
           api.get("/pets"),
-          api.get("/users").catch(() => ({ data: [] })),
+          api.get("/users", { params: { limit: 9999 } }).catch(() => ({ data: [] })),
         ]);
         setPets(petsRes.data);
-        const allUsers: Vet[] = usersRes.data;
+        const rawUsers = usersRes.data;
+        const allUsers: Vet[] = Array.isArray(rawUsers) ? rawUsers : (rawUsers as { data: Vet[] }).data ?? [];
         const vetsOnly = allUsers.filter((u) => u.role === "VET");
         setVets(vetsOnly.length > 0 ? vetsOnly : allUsers);
       } catch {

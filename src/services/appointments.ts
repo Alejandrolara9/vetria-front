@@ -77,8 +77,10 @@ export async function createAppointment(data: CreateAppointmentDto): Promise<App
 }
 
 export async function listAppointments(query?: ListAppointmentsQuery): Promise<Appointment[]> {
-  const res = await api.get<Appointment[]>("/appointments", { params: query });
-  return res.data;
+  const res = await api.get<{ data: Appointment[] }>("/appointments", {
+    params: { ...query, limit: 9999 },
+  });
+  return res.data.data;
 }
 
 export async function getAppointmentStatsToday(): Promise<AppointmentStats> {
