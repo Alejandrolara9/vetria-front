@@ -328,8 +328,65 @@ export default function ServicesPage() {
         </select>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
+      {/* Mobile: cards */}
+      {loading && services.length === 0 ? (
+        <div className="md:hidden space-y-3">
+          {[1, 2, 3].map((i) => <div key={i} className="h-32 bg-gray-100 rounded-xl animate-pulse" />)}
+        </div>
+      ) : services.length === 0 ? (
+        <div className="md:hidden text-center py-12 text-muted-foreground">
+          {search || showActive !== undefined
+            ? "No se encontraron servicios con ese filtro"
+            : "No hay servicios registrados. Crea el primero."}
+        </div>
+      ) : (
+        <div className="md:hidden space-y-3">
+          {services.map((svc) => (
+            <div key={svc.id} className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
+              <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-bold text-gray-900 text-base leading-snug">{svc.name}</p>
+                  {svc.description && (
+                    <p className="text-xs text-gray-400 mt-0.5 truncate">{svc.description}</p>
+                  )}
+                </div>
+                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold flex-shrink-0 mt-0.5 ${svc.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                  {svc.active ? "Activo" : "Inactivo"}
+                </span>
+              </div>
+              <div className="px-4 pb-4">
+                <div className="grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1.5 text-sm">
+                  {svc.category && (
+                    <>
+                      <span className="text-gray-400 font-medium">Categoría</span>
+                      <span className="text-gray-700 truncate">{svc.category}</span>
+                    </>
+                  )}
+                  <span className="text-gray-400 font-medium">Precio</span>
+                  <span className="text-gray-900 font-semibold">{formatCurrency(svc.price)}</span>
+                </div>
+              </div>
+              <div className="px-4 py-3 bg-gray-50 border-t border-border flex gap-2">
+                <button
+                  onClick={() => openEdit(svc)}
+                  className="flex-1 inline-flex items-center justify-center text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleDelete(svc)}
+                  className="flex-1 inline-flex items-center justify-center text-sm px-3 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-medium transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Desktop: tabla */}
+      <div className="hidden md:block bg-card-bg rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-border">
             <tr>
@@ -357,48 +414,23 @@ export default function ServicesPage() {
               </tr>
             ) : (
               services.map((svc) => (
-                <tr
-                  key={svc.id}
-                  className="border-b border-border last:border-0 hover:bg-gray-50"
-                >
+                <tr key={svc.id} className="border-b border-border last:border-0 hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <p className="font-medium">{svc.name}</p>
                     {svc.description && (
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                        {svc.description}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{svc.description}</p>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground">
-                    {svc.category ?? "—"}
-                  </td>
-                  <td className="px-6 py-4 text-right font-semibold">
-                    {formatCurrency(svc.price)}
-                  </td>
+                  <td className="px-6 py-4 text-muted-foreground">{svc.category ?? "—"}</td>
+                  <td className="px-6 py-4 text-right font-semibold">{formatCurrency(svc.price)}</td>
                   <td className="px-6 py-4 text-center">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        svc.active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${svc.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
                       {svc.active ? "Activo" : "Inactivo"}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => openEdit(svc)}
-                      className="text-primary hover:underline mr-4"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(svc)}
-                      className="text-danger hover:underline"
-                    >
-                      Eliminar
-                    </button>
+                    <button onClick={() => openEdit(svc)} className="text-primary hover:underline mr-4">Editar</button>
+                    <button onClick={() => handleDelete(svc)} className="text-danger hover:underline">Eliminar</button>
                   </td>
                 </tr>
               ))
