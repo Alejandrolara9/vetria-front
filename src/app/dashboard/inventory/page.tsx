@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { api } from "@/services/api";
+import { usePagination } from "@/hooks/usePagination";
+import { SearchInput } from "@/components/SearchInput";
+import { PaginationBar } from "@/components/PaginationBar";
+import type { PaginatedResponse } from "@/types/pagination";
 import {
-  getProducts,
   getInventoryStats,
   getLowStockProducts,
   createProduct,
@@ -629,57 +633,76 @@ function MovementModal({
 // ─── Pagina principal ─────────────────────────────────────────────────────────
 
 export default function InventoryPage() {
-  const [products, setProducts] = useState<Product[]>([]);
   const [stats, setStats] = useState<InventoryStats | null>(null);
   const [lowStockItems, setLowStockItems] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Filtros
-  const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<ProductCategory | "">("");
   const [onlyLowStock, setOnlyLowStock] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Modales
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [movementProduct, setMovementProduct] = useState<Product | null>(null);
 
-  const loadData = useCallback(async () => {
+  // Stats y low-stock: fetched independientemente
+  const loadSideData = useCallback(async () => {
     try {
-      setLoading(true);
-      const [productList, inventoryStats, lowStock] = await Promise.all([
-        getProducts(
-          categoryFilter ? { category: categoryFilter } : undefined
-        ),
+      const [inventoryStats, lowStock] = await Promise.all([
         getInventoryStats(),
         getLowStockProducts(),
       ]);
-      setProducts(productList);
       setStats(inventoryStats);
       setLowStockItems(lowStock);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Continuar sin estadísticas
     }
-  }, [categoryFilter]);
+  }, [refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadSideData();
+  }, [loadSideData]);
 
-  // Filtrado local por búsqueda de nombre y toggle de stock bajo
-  const filteredProducts = products.filter((p) => {
-    const matchesSearch = p.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchesLowStock = onlyLowStock ? p.stock <= p.minStock : true;
-    return matchesSearch && matchesLowStock;
-  });
+  // Paginación de productos
+  const fetchInventory = useCallback(
+    async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
+      const params = new URLSearchParams({
+        page: String(pg),
+        limit: String(lim),
+        ...(srch ? { search: srch } : {}),
+        ...(categoryFilter ? { category: categoryFilter } : {}),
+        ...(onlyLowStock ? { lowStock: "true" } : {}),
+      });
+      const res = await api.get<PaginatedResponse<Product>>(
+        `/inventory/products?${params}`,
+        { signal }
+      );
+      return res.data;
+    },
+    [categoryFilter, onlyLowStock, refreshKey]
+  );
+
+  const {
+    data: products,
+    total,
+    page,
+    totalPages,
+    search,
+    loading,
+    setSearch,
+    setPage,
+  } = usePagination<Product>({ fetchFn: fetchInventory });
+
+  function triggerRefresh() {
+    setRefreshKey((k) => k + 1);
+  }
 
   async function handleDelete(product: Product) {
     if (!confirm(`Desactivar el producto "${product.name}"?`)) return;
     try {
       await deleteProduct(product.id);
-      loadData();
+      triggerRefresh();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -776,19 +799,19 @@ export default function InventoryPage() {
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="Buscar por nombre..."
-          className="px-4 py-2 border border-border rounded-lg text-sm w-64"
+        <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={setSearch}
+          placeholder="Buscar por nombre..."
+          disabled={loading}
         />
         <select
           className="px-4 py-2 border border-border rounded-lg text-sm bg-white"
           value={categoryFilter}
-          onChange={(e) =>
-            setCategoryFilter(e.target.value as ProductCategory | "")
-          }
+          onChange={(e) => {
+            setCategoryFilter(e.target.value as ProductCategory | "");
+            setPage(1);
+          }}
         >
           <option value="">Todas las categorias</option>
           {ALL_CATEGORIES.map((cat) => (
@@ -798,7 +821,7 @@ export default function InventoryPage() {
           ))}
         </select>
         <button
-          onClick={() => setOnlyLowStock((v) => !v)}
+          onClick={() => { setOnlyLowStock((v) => !v); setPage(1); }}
           className={`px-4 py-2 rounded-lg text-sm border transition-colors ${
             onlyLowStock
               ? "bg-orange-100 text-orange-700 border-orange-300"
@@ -835,21 +858,23 @@ export default function InventoryPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {loading && products.length === 0 ? (
               <>
                 <SkeletonRow />
                 <SkeletonRow />
                 <SkeletonRow />
                 <SkeletonRow />
               </>
-            ) : filteredProducts.length === 0 ? (
+            ) : products.length === 0 ? (
               <tr>
                 <td colSpan={6} className="text-center py-12 text-muted-foreground">
-                  No se encontraron productos
+                  {search || categoryFilter || onlyLowStock
+                    ? "No se encontraron productos con ese criterio."
+                    : "No hay productos registrados."}
                 </td>
               </tr>
             ) : (
-              filteredProducts.map((product) => {
+              products.map((product) => {
                 const isLow = product.stock <= product.minStock;
                 return (
                   <tr
@@ -934,12 +959,20 @@ export default function InventoryPage() {
         </table>
       </div>
 
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       {/* Modal crear */}
       {showCreateModal && (
         <ProductModal
           product={null}
           onClose={() => setShowCreateModal(false)}
-          onSaved={loadData}
+          onSaved={triggerRefresh}
         />
       )}
 
@@ -948,7 +981,7 @@ export default function InventoryPage() {
         <ProductModal
           product={editingProduct}
           onClose={() => setEditingProduct(null)}
-          onSaved={loadData}
+          onSaved={triggerRefresh}
         />
       )}
 
@@ -957,7 +990,7 @@ export default function InventoryPage() {
         <MovementModal
           product={movementProduct}
           onClose={() => setMovementProduct(null)}
-          onSaved={loadData}
+          onSaved={triggerRefresh}
         />
       )}
     </div>
