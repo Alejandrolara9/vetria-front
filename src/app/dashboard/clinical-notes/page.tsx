@@ -1063,32 +1063,81 @@ export default function ClinicalNotesPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {notes.map((note) => (
-            <button key={note.id} onClick={() => setSelectedNote(note)}
-              className="bg-white rounded-xl border border-gray-200 p-5 text-left hover:border-blue-300 hover:shadow-sm transition-all">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="font-semibold text-sm">{note.pet?.name ?? "Mascota"}</p>
-                  <p className="text-xs text-gray-400">{note.pet?.species}</p>
+        <>
+          {/* Móvil: tarjetas */}
+          <div className="md:hidden space-y-3">
+            {notes.map((note) => (
+              <button key={note.id} onClick={() => setSelectedNote(note)}
+                className="w-full bg-white rounded-xl border border-gray-200 p-5 text-left hover:border-blue-300 hover:shadow-sm transition-all">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="font-semibold text-sm">{note.pet?.name ?? "Mascota"}</p>
+                    <p className="text-xs text-gray-400">{note.pet?.species}</p>
+                  </div>
+                  <StatusBadge status={note.status} />
                 </div>
-                <StatusBadge status={note.status} />
-              </div>
-              {note.chiefComplaint && (
-                <p className="text-sm font-medium mb-1 line-clamp-1">{note.chiefComplaint}</p>
-              )}
-              <p className="text-xs text-gray-400 line-clamp-2 italic">{note.rawInput}</p>
-              <div className="flex items-center justify-between mt-3">
-                <p className="text-xs text-gray-300">
-                  {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
-                </p>
-                {note.author?.name && (
-                  <p className="text-xs text-gray-400">Dr. {note.author?.name}</p>
+                {note.chiefComplaint && (
+                  <p className="text-sm font-medium mb-1 line-clamp-1">{note.chiefComplaint}</p>
                 )}
-              </div>
-            </button>
-          ))}
-        </div>
+                <p className="text-xs text-gray-400 line-clamp-2 italic">{note.rawInput}</p>
+                <div className="flex items-center justify-between mt-3">
+                  <p className="text-xs text-gray-300">
+                    {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
+                  </p>
+                  {note.author?.name && (
+                    <p className="text-xs text-gray-400">Dr. {note.author?.name}</p>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop: tabla */}
+          <div className="hidden md:block bg-white rounded-xl border overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                <tr>
+                  <th className="px-4 py-3 text-left">Paciente</th>
+                  <th className="px-4 py-3 text-left">Motivo de consulta</th>
+                  <th className="px-4 py-3 text-left">Veterinario</th>
+                  <th className="px-4 py-3 text-left">Fecha</th>
+                  <th className="px-4 py-3 text-left">Estado</th>
+                  <th className="px-4 py-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {notes.map((note) => (
+                  <tr key={note.id} onClick={() => setSelectedNote(note)}
+                    className="hover:bg-gray-50 transition-colors cursor-pointer">
+                    <td className="px-4 py-3">
+                      <p className="font-medium">{note.pet?.name ?? "Mascota"}</p>
+                      <p className="text-xs text-gray-400">{note.pet?.species}</p>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 max-w-xs">
+                      <span className="line-clamp-1">{note.chiefComplaint || <span className="text-gray-300 italic">Sin motivo</span>}</span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{note.author?.name ? `Dr. ${note.author.name}` : "—"}</td>
+                    <td className="px-4 py-3 text-gray-500">
+                      {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" })}
+                    </td>
+                    <td className="px-4 py-3"><StatusBadge status={note.status} /></td>
+                    <td className="px-4 py-3 text-right">
+                      <span
+                        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
+                        title="Ver historia">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Ver
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       <PaginationBar
