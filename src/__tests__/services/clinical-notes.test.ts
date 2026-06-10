@@ -9,6 +9,7 @@ import {
   generateClinicalNote,
   reviewClinicalNote,
   listClinicalNotes,
+  listArchivedClinicalNotes,
   getClinicalNotesByPet,
   getClinicalNoteById,
   deleteClinicalNote,
@@ -71,10 +72,43 @@ describe("reviewClinicalNote", () => {
   });
 });
 
+const paginated = { data: [note], total: 1, page: 1, totalPages: 1 };
+
 describe("listClinicalNotes", () => {
-  it("GETs /clinical-notes", async () => {
-    mock.onGet("/clinical-notes").reply(200, [note]);
-    expect(await listClinicalNotes()).toEqual([note]);
+  it("GETs /clinical-notes con paginación y devuelve PaginatedResponse", async () => {
+    mock.onGet("/clinical-notes").reply(200, paginated);
+    const res = await listClinicalNotes(1, 20, "");
+    expect(res).toEqual(paginated);
+  });
+
+  it("envía page, limit, search y status como query params", async () => {
+    mock.onGet("/clinical-notes").reply(200, paginated);
+    await listClinicalNotes(2, 10, "tobby", undefined, "APPROVED");
+    const params = mock.history.get[0].params;
+    expect(params).toEqual({ page: 2, limit: 10, search: "tobby", status: "APPROVED" });
+  });
+
+  it("omite search y status cuando están vacíos o ALL", async () => {
+    mock.onGet("/clinical-notes").reply(200, paginated);
+    await listClinicalNotes(1, 20, "", undefined, "ALL");
+    const params = mock.history.get[0].params;
+    expect(params.search).toBeUndefined();
+    expect(params.status).toBeUndefined();
+  });
+});
+
+describe("listArchivedClinicalNotes", () => {
+  it("GETs /clinical-notes/archived con paginación", async () => {
+    mock.onGet("/clinical-notes/archived").reply(200, paginated);
+    const res = await listArchivedClinicalNotes(1, 20, "");
+    expect(res).toEqual(paginated);
+  });
+
+  it("envía los query params a /archived", async () => {
+    mock.onGet("/clinical-notes/archived").reply(200, paginated);
+    await listArchivedClinicalNotes(3, 15, "rex", undefined, "REJECTED");
+    const params = mock.history.get[0].params;
+    expect(params).toEqual({ page: 3, limit: 15, search: "rex", status: "REJECTED" });
   });
 });
 
