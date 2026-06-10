@@ -51,8 +51,10 @@ export default function NavbarClient() {
           </a>
           <Link
             href="/login"
-            className={`text-sm font-medium transition-colors hidden sm:block ${
-              scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
+            className={`hidden sm:flex items-center text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
+              scrolled
+                ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                : "border-white/25 text-white hover:bg-white/10"
             }`}
           >
             Iniciar sesión
