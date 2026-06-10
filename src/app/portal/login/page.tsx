@@ -55,14 +55,14 @@ export default function PortalLoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center px-6 py-12 min-h-screen">
+    <div className="relative flex items-center justify-center px-6 py-12 min-h-screen">
+      <Link
+        href="/"
+        className="absolute top-5 left-5 inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg border border-white/15 text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+      >
+        ← Volver al inicio
+      </Link>
       <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm mb-6 transition-colors"
-        >
-          ← Volver al inicio
-        </Link>
         <div className="text-center mb-8">
           <div className="w-20 h-20 relative mx-auto mb-4">
             <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
