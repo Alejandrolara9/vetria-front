@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ResponsiveGoogleLogin from "@/components/ResponsiveGoogleLogin";
 import { ownerLogin, ownerGoogleAuth, saveOwnerToken } from "@/services/owner-portal";
@@ -54,15 +55,31 @@ export default function PortalLoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center px-6 py-12 min-h-screen">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 relative mx-auto mb-4">
-            <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar mínimo */}
+      <nav className="flex items-center justify-between px-6 py-4">
+        <Link href="/" className="flex items-center gap-2 group">
+          <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg shadow-md" />
+          <span className="font-bold text-white text-lg group-hover:text-teal-300 transition-colors">Vetria</span>
+        </Link>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg border border-white/15 text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          ← Volver al inicio
+        </Link>
+      </nav>
+
+      {/* Contenido centrado */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 relative mx-auto mb-4">
+              <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
+            </div>
+            <h1 className="text-2xl font-extrabold text-white mb-1">Portal de Mascotas</h1>
+            <p className="text-slate-400 text-sm">Consulta el historial de salud de tus mascotas</p>
           </div>
-          <h1 className="text-2xl font-extrabold text-white mb-1">Portal de Mascotas</h1>
-          <p className="text-slate-400 text-sm">Consulta el historial de salud de tus mascotas</p>
-        </div>
 
         <div className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-8 shadow-2xl">
           {error && (
@@ -131,6 +148,7 @@ export default function PortalLoginPage() {
         <p className="text-center text-slate-500 text-xs mt-4">
           ¿No tienes acceso? Pide a tu veterinaria que te invite.
         </p>
+        </div>
       </div>
     </div>
   );
