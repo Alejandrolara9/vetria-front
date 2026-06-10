@@ -63,11 +63,11 @@ function LoginContent() {
           <Image src="/logo.png" alt="Vetria" width={32} height={32} className="rounded-lg shadow-md" />
           <span className="font-bold text-white text-lg group-hover:text-teal-300 transition-colors">Vetria</span>
         </Link>
-        <Link href="/" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver al inicio
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg border border-white/15 text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          ← Volver al inicio
         </Link>
       </nav>
 
