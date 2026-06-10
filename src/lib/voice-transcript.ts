@@ -28,8 +28,8 @@ export type VoiceResult = {
 export function buildTranscript(results: ArrayLike<VoiceResult>): string {
   let out = "";
 
-  for (let i = 0; i < results.length; i++) {
-    const t = results[i]?.[0]?.transcript ?? "";
+  for (const result of Array.from(results)) {
+    const t = result?.[0]?.transcript ?? "";
     if (!t) continue;
 
     if (out === "") {
