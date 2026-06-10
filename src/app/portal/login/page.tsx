@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ResponsiveGoogleLogin from "@/components/ResponsiveGoogleLogin";
 import { ownerLogin, ownerGoogleAuth, saveOwnerToken } from "@/services/owner-portal";
@@ -56,6 +57,12 @@ export default function PortalLoginPage() {
   return (
     <div className="flex items-center justify-center px-6 py-12 min-h-screen">
       <div className="w-full max-w-md">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm mb-6 transition-colors"
+        >
+          ← Volver al inicio
+        </Link>
         <div className="text-center mb-8">
           <div className="w-20 h-20 relative mx-auto mb-4">
             <Image src="/logo.png" alt="Vetria" fill className="object-contain" />
