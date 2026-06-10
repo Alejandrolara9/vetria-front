@@ -21,7 +21,7 @@ import {
 } from "@/services/clinical-notes";
 import { SectionReviewPanel } from "@/components/SectionReviewPanel";
 import { hasNewSectionsFormat } from "@/lib/section-utils";
-import { collectTranscript } from "@/lib/voice-transcript";
+import { buildTranscript } from "@/lib/voice-transcript";
 import { AppointmentSuggestionModal } from "@/components/AppointmentSuggestionModal";
 import { type AppointmentSuggestion } from "@/services/clinical-notes";
 import { PrescriptionFromNoteModal } from "@/components/PrescriptionFromNoteModal";
@@ -141,7 +141,6 @@ function useVoiceInput(onTranscript: (text: string) => void) {
   const [supported, setSupported] = useState(false);
   const [permissionError, setPermissionError] = useState(false);
   const recognitionRef = useRef<SpeechRec | null>(null) as MutableRefObject<SpeechRec | null>;
-  const finalTranscriptRef = useRef("");
 
   useEffect(() => {
     setSupported(getSpeechRecognition() !== null);
@@ -167,15 +166,8 @@ function useVoiceInput(onTranscript: (text: string) => void) {
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    finalTranscriptRef.current = "";
     recognition.onresult = (e) => {
-      const { finalText, display } = collectTranscript(
-        e.results,
-        e.resultIndex,
-        finalTranscriptRef.current
-      );
-      finalTranscriptRef.current = finalText;
-      onTranscript(display);
+      onTranscript(buildTranscript(e.results));
     };
 
     recognition.onerror = (e) => {
