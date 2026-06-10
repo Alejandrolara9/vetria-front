@@ -21,6 +21,7 @@ import {
 } from "@/services/clinical-notes";
 import { SectionReviewPanel } from "@/components/SectionReviewPanel";
 import { hasNewSectionsFormat } from "@/lib/section-utils";
+import { collectTranscript } from "@/lib/voice-transcript";
 import { AppointmentSuggestionModal } from "@/components/AppointmentSuggestionModal";
 import { type AppointmentSuggestion } from "@/services/clinical-notes";
 import { PrescriptionFromNoteModal } from "@/components/PrescriptionFromNoteModal";
@@ -121,7 +122,7 @@ type SpeechRec = {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
-  onresult: ((e: { results: { [i: number]: SpeechRecResult; length: number } }) => void) | null;
+  onresult: ((e: { results: { [i: number]: SpeechRecResult; length: number }; resultIndex: number }) => void) | null;
   onend: (() => void) | null;
   onerror: ((e: { error: string }) => void) | null;
   start(): void;
@@ -140,6 +141,7 @@ function useVoiceInput(onTranscript: (text: string) => void) {
   const [supported, setSupported] = useState(false);
   const [permissionError, setPermissionError] = useState(false);
   const recognitionRef = useRef<SpeechRec | null>(null) as MutableRefObject<SpeechRec | null>;
+  const finalTranscriptRef = useRef("");
 
   useEffect(() => {
     setSupported(getSpeechRecognition() !== null);
@@ -165,18 +167,15 @@ function useVoiceInput(onTranscript: (text: string) => void) {
     recognition.continuous = true;
     recognition.interimResults = true;
 
+    finalTranscriptRef.current = "";
     recognition.onresult = (e) => {
-      let final = "";
-      let interim = "";
-      for (let i = 0; i < e.results.length; i++) {
-        const r = e.results[i];
-        if (r.isFinal) {
-          final += r[0].transcript;
-        } else {
-          interim += r[0].transcript;
-        }
-      }
-      onTranscript((final + interim).trim());
+      const { finalText, display } = collectTranscript(
+        e.results,
+        e.resultIndex,
+        finalTranscriptRef.current
+      );
+      finalTranscriptRef.current = finalText;
+      onTranscript(display);
     };
 
     recognition.onerror = (e) => {
