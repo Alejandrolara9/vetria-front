@@ -1,4 +1,18 @@
 import { api } from "./api";
+import type { PaginatedResponse } from "../types/pagination";
+
+/** Construye los query params de listado, omitiendo search/status vacíos o "ALL". */
+function buildNotesListParams(
+  page: number,
+  limit: number,
+  search: string,
+  status?: string
+): Record<string, string | number> {
+  const params: Record<string, string | number> = { page, limit };
+  if (search) params.search = search;
+  if (status && status !== "ALL") params.status = status;
+  return params;
+}
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -111,9 +125,18 @@ export async function reviewClinicalNote(
   return res.data;
 }
 
-/** Lista todas las historias clínicas del tenant. */
-export async function listClinicalNotes(): Promise<ClinicalNote[]> {
-  const res = await api.get<ClinicalNote[]>("/clinical-notes");
+/** Lista paginada de historias clínicas activas del tenant. */
+export async function listClinicalNotes(
+  page: number,
+  limit: number,
+  search: string,
+  signal?: AbortSignal,
+  status?: string
+): Promise<PaginatedResponse<ClinicalNote>> {
+  const res = await api.get<PaginatedResponse<ClinicalNote>>("/clinical-notes", {
+    params: buildNotesListParams(page, limit, search, status),
+    signal,
+  });
   return res.data;
 }
 
@@ -134,9 +157,18 @@ export async function deleteClinicalNote(id: string): Promise<void> {
   await api.delete(`/clinical-notes/${id}`);
 }
 
-/** Lista las historias clínicas archivadas (soft-deleted) del tenant. */
-export async function listArchivedClinicalNotes(): Promise<ClinicalNote[]> {
-  const res = await api.get<ClinicalNote[]>("/clinical-notes/archived");
+/** Lista paginada de historias clínicas archivadas (soft-deleted) del tenant. */
+export async function listArchivedClinicalNotes(
+  page: number,
+  limit: number,
+  search: string,
+  signal?: AbortSignal,
+  status?: string
+): Promise<PaginatedResponse<ClinicalNote>> {
+  const res = await api.get<PaginatedResponse<ClinicalNote>>("/clinical-notes/archived", {
+    params: buildNotesListParams(page, limit, search, status),
+    signal,
+  });
   return res.data;
 }
 

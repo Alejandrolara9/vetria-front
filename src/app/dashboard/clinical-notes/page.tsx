@@ -22,6 +22,8 @@ import {
 import { SectionReviewPanel } from "@/components/SectionReviewPanel";
 import { hasNewSectionsFormat } from "@/lib/section-utils";
 import { buildTranscript } from "@/lib/voice-transcript";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationBar } from "@/components/PaginationBar";
 import { AppointmentSuggestionModal } from "@/components/AppointmentSuggestionModal";
 import { type AppointmentSuggestion } from "@/services/clinical-notes";
 import { PrescriptionFromNoteModal } from "@/components/PrescriptionFromNoteModal";
@@ -882,80 +884,129 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   );
 }
 
-// ─── Página principal ─────────────────────────────────────────────────────────
+// ─── Lista de archivadas (paginada, carga perezosa) ────────────────────────────
 
-export default function ClinicalNotesPage() {
-  const [notes, setNotes] = useState<ClinicalNote[]>([]);
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [showCreate, setShowCreate] = useState(false);
-  const [selectedNote, setSelectedNote] = useState<ClinicalNote | null>(null);
-  const [showArchived, setShowArchived] = useState(false);
-  const [archivedNotes, setArchivedNotes] = useState<ClinicalNote[]>([]);
-  const [loadingArchived, setLoadingArchived] = useState(false);
+function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
   const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  useEffect(() => { loadData(); }, []);
+  const fetchArchived = useCallback(
+    (page: number, limit: number, search: string, signal: AbortSignal) =>
+      listArchivedClinicalNotes(page, limit, search, signal),
+    [refreshKey]
+  );
 
-  async function loadData() {
-    try {
-      const [notesRes, petsRes] = await Promise.all([
-        listClinicalNotes(),
-        api.get<Pet[]>("/pets").then((r) => r.data).catch(() => []),
-      ]);
-      setNotes(notesRes);
-      setPets(petsRes);
-    } catch {
-      // Error silencioso en carga
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function refreshNotes() {
-    try { setNotes(await listClinicalNotes()); } catch { /* silencioso */ }
-  }
-
-  async function handleToggleArchived() {
-    if (!showArchived) {
-      setLoadingArchived(true);
-      try { setArchivedNotes(await listArchivedClinicalNotes()); } catch { /* silencioso */ }
-      finally { setLoadingArchived(false); }
-    }
-    setShowArchived((v) => !v);
-  }
+  const { data: archivedNotes, total, page, totalPages, loading, setPage } =
+    usePagination<ClinicalNote>({ fetchFn: fetchArchived });
 
   async function handleRestore(id: string) {
     setRestoringId(id);
     try {
       await restoreClinicalNote(id);
-      setArchivedNotes((prev) => prev.filter((n) => n.id !== id));
-      await refreshNotes();
+      setRefreshKey((k) => k + 1); // refresca esta lista de archivadas
+      onRestored();                // refresca la lista de activas en el padre
     } catch { /* silencioso */ }
     finally { setRestoringId(null); }
   }
 
-  const filtered = notes.filter((n) => {
-    const matchesStatus = statusFilter === "ALL" || n.status === statusFilter;
-    const q = search.toLowerCase();
-    const matchesSearch = !q ||
-      (n.pet?.name ?? "").toLowerCase().includes(q) ||
-      (n.chiefComplaint ?? "").toLowerCase().includes(q) ||
-      n.rawInput.toLowerCase().includes(q);
-    return matchesStatus && matchesSearch;
-  });
+  return (
+    <div className="mb-8">
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-sm font-semibold text-amber-700">Historias archivadas</span>
+        <span className="text-xs text-gray-400">({total})</span>
+      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-amber-50 rounded-xl border border-amber-100 p-5 animate-pulse">
+              <div className="h-4 bg-amber-100 rounded w-3/4 mb-3" />
+              <div className="h-3 bg-amber-100 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      ) : archivedNotes.length === 0 ? (
+        <p className="text-sm text-gray-400 italic">No hay historias archivadas.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {archivedNotes.map((note) => (
+            <div key={note.id} className="bg-amber-50 rounded-xl border border-amber-100 p-5 opacity-80">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="font-semibold text-sm text-gray-600">{note.pet?.name ?? "Mascota"}</p>
+                  <p className="text-xs text-gray-400">{note.pet?.species}</p>
+                </div>
+                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">Archivada</span>
+              </div>
+              {note.chiefComplaint && (
+                <p className="text-sm text-gray-500 mb-1 line-clamp-1">{note.chiefComplaint}</p>
+              )}
+              <p className="text-xs text-gray-400 line-clamp-2 italic mb-3">{note.rawInput}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-300">
+                  {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+                <button
+                  onClick={() => handleRestore(note.id)}
+                  disabled={restoringId === note.id}
+                  className="text-xs text-amber-700 hover:text-amber-900 font-medium border border-amber-300 px-2 py-1 rounded-lg hover:bg-amber-100 disabled:opacity-50 transition-colors"
+                >
+                  {restoringId === note.id ? "Restaurando..." : "Restaurar"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <PaginationBar page={page} totalPages={totalPages} total={total} onPageChange={setPage} loading={loading} />
+      <hr className="mt-6 border-gray-100" />
+    </div>
+  );
+}
+
+// ─── Página principal ─────────────────────────────────────────────────────────
+
+export default function ClinicalNotesPage() {
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [showCreate, setShowCreate] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<ClinicalNote | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // fetchFn server-side: cierra sobre statusFilter y refreshKey (este último
+  // fuerza un refetch tras crear/editar/restaurar sin cambiar de página).
+  const fetchNotes = useCallback(
+    (page: number, limit: number, search: string, signal: AbortSignal) =>
+      listClinicalNotes(page, limit, search, signal, statusFilter),
+    [statusFilter, refreshKey]
+  );
+
+  const {
+    data: notes,
+    total,
+    page,
+    totalPages,
+    search,
+    loading,
+    setSearch,
+    setPage,
+  } = usePagination<ClinicalNote>({ fetchFn: fetchNotes });
+
+  useEffect(() => {
+    api.get<Pet[]>("/pets").then((r) => setPets(r.data)).catch(() => setPets([]));
+  }, []);
+
+  const refreshNotes = () => setRefreshKey((k) => k + 1);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Historias Clínicas</h1>
-          <p className="text-gray-400 text-sm mt-1">{notes.length} registros · asistidas por IA</p>
+          <p className="text-gray-400 text-sm mt-1">{total} registros · asistidas por IA</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleToggleArchived}
+          <button onClick={() => setShowArchived((v) => !v)}
             className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
               showArchived
                 ? "bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100"
@@ -987,58 +1038,8 @@ export default function ClinicalNotesPage() {
         </div>
       </div>
 
-      {/* Archivadas */}
-      {showArchived && (
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-semibold text-amber-700">Historias archivadas</span>
-            <span className="text-xs text-gray-400">({archivedNotes.length})</span>
-          </div>
-          {loadingArchived ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="bg-amber-50 rounded-xl border border-amber-100 p-5 animate-pulse">
-                  <div className="h-4 bg-amber-100 rounded w-3/4 mb-3" />
-                  <div className="h-3 bg-amber-100 rounded w-1/2" />
-                </div>
-              ))}
-            </div>
-          ) : archivedNotes.length === 0 ? (
-            <p className="text-sm text-gray-400 italic">No hay historias archivadas.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {archivedNotes.map((note) => (
-                <div key={note.id} className="bg-amber-50 rounded-xl border border-amber-100 p-5 opacity-80">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-sm text-gray-600">{note.pet?.name ?? "Mascota"}</p>
-                      <p className="text-xs text-gray-400">{note.pet?.species}</p>
-                    </div>
-                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">Archivada</span>
-                  </div>
-                  {note.chiefComplaint && (
-                    <p className="text-sm text-gray-500 mb-1 line-clamp-1">{note.chiefComplaint}</p>
-                  )}
-                  <p className="text-xs text-gray-400 line-clamp-2 italic mb-3">{note.rawInput}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-300">
-                      {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
-                    </p>
-                    <button
-                      onClick={() => handleRestore(note.id)}
-                      disabled={restoringId === note.id}
-                      className="text-xs text-amber-700 hover:text-amber-900 font-medium border border-amber-300 px-2 py-1 rounded-lg hover:bg-amber-100 disabled:opacity-50 transition-colors"
-                    >
-                      {restoringId === note.id ? "Restaurando..." : "Restaurar"}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          <hr className="mt-6 border-gray-100" />
-        </div>
-      )}
+      {/* Archivadas (carga perezosa + paginación propia) */}
+      {showArchived && <ArchivedNotesList onRestored={refreshNotes} />}
 
       {/* Lista */}
       {loading ? (
@@ -1051,7 +1052,7 @@ export default function ClinicalNotesPage() {
             </div>
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : notes.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1063,7 +1064,7 @@ export default function ClinicalNotesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((note) => (
+          {notes.map((note) => (
             <button key={note.id} onClick={() => setSelectedNote(note)}
               className="bg-white rounded-xl border border-gray-200 p-5 text-left hover:border-blue-300 hover:shadow-sm transition-all">
               <div className="flex items-start justify-between mb-3">
@@ -1090,12 +1091,20 @@ export default function ClinicalNotesPage() {
         </div>
       )}
 
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       {showCreate && (
         <CreateModal
           pets={pets}
           onClose={() => setShowCreate(false)}
           onCreated={(note) => {
-            setNotes((prev) => [note, ...prev]);
+            refreshNotes();
             setShowCreate(false);
             setSelectedNote(note);
           }}
