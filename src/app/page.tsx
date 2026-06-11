@@ -190,6 +190,16 @@ export default function LandingPage() {
               </span>
             </div>
 
+            {process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN === "true" && (
+              <Link
+                href="/fundadores"
+                className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-amber-400/15 border border-amber-400/30 rounded-full text-amber-300 text-sm font-semibold hover:bg-amber-400/25 transition-colors backdrop-blur-sm"
+              >
+                🏆 Plan Fundadores: $50.000/mes los primeros 3 meses
+                <span aria-hidden>→</span>
+              </Link>
+            )}
+
             <h1 className="text-4xl sm:text-5xl xl:text-[3.5rem] font-extrabold text-white leading-[1.1] tracking-tight mb-5">
               El veterinario que<br />
               <span style={{ background: "linear-gradient(90deg, #2dd4bf, #34d399, #fbbf24)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>

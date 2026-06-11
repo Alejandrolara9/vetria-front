@@ -8,6 +8,7 @@ import {
   PLAN_PRICES,
   PLAN_LABELS,
   CREDIT_PACKS,
+  FOUNDERS_PRICING,
 } from "@/services/payments";
 
 jest.mock("@/services/api", () => ({
@@ -98,6 +99,31 @@ describe("payments service", () => {
     const result = await initiateSubscription("MONTHLY");
     expect(mockedApi.post).toHaveBeenCalledWith("/mp/checkout/subscription", { plan: "BASIC", period: "MONTHLY" });
     expect(result.subscriptionId).toBe("sub-1");
+  });
+
+  describe("FOUNDERS_PRICING", () => {
+    it("promo 50_000 x 3 meses, estándar 100_000", () => {
+      expect(FOUNDERS_PRICING.promoPriceCOP).toBe(50_000);
+      expect(FOUNDERS_PRICING.promoMonths).toBe(3);
+      expect(FOUNDERS_PRICING.standardPriceCOP).toBe(100_000);
+    });
+  });
+
+  it("initiateSubscription con founders envía el flag", async () => {
+    mockedApi.post.mockResolvedValue({ data: { checkoutUrl: "https://mp.com", subscriptionId: "sub-f" } });
+    const result = await initiateSubscription("MONTHLY", true);
+    expect(mockedApi.post).toHaveBeenCalledWith("/mp/checkout/subscription", {
+      plan: "BASIC",
+      period: "MONTHLY",
+      founders: true,
+    });
+    expect(result.subscriptionId).toBe("sub-f");
+  });
+
+  it("initiateSubscription sin founders NO envía el flag (compat backend)", async () => {
+    mockedApi.post.mockResolvedValue({ data: { checkoutUrl: "https://mp.com", subscriptionId: "sub-1" } });
+    await initiateSubscription("MONTHLY");
+    expect(mockedApi.post).toHaveBeenCalledWith("/mp/checkout/subscription", { plan: "BASIC", period: "MONTHLY" });
   });
 
   it("cancelSubscription uses shared api client", async () => {

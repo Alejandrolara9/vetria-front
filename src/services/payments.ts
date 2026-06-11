@@ -59,10 +59,20 @@ export const BILLING_DESCRIPTIONS: Record<BillingPeriod, string> = {
   ANNUAL:   "$1.000.000 / año · 2 meses gratis",
 };
 
+export const FOUNDERS_PRICING = {
+  promoPriceCOP:    50_000,
+  promoMonths:      3,
+  standardPriceCOP: 100_000,
+} as const;
+
 export async function initiateSubscription(
-  period: BillingPeriod
+  period: BillingPeriod,
+  founders = false
 ): Promise<{ checkoutUrl: string; subscriptionId: string }> {
-  const res = await api.post("/mp/checkout/subscription", { plan: "BASIC", period });
+  const body = founders
+    ? { plan: "BASIC", period, founders: true }
+    : { plan: "BASIC", period };
+  const res = await api.post("/mp/checkout/subscription", body);
   return res.data;
 }
 

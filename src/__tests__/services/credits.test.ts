@@ -12,6 +12,7 @@ const mockCredits = {
   plan: "BASIC" as const,
   trialEndsAt: null,
   creditsRefreshedAt: "2026-05-01T00:00:00Z",
+  wasFounder: false,
 };
 
 describe("CREDIT_PACKS", () => {
