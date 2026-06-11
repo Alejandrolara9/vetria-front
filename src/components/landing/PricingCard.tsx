@@ -37,6 +37,7 @@ const PLAN_BASIC = [
 
 export default function PricingCard() {
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("MONTHLY");
+  const foundersCampaign = process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN === "true";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
@@ -92,19 +93,31 @@ export default function PricingCard() {
             ))}
           </div>
 
-          {BILLING_OPTIONS.filter((o) => o.id === billingPeriod).map((opt) => (
-            <div key={opt.id}>
-              <div className="flex items-end gap-1">
-                <span className="text-5xl font-extrabold text-white">{opt.price}</span>
-                <span className="text-teal-300 mb-2 text-sm">{opt.sub}</span>
+          {BILLING_OPTIONS.filter((o) => o.id === billingPeriod).map((opt) => {
+            const promo = foundersCampaign && opt.id === "MONTHLY";
+            return (
+              <div key={opt.id}>
+                <div className="flex items-end gap-1">
+                  {promo && (
+                    <span className="text-2xl font-bold text-slate-500 line-through mr-1 mb-2">$100k</span>
+                  )}
+                  <span className="text-5xl font-extrabold text-white">{promo ? "$50k" : opt.price}</span>
+                  <span className="text-teal-300 mb-2 text-sm">{opt.sub}</span>
+                </div>
+                {promo ? (
+                  <span className="inline-block mt-1.5 bg-amber-400/20 text-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-400/30">
+                    🏆 Fundadores: 3 meses a $50.000, luego $100.000/mes
+                  </span>
+                ) : (
+                  opt.badge && (
+                    <span className="inline-block mt-1.5 bg-amber-400/20 text-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-400/30">
+                      {opt.badge}
+                    </span>
+                  )
+                )}
               </div>
-              {opt.badge && (
-                <span className="inline-block mt-1.5 bg-amber-400/20 text-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-400/30">
-                  {opt.badge}
-                </span>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
         <ul className="relative space-y-2.5 mb-8 flex-1">
           {PLAN_BASIC.map((item) => (
