@@ -198,7 +198,7 @@ export default function BillingPage() {
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {foundersOffer
-                ? `Plan Fundadores: $50.000/mes los primeros 3 meses, luego $100.000/mes`
+                ? `Plan Fundadores: $${FOUNDERS_PRICING.promoPriceCOP.toLocaleString("es-CO")}/mes los primeros ${FOUNDERS_PRICING.promoMonths} meses, luego $${FOUNDERS_PRICING.standardPriceCOP.toLocaleString("es-CO")}/mes`
                 : BILLING_DESCRIPTIONS[period]}
             </p>
           </div>
