@@ -9,6 +9,8 @@ services:
       args:
         NEXT_PUBLIC_API_URL: https://api.vetria.cloud
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: 958305458964-q49uqmidl8krrcbk170f8237954fim2m.apps.googleusercontent.com
+        # Campaña Plan Fundadores: "false" + rebuild oculta la oferta en billing
+        NEXT_PUBLIC_FOUNDERS_CAMPAIGN: "true"
     container_name: vetria_frontend
     ports:
       - "3000:3000"
