@@ -11,6 +11,7 @@ export interface TenantCredits {
   mpSubscriptionId:       string | null;
   founderPromo:           boolean;
   founderCyclesRemaining: number | null;
+  wasFounder:             boolean;
 }
 
 export interface CreditTopUpRequest {

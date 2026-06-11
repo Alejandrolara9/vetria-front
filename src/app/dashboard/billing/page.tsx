@@ -70,6 +70,7 @@ export default function BillingPage() {
   const [hasSubscription, setHasSubscription]   = useState(false);
   const [founderPromo, setFounderPromo]         = useState(false);
   const [founderCycles, setFounderCycles]       = useState<number | null>(null);
+  const [wasFounder, setWasFounder]             = useState(false);
 
   useEffect(() => {
     fetchMyCredits().then((c) => {
@@ -78,6 +79,7 @@ export default function BillingPage() {
       setHasSubscription(!!c.mpSubscriptionId);
       setFounderPromo(c.founderPromo);
       setFounderCycles(c.founderCyclesRemaining);
+      setWasFounder(c.wasFounder);
     }).catch(() => { /* show page without subscription info */ });
   }, []);
 
@@ -124,7 +126,7 @@ export default function BillingPage() {
     ? new Date(planPeriodEndsAt).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })
     : null;
 
-  const foundersOffer = FOUNDERS_CAMPAIGN && !hasSubscription && period === "MONTHLY";
+  const foundersOffer = FOUNDERS_CAMPAIGN && !hasSubscription && !wasFounder && period === "MONTHLY";
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
