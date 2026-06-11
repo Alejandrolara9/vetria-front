@@ -8,6 +8,7 @@ import {
   BILLING_DESCRIPTIONS,
   initiateCreditsCheckout,
   CREDIT_PACKS,
+  FOUNDERS_PRICING,
   type BillingPeriod,
   type CreditPackIndex,
 } from "@/services/payments";
@@ -56,6 +57,8 @@ const PERIOD_BADGES: Partial<Record<BillingPeriod, string>> = {
   ANNUAL:   "⭐ 2 meses gratis",
 };
 
+const FOUNDERS_CAMPAIGN = process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN === "true";
+
 export default function BillingPage() {
   const [period, setPeriod]                     = useState<BillingPeriod>("MONTHLY");
   const [loadingSubscription, setLoadingSub]    = useState(false);
@@ -65,20 +68,24 @@ export default function BillingPage() {
   const [currentPeriod, setCurrentPeriod]       = useState<BillingPeriod | null>(null);
   const [planPeriodEndsAt, setPlanPeriodEndsAt] = useState<string | null>(null);
   const [hasSubscription, setHasSubscription]   = useState(false);
+  const [founderPromo, setFounderPromo]         = useState(false);
+  const [founderCycles, setFounderCycles]       = useState<number | null>(null);
 
   useEffect(() => {
     fetchMyCredits().then((c) => {
       if (c.billingPeriod) setCurrentPeriod(c.billingPeriod as BillingPeriod);
       if (c.planPeriodEndsAt) setPlanPeriodEndsAt(c.planPeriodEndsAt);
       setHasSubscription(!!c.mpSubscriptionId);
+      setFounderPromo(c.founderPromo);
+      setFounderCycles(c.founderCyclesRemaining);
     }).catch(() => { /* show page without subscription info */ });
   }, []);
 
-  async function handleSubscribe() {
+  async function handleSubscribe(founders = false) {
     setError("");
     setLoadingSub(true);
     try {
-      const { checkoutUrl } = await initiateSubscription(period);
+      const { checkoutUrl } = await initiateSubscription(period, founders);
       globalThis.window.location.assign(checkoutUrl);
     } catch {
       setError("No se pudo iniciar la suscripción. Intenta de nuevo.");
@@ -116,6 +123,8 @@ export default function BillingPage() {
   const periodEndsStr = planPeriodEndsAt
     ? new Date(planPeriodEndsAt).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })
     : null;
+
+  const foundersOffer = FOUNDERS_CAMPAIGN && !hasSubscription && period === "MONTHLY";
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -184,10 +193,14 @@ export default function BillingPage() {
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Plan BASIC</p>
             <h3 className="text-xl font-bold">Para clínicas que crecen</h3>
             <p className="text-3xl font-bold mt-1">
-              ${BILLING_PRICES[period].toLocaleString("es-CO")}
+              ${(foundersOffer ? FOUNDERS_PRICING.promoPriceCOP : BILLING_PRICES[period]).toLocaleString("es-CO")}
               <span className="text-sm font-normal text-muted-foreground"> COP</span>
             </p>
-            <p className="text-xs text-muted-foreground mt-1">{BILLING_DESCRIPTIONS[period]}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {foundersOffer
+                ? `Plan Fundadores: $50.000/mes los primeros 3 meses, luego $100.000/mes`
+                : BILLING_DESCRIPTIONS[period]}
+            </p>
           </div>
           <ul className="space-y-2 flex-1">
             {BASIC_FEATURES.map((f) => (
@@ -201,6 +214,11 @@ export default function BillingPage() {
                 ✅ Suscripción activa · {currentPeriod ? PERIOD_LABELS[currentPeriod] : ""}
                 {periodEndsStr && ` · próximo cobro ${periodEndsStr}`}
               </p>
+              {founderPromo && (
+                <p className="text-xs text-center text-amber-600 font-medium">
+                  🏆 Plan Fundadores · {founderCycles ?? 0} {founderCycles === 1 ? "cobro" : "cobros"} de $50.000 restantes
+                </p>
+              )}
               <button
                 onClick={handleCancel}
                 disabled={loadingCancel}
@@ -211,11 +229,11 @@ export default function BillingPage() {
             </div>
           ) : (
             <button
-              onClick={handleSubscribe}
+              onClick={() => handleSubscribe(foundersOffer)}
               disabled={loadingSubscription}
               className="w-full py-2.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
-              {loadingSubscription ? "Iniciando..." : "Suscribirse"}
+              {loadingSubscription ? "Iniciando..." : foundersOffer ? "Quiero ser Fundador" : "Suscribirse"}
             </button>
           )}
         </div>
