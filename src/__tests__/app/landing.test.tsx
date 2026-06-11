@@ -49,3 +49,30 @@ describe("Landing — CTA demo", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("Landing — campaña Fundadores", () => {
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN;
+  });
+
+  it("con campaña activa muestra el pill del hero con link a /fundadores", () => {
+    process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN = "true";
+    render(<LandingPage />);
+    const pill = screen.getByText(/Plan Fundadores: \$50\.000\/mes los primeros 3 meses/i);
+    expect(pill.closest("a")).toHaveAttribute("href", "/fundadores");
+  });
+
+  it("con campaña activa la card de precios muestra el promo en Mensual", () => {
+    process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN = "true";
+    render(<LandingPage />);
+    expect(screen.getByText("$50k")).toBeInTheDocument();
+    expect(screen.getByText("$100k")).toBeInTheDocument(); // precio normal tachado
+    expect(screen.getByText(/luego \$100\.000\/mes/i)).toBeInTheDocument();
+  });
+
+  it("sin campaña no hay rastro de la promo", () => {
+    render(<LandingPage />);
+    expect(screen.queryByText(/Plan Fundadores/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("$50k")).not.toBeInTheDocument();
+  });
+});
