@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { redirect } from "next/navigation";
 import FundadoresPage from "../../app/fundadores/page";
 
 jest.mock("next/link", () => ({
@@ -8,9 +9,35 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("next/navigation", () => ({
+  redirect: jest.fn(() => {
+    throw new Error("NEXT_REDIRECT");
+  }),
+}));
+
+const mockRedirect = redirect as unknown as jest.Mock;
+
+describe("Fundadores Landing Page (campaña cerrada)", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    delete process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN;
+  });
+
+  it("redirige a / cuando la campaña no está activa", () => {
+    expect(() => render(<FundadoresPage />)).toThrow("NEXT_REDIRECT");
+    expect(mockRedirect).toHaveBeenCalledWith("/");
+  });
+});
+
 describe("Fundadores Landing Page", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN = "true";
     render(<FundadoresPage />);
+  });
+
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN;
   });
 
   it("renderiza el título principal de la página", () => {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -17,6 +18,9 @@ const BENEFITS = [
 ];
 
 export default function FundadoresPage() {
+  // Campaña cerrada → la landing de ads deja de existir (mismo flag que el resto de la promo)
+  if (process.env.NEXT_PUBLIC_FOUNDERS_CAMPAIGN !== "true") redirect("/");
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-teal-50 to-white">
       <section className="max-w-3xl mx-auto px-6 py-16 text-center">
