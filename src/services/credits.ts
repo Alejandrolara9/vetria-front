@@ -1,14 +1,16 @@
 import { api } from "./api";
 
 export interface TenantCredits {
-  creditBalance:      number;
-  plan:               "FREE" | "BASIC" | "PRO";
-  trialEndsAt:        string | null;
-  creditsRefreshedAt: string | null;
-  gracePeriodEndsAt:  string | null;
-  planPeriodEndsAt:   string | null;
-  billingPeriod:      "MONTHLY" | "SEMESTER" | "ANNUAL" | null;
-  mpSubscriptionId:   string | null;
+  creditBalance:          number;
+  plan:                   "FREE" | "BASIC" | "PRO";
+  trialEndsAt:            string | null;
+  creditsRefreshedAt:     string | null;
+  gracePeriodEndsAt:      string | null;
+  planPeriodEndsAt:       string | null;
+  billingPeriod:          "MONTHLY" | "SEMESTER" | "ANNUAL" | null;
+  mpSubscriptionId:       string | null;
+  founderPromo:           boolean;
+  founderCyclesRemaining: number | null;
 }
 
 export interface CreditTopUpRequest {
