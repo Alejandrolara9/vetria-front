@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/services/api";
 import { usePagination } from "@/hooks/usePagination";
@@ -29,6 +29,7 @@ import {
   dateToApiFields,
   type CalendarEvent,
 } from "./calendar-utils";
+import { parseLocalDate } from "@/lib/date-utils";
 import { getMyProfile, type UserProfile } from "@/services/user-profile";
 import { Calendar } from "react-big-calendar";
 import withDragAndDrop, { type EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
@@ -589,7 +590,7 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
     }
   }
 
-  const scheduledDate = new Date(appointment.date);
+  const scheduledDate = parseLocalDate(appointment.date);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -860,6 +861,7 @@ export default function AppointmentsPage() {
   const [selectedVetId, setSelectedVetId] = useState<string>("all");
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [dragError, setDragError] = useState<string | null>(null);
+  const rescheduleInFlight = useRef(false);
   const [preselectedSlot, setPreselectedSlot] = useState<{
     date: string;
     startTime: string;
@@ -1001,6 +1003,8 @@ export default function AppointmentsPage() {
     end: Date,
     errorMsg: string
   ) {
+    if (rescheduleInFlight.current) return;
+    rescheduleInFlight.current = true;
     const fields = dateToApiFields(start, end);
     setAppointments((appts) =>
       appts.map((a) => (a.id === eventId ? { ...a, ...fields } : a))
@@ -1011,6 +1015,8 @@ export default function AppointmentsPage() {
       // Refetch from server so concurrent drags don't compound stale rollbacks
       loadCalendar();
       setDragError(errorMsg);
+    } finally {
+      rescheduleInFlight.current = false;
     }
   }
 
@@ -1249,7 +1255,7 @@ export default function AppointmentsPage() {
                     <td className="px-4 py-3 font-medium">{appt.pet.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">{appt.vet.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {new Date(appt.date).toLocaleDateString("es-CO", {
+                      {parseLocalDate(appt.date).toLocaleDateString("es-CO", {
                         weekday: "short", day: "numeric", month: "short",
                       })}{" "}
                       {appt.startTime}

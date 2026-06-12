@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { parseLocalDate } from "@/lib/date-utils";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -84,13 +85,13 @@ function calcAge(birthDate: string): string {
 }
 
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("es-CO", {
+  return parseLocalDate(d).toLocaleDateString("es-CO", {
     day: "numeric", month: "short", year: "numeric",
   });
 }
 
 function daysFromNow(d: string): number {
-  return Math.ceil((new Date(d).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  return Math.ceil((parseLocalDate(d).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
 const EVENT_LABELS: Record<string, string> = {

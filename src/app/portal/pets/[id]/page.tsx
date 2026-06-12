@@ -23,6 +23,7 @@ import {
   type PetReminder,
   type ClinicAccessRequest,
 } from "@/services/owner-portal";
+import { parseLocalDate } from "@/lib/date-utils";
 
 const SPECIES_EMOJI: Record<string, string> = {
   Canino: "🐕", Felino: "🐈", Ave: "🦜", Reptil: "🦎",
@@ -330,12 +331,12 @@ export default function PortalPetDetailPage() {
                           )}
                         </div>
                         <p className="text-gray-400 text-xs whitespace-nowrap shrink-0">
-                          {new Date(ev.appliedDate).toLocaleDateString("es-CO")}
+                          {parseLocalDate(ev.appliedDate).toLocaleDateString("es-CO")}
                         </p>
                       </div>
                       {ev.nextDueDate && (
                         <p className="text-gray-400 text-xs mt-1.5">
-                          Próxima: {new Date(ev.nextDueDate).toLocaleDateString("es-CO")}
+                          Próxima: {parseLocalDate(ev.nextDueDate).toLocaleDateString("es-CO")}
                         </p>
                       )}
                     </div>
