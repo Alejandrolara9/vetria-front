@@ -193,7 +193,7 @@ export function ClientFormModal({ client, onSave, onClose }: ClientFormModalProp
           <div className="flex gap-2 pt-1">
             <button
               type="submit" disabled={saving}
-              className="flex-1 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-500 text-sm font-semibold disabled:opacity-50"
+              className="flex-1 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-semibold disabled:opacity-50"
             >
               {saving ? "Guardando..." : client ? "Actualizar" : "Registrar"}
             </button>

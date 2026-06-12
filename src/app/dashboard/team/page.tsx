@@ -6,6 +6,7 @@ import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/Passwo
 import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/SearchInput";
 import { PaginationBar } from "@/components/PaginationBar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 
 type Role = "ADMIN" | "VET" | "RECEPTIONIST";
@@ -36,6 +37,8 @@ export default function TeamPage() {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", password: "", role: "VET" as Role });
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const fetchTeam = useCallback(
     async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
@@ -109,9 +112,16 @@ export default function TeamPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`¿Eliminar a ${name}?`)) return;
+    setMemberToDelete({ id, name });
+    setDeleteConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    if (!memberToDelete) return;
+    setDeleteConfirmOpen(false);
     try {
-      await api.delete(`/users/${id}`);
+      await api.delete(`/users/${memberToDelete.id}`);
+      setMemberToDelete(null);
       handleRefresh();
     } catch (error: unknown) {
       const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -382,6 +392,13 @@ export default function TeamPage() {
         total={total}
         onPageChange={setPage}
         loading={loading}
+      />
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={`¿Eliminar a ${memberToDelete?.name}?`}
+        variant="danger"
+        onConfirm={doDelete}
+        onClose={() => { setDeleteConfirmOpen(false); setMemberToDelete(null); }}
       />
     </div>
   );

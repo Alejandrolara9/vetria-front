@@ -12,6 +12,7 @@ import {
 import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/SearchInput";
 import { PaginationBar } from "@/components/PaginationBar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -210,7 +211,7 @@ function ServiceModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving ? "Guardando..." : initial ? "Guardar cambios" : "Crear Servicio"}
             </button>
@@ -234,6 +235,8 @@ export default function ServicesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | undefined>(undefined);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
   // undefined = todos, true = activos, false = inactivos
   const [showActive, setShowActive] = useState<boolean | undefined>(undefined);
 
@@ -267,9 +270,16 @@ export default function ServicesPage() {
   }
 
   async function handleDelete(svc: Service) {
-    if (!confirm(`Eliminar el servicio "${svc.name}"? Esta accion no se puede deshacer.`)) return;
+    setServiceToDelete(svc);
+    setDeleteConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    if (!serviceToDelete) return;
+    setDeleteConfirmOpen(false);
     try {
-      await deleteService(svc.id);
+      await deleteService(serviceToDelete.id);
+      setServiceToDelete(null);
       handleRefresh();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -299,7 +309,7 @@ export default function ServicesPage() {
         </div>
         <button
           onClick={openCreate}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
         >
           + Nuevo Servicio
         </button>
@@ -456,6 +466,14 @@ export default function ServicesPage() {
           onSaved={handleRefresh}
         />
       )}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={`¿Eliminar el servicio "${serviceToDelete?.name}"?`}
+        description="Esta acción no se puede deshacer."
+        variant="danger"
+        onConfirm={doDelete}
+        onClose={() => { setDeleteConfirmOpen(false); setServiceToDelete(null); }}
+      />
     </div>
   );
 }

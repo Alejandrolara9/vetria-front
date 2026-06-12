@@ -25,6 +25,7 @@ import { buildTranscript } from "@/lib/voice-transcript";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationBar } from "@/components/PaginationBar";
 import { AppointmentSuggestionModal } from "@/components/AppointmentSuggestionModal";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { type AppointmentSuggestion } from "@/services/clinical-notes";
 import { PrescriptionFromNoteModal } from "@/components/PrescriptionFromNoteModal";
 import type { MedicationItem } from "@/services/clinical-notes";
@@ -447,7 +448,7 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
             <div className="flex gap-2 pt-2">
               <button type="submit"
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center justify-center gap-2">
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium flex items-center justify-center gap-2">
                 ✨ Generar Historia con IA
               </button>
               <button type="button" onClick={onClose}
@@ -567,6 +568,8 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   const [viewMode, setViewMode] = useState<"preview" | "edit">("preview");
   const [appointmentSuggestion, setAppointmentSuggestion] = useState<AppointmentSuggestion | null>(null);
   const [pendingMedications, setPendingMedications] = useState<MedicationItem[] | null>(null);
+  const [rejectConfirmOpen, setRejectConfirmOpen] = useState(false);
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -630,7 +633,11 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   }
 
   async function handleReject() {
-    if (!confirm("¿Rechazar esta historia clínica?")) return;
+    setRejectConfirmOpen(true);
+  }
+
+  async function doReject() {
+    setRejectConfirmOpen(false);
     setActing(true); setError(null);
     try {
       await reviewClinicalNote(note.id, { status: "REJECTED", vetFeedback: vetFeedback.trim() || undefined });
@@ -642,7 +649,11 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   }
 
   async function handleDelete() {
-    if (!confirm("¿Archivar esta historia clínica? Podrás recuperarla desde 'Ver archivadas'.")) return;
+    setArchiveConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    setArchiveConfirmOpen(false);
     setActing(true);
     try {
       await deleteClinicalNote(note.id);
@@ -826,7 +837,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
                 {acting ? "Procesando..." : "✓ Aprobar"}
               </button>
               <button onClick={handleEditAndApprove} disabled={acting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 font-medium">
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90 disabled:opacity-50 font-medium">
                 {acting ? "Guardando..." : "Guardar edición y aprobar"}
               </button>
               <button onClick={handleReject} disabled={acting}
@@ -880,6 +891,23 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           }}
         />
       )}
+      <ConfirmDialog
+        open={rejectConfirmOpen}
+        title="¿Rechazar esta historia clínica?"
+        variant="danger"
+        loading={acting}
+        onConfirm={doReject}
+        onClose={() => setRejectConfirmOpen(false)}
+      />
+      <ConfirmDialog
+        open={archiveConfirmOpen}
+        title="¿Archivar esta historia clínica?"
+        description="Podrás recuperarla desde 'Ver archivadas'."
+        variant="danger"
+        loading={acting}
+        onConfirm={doDelete}
+        onClose={() => setArchiveConfirmOpen(false)}
+      />
     </div>
   );
 }
@@ -1021,7 +1049,7 @@ export default function ClinicalNotesPage() {
             {showArchived ? "Ver activas" : "Ver archivadas"}
           </button>
           <button onClick={() => setShowCreate(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center gap-2">
             ✨ Nueva Historia con IA
           </button>
         </div>

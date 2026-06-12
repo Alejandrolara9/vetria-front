@@ -5,6 +5,7 @@ import { api } from "@/services/api";
 import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/SearchInput";
 import { PaginationBar } from "@/components/PaginationBar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 import {
   getInventoryStats,
@@ -370,7 +371,7 @@ function ProductModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving
                 ? "Guardando..."
@@ -612,7 +613,7 @@ function MovementModal({
             <button
               type="submit"
               disabled={saving || wouldGoNegative || qty <= 0}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving ? "Registrando..." : "Registrar Movimiento"}
             </button>
@@ -645,6 +646,8 @@ export default function InventoryPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [movementProduct, setMovementProduct] = useState<Product | null>(null);
+  const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
+  const [productToDeactivate, setProductToDeactivate] = useState<Product | null>(null);
 
   // Stats y low-stock: fetched independientemente
   const loadSideData = useCallback(async () => {
@@ -699,9 +702,16 @@ export default function InventoryPage() {
   }
 
   async function handleDelete(product: Product) {
-    if (!confirm(`Desactivar el producto "${product.name}"?`)) return;
+    setProductToDeactivate(product);
+    setDeactivateConfirmOpen(true);
+  }
+
+  async function doDeactivate() {
+    if (!productToDeactivate) return;
+    setDeactivateConfirmOpen(false);
     try {
-      await deleteProduct(product.id);
+      await deleteProduct(productToDeactivate.id);
+      setProductToDeactivate(null);
       triggerRefresh();
     } catch (err: unknown) {
       const msg =
@@ -723,7 +733,7 @@ export default function InventoryPage() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
         >
           + Nuevo Producto
         </button>
@@ -1002,6 +1012,13 @@ export default function InventoryPage() {
           onSaved={triggerRefresh}
         />
       )}
+      <ConfirmDialog
+        open={deactivateConfirmOpen}
+        title={`¿Desactivar el producto "${productToDeactivate?.name}"?`}
+        variant="danger"
+        onConfirm={doDeactivate}
+        onClose={() => { setDeactivateConfirmOpen(false); setProductToDeactivate(null); }}
+      />
     </div>
   );
 }
