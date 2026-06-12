@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { api } from "@/services/api";
+import { useRole } from "@/hooks/useRole";
 import {
   getReminderStats,
   createReminder,
@@ -421,6 +422,9 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function RemindersPage() {
+  const { role } = useRole();
+  const canCreateEdit = role === "ADMIN" || role === "VET";
+
   const [activeTab, setActiveTab] = useState<TabId>("upcoming");
   const [pets, setPets] = useState<Pet[]>([]);
   const [stats, setStats] = useState<ReminderStats | null>(null);
@@ -577,12 +581,14 @@ export default function RemindersPage() {
             </svg>
             {sending ? "Enviando..." : "Enviar ahora"}
           </button>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
-          >
-            + Nuevo Recordatorio
-          </button>
+          {canCreateEdit && (
+            <button
+              onClick={() => setShowCreate(true)}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+            >
+              + Nuevo Recordatorio
+            </button>
+          )}
         </div>
       </div>
 
@@ -854,8 +860,8 @@ export default function RemindersPage() {
         </div>
       )}
 
-      {/* Modal de creación */}
-      {showCreate && (
+      {/* Modal de creación — solo ADMIN / VET */}
+      {canCreateEdit && showCreate && (
         <CreateReminderModal
           pets={pets}
           onClose={() => setShowCreate(false)}
