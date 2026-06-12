@@ -13,11 +13,11 @@ const VALID_ROLES: Role[] = ["ADMIN", "VET", "RECEPTIONIST"];
 const ROUTE_ROLES: Record<string, Role[]> = {
   "/dashboard/clinical-notes": ["ADMIN", "VET"],
   "/dashboard/prescriptions": ["VET", "ADMIN"],
-  "/dashboard/reminders": ["ADMIN", "VET"],
+  "/dashboard/reminders": ["ADMIN", "VET", "RECEPTIONIST"],
   "/dashboard/protocols": ["ADMIN", "VET"],
   "/dashboard/invoices": ["ADMIN", "RECEPTIONIST"],
   "/dashboard/services": ["ADMIN"],
-  "/dashboard/inventory": ["ADMIN"],
+  "/dashboard/inventory": ["ADMIN", "VET"],
   "/dashboard/reports": ["ADMIN"],
   "/dashboard/team": ["ADMIN"],
   "/dashboard/settings/branding": ["ADMIN"],
