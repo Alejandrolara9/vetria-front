@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/services/api";
 import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/SearchInput";
 import { PaginationBar } from "@/components/PaginationBar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 import {
   listAppointments,
@@ -29,6 +30,7 @@ import {
   dateToApiFields,
   type CalendarEvent,
 } from "./calendar-utils";
+import { parseLocalDate } from "@/lib/date-utils";
 import { getMyProfile, type UserProfile } from "@/services/user-profile";
 import { Calendar } from "react-big-calendar";
 import withDragAndDrop, { type EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
@@ -445,7 +447,7 @@ function CreateAppointmentModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving ? "Guardando..." : "Crear Cita"}
             </button>
@@ -487,6 +489,7 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [showAttendForm, setShowAttendForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const inferredType = inferAppointmentType(appointment.title);
   const [attendForm, setAttendForm] = useState({
@@ -576,7 +579,11 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
   }
 
   async function handleDelete() {
-    if (!confirm("Eliminar esta cita permanentemente?")) return;
+    setDeleteConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    setDeleteConfirmOpen(false);
     setActing(true);
     try {
       await deleteAppointment(appointment.id);
@@ -589,7 +596,7 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
     }
   }
 
-  const scheduledDate = new Date(appointment.date);
+  const scheduledDate = parseLocalDate(appointment.date);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -800,7 +807,7 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
                 <button
                   onClick={handleConfirm}
                   disabled={acting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90 disabled:opacity-50"
                 >
                   Confirmar
                 </button>
@@ -836,6 +843,15 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="¿Eliminar esta cita?"
+        description="Esta acción no se puede deshacer."
+        variant="danger"
+        loading={acting}
+        onConfirm={doDelete}
+        onClose={() => setDeleteConfirmOpen(false)}
+      />
     </div>
   );
 }
@@ -860,6 +876,7 @@ export default function AppointmentsPage() {
   const [selectedVetId, setSelectedVetId] = useState<string>("all");
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [dragError, setDragError] = useState<string | null>(null);
+  const rescheduleInFlight = useRef(false);
   const [preselectedSlot, setPreselectedSlot] = useState<{
     date: string;
     startTime: string;
@@ -1001,6 +1018,8 @@ export default function AppointmentsPage() {
     end: Date,
     errorMsg: string
   ) {
+    if (rescheduleInFlight.current) return;
+    rescheduleInFlight.current = true;
     const fields = dateToApiFields(start, end);
     setAppointments((appts) =>
       appts.map((a) => (a.id === eventId ? { ...a, ...fields } : a))
@@ -1011,6 +1030,8 @@ export default function AppointmentsPage() {
       // Refetch from server so concurrent drags don't compound stale rollbacks
       loadCalendar();
       setDragError(errorMsg);
+    } finally {
+      rescheduleInFlight.current = false;
     }
   }
 
@@ -1066,7 +1087,7 @@ export default function AppointmentsPage() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="px-3 py-2 md:px-4 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
+          className="px-3 py-2 md:px-4 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
         >
           + Nueva Cita
         </button>
@@ -1207,22 +1228,22 @@ export default function AppointmentsPage() {
           </select>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm min-w-[560px] bg-card-bg">
-            <thead className="bg-gray-50 border-b border-border">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+          <table className="w-full text-sm min-w-[560px]">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Veterinario</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fecha y hora</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Mascota</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Veterinario</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha y hora</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
               </tr>
             </thead>
             <tbody>
               {tableLoading && tableAppointments.length === 0 ? (
                 <>
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="border-b border-border">
+                    <tr key={i} className="border-t border-gray-100">
                       {[1, 2, 3, 4, 5].map((c) => (
                         <td key={c} className="px-4 py-3">
                           <div className="h-4 bg-gray-200 rounded animate-pulse" />
@@ -1244,23 +1265,23 @@ export default function AppointmentsPage() {
                   <tr
                     key={appt.id}
                     onClick={() => setSelectedAppointment(appt)}
-                    className="border-b border-border last:border-0 hover:bg-gray-50 cursor-pointer"
+                    className="border-t border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     <td className="px-4 py-3 font-medium">{appt.pet.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{appt.vet.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {new Date(appt.date).toLocaleDateString("es-CO", {
+                    <td className="px-4 py-3 text-sm text-gray-600">{appt.vet.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {parseLocalDate(appt.date).toLocaleDateString("es-CO", {
                         weekday: "short", day: "numeric", month: "short",
                       })}{" "}
                       {appt.startTime}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs px-2 py-0.5 rounded-full border bg-blue-100 text-blue-800 border-blue-300">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border bg-blue-100 text-blue-800 border-blue-300">
                         {appt.title}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_BADGE[appt.status]}`}>
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[appt.status]}`}>
                         {STATUS_LABELS[appt.status]}
                       </span>
                     </td>

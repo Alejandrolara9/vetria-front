@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import {
   initiateSubscription,
   cancelSubscription,
@@ -63,6 +64,7 @@ export default function BillingPage() {
   const [period, setPeriod]                     = useState<BillingPeriod>("MONTHLY");
   const [loadingSubscription, setLoadingSub]    = useState(false);
   const [loadingCancel, setLoadingCancel]       = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [loadingCredits, setLoadingCredits]     = useState<CreditPackIndex | null>(null);
   const [error, setError]                       = useState("");
   const [currentPeriod, setCurrentPeriod]       = useState<BillingPeriod | null>(null);
@@ -96,7 +98,11 @@ export default function BillingPage() {
   }
 
   async function handleCancel() {
-    if (!confirm("¿Seguro que quieres cancelar tu suscripción? Tu plan permanecerá activo hasta su fecha de vencimiento.")) return;
+    setCancelConfirmOpen(true);
+  }
+
+  async function doCancel() {
+    setCancelConfirmOpen(false);
     setError("");
     setLoadingCancel(true);
     try {
@@ -262,6 +268,15 @@ export default function BillingPage() {
           ))}
         </div>
       </div>
+      <ConfirmDialog
+        open={cancelConfirmOpen}
+        title="¿Cancelar tu suscripción?"
+        description="Tu plan permanecerá activo hasta su fecha de vencimiento."
+        variant="danger"
+        loading={loadingCancel}
+        onConfirm={doCancel}
+        onClose={() => setCancelConfirmOpen(false)}
+      />
     </div>
   );
 }

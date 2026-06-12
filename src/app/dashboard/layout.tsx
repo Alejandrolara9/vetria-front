@@ -7,17 +7,17 @@ import { RenewalWarningModal } from "@/components/RenewalWarningModal";
 import { fetchMyCredits } from "@/services/credits";
 import { api, redirect } from "@/services/api";
 
-type Role = "ADMIN" | "VET" | "RECEPTIONIST";
-const VALID_ROLES: Role[] = ["ADMIN", "VET", "RECEPTIONIST"];
+type Role = "ADMIN" | "VET" | "RECEPTIONIST" | "AUXILIAR";
+const VALID_ROLES: Role[] = ["ADMIN", "VET", "RECEPTIONIST", "AUXILIAR"];
 
 const ROUTE_ROLES: Record<string, Role[]> = {
-  "/dashboard/clinical-notes": ["ADMIN", "VET"],
+  "/dashboard/clinical-notes": ["ADMIN", "VET", "AUXILIAR"],
   "/dashboard/prescriptions": ["VET", "ADMIN"],
-  "/dashboard/reminders": ["ADMIN", "VET"],
+  "/dashboard/reminders": ["ADMIN", "VET", "RECEPTIONIST", "AUXILIAR"],
   "/dashboard/protocols": ["ADMIN", "VET"],
   "/dashboard/invoices": ["ADMIN", "RECEPTIONIST"],
   "/dashboard/services": ["ADMIN"],
-  "/dashboard/inventory": ["ADMIN"],
+  "/dashboard/inventory": ["ADMIN", "VET", "AUXILIAR"],
   "/dashboard/reports": ["ADMIN"],
   "/dashboard/team": ["ADMIN"],
   "/dashboard/settings/branding": ["ADMIN"],

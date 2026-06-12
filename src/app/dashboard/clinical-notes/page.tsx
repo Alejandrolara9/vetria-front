@@ -23,8 +23,10 @@ import { SectionReviewPanel } from "@/components/SectionReviewPanel";
 import { hasNewSectionsFormat } from "@/lib/section-utils";
 import { buildTranscript } from "@/lib/voice-transcript";
 import { usePagination } from "@/hooks/usePagination";
+import { useRole } from "@/hooks/useRole";
 import { PaginationBar } from "@/components/PaginationBar";
 import { AppointmentSuggestionModal } from "@/components/AppointmentSuggestionModal";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { type AppointmentSuggestion } from "@/services/clinical-notes";
 import { PrescriptionFromNoteModal } from "@/components/PrescriptionFromNoteModal";
 import type { MedicationItem } from "@/services/clinical-notes";
@@ -70,7 +72,7 @@ interface Pet {
 
 function StatusBadge({ status }: { status: ClinicalNoteStatus }) {
   return (
-    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_BADGE[status]}`}>
+    <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[status]}`}>
       {STATUS_LABELS[status]}
     </span>
   );
@@ -447,7 +449,7 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
             <div className="flex gap-2 pt-2">
               <button type="submit"
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center justify-center gap-2">
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium flex items-center justify-center gap-2">
                 ✨ Generar Historia con IA
               </button>
               <button type="button" onClick={onClose}
@@ -556,9 +558,10 @@ interface DetailModalProps {
   note: ClinicalNote;
   onClose: () => void;
   onUpdated: () => void;
+  canWrite: boolean;
 }
 
-function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps) {
+function DetailModal({ note: initialNote, onClose, onUpdated, canWrite }: DetailModalProps) {
   const [note, setNote] = useState<ClinicalNote>(initialNote);
   const [editedText, setEditedText] = useState(initialNote.finalNote ?? initialNote.generatedNote ?? "");
   const [vetFeedback, setVetFeedback] = useState("");
@@ -567,6 +570,8 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   const [viewMode, setViewMode] = useState<"preview" | "edit">("preview");
   const [appointmentSuggestion, setAppointmentSuggestion] = useState<AppointmentSuggestion | null>(null);
   const [pendingMedications, setPendingMedications] = useState<MedicationItem[] | null>(null);
+  const [rejectConfirmOpen, setRejectConfirmOpen] = useState(false);
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -630,7 +635,11 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   }
 
   async function handleReject() {
-    if (!confirm("¿Rechazar esta historia clínica?")) return;
+    setRejectConfirmOpen(true);
+  }
+
+  async function doReject() {
+    setRejectConfirmOpen(false);
     setActing(true); setError(null);
     try {
       await reviewClinicalNote(note.id, { status: "REJECTED", vetFeedback: vetFeedback.trim() || undefined });
@@ -642,7 +651,11 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   }
 
   async function handleDelete() {
-    if (!confirm("¿Archivar esta historia clínica? Podrás recuperarla desde 'Ver archivadas'.")) return;
+    setArchiveConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    setArchiveConfirmOpen(false);
     setActing(true);
     try {
       await deleteClinicalNote(note.id);
@@ -727,7 +740,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           )}
 
           {/* Historia en revisión — secciones estructuradas o fallback markdown */}
-          {isPendingReview && !isGenerating && (
+          {isPendingReview && !isGenerating && canWrite && (
             <div className="text-sm">
               {hasStructuredSections ? (
                 <SectionReviewPanel
@@ -806,7 +819,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           )}
 
           {/* Feedback — solo para notas sin secciones estructuradas */}
-          {isPendingReview && !hasStructuredSections && (
+          {isPendingReview && !hasStructuredSections && canWrite && (
             <div className="text-sm">
               <label className="block text-xs text-gray-400 mb-1">
                 Comentarios para mejorar (opcional)
@@ -819,14 +832,14 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           )}
 
           {/* Botones de revisión — solo para notas sin secciones estructuradas */}
-          {isPendingReview && !hasStructuredSections && (
+          {isPendingReview && !hasStructuredSections && canWrite && (
             <div className="flex gap-2 pt-2 flex-wrap">
               <button onClick={handleApprove} disabled={acting}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 disabled:opacity-50 font-medium">
                 {acting ? "Procesando..." : "✓ Aprobar"}
               </button>
               <button onClick={handleEditAndApprove} disabled={acting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 font-medium">
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90 disabled:opacity-50 font-medium">
                 {acting ? "Guardando..." : "Guardar edición y aprobar"}
               </button>
               <button onClick={handleReject} disabled={acting}
@@ -844,12 +857,14 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
             </div>
           )}
 
-          <div className="pt-1 border-t border-gray-100">
-            <button onClick={handleDelete} disabled={acting}
-              className="text-xs text-gray-400 hover:text-amber-600 disabled:opacity-50">
-              Archivar historia clínica
-            </button>
-          </div>
+          {canWrite && (
+            <div className="pt-1 border-t border-gray-100">
+              <button onClick={handleDelete} disabled={acting}
+                className="text-xs text-gray-400 hover:text-amber-600 disabled:opacity-50">
+                Archivar historia clínica
+              </button>
+            </div>
+          )}
         </div>
       </div>
       {appointmentSuggestion && (
@@ -880,14 +895,32 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           }}
         />
       )}
+      <ConfirmDialog
+        open={rejectConfirmOpen}
+        title="¿Rechazar esta historia clínica?"
+        variant="danger"
+        loading={acting}
+        onConfirm={doReject}
+        onClose={() => setRejectConfirmOpen(false)}
+      />
+      <ConfirmDialog
+        open={archiveConfirmOpen}
+        title="¿Archivar esta historia clínica?"
+        description="Podrás recuperarla desde 'Ver archivadas'."
+        variant="danger"
+        loading={acting}
+        onConfirm={doDelete}
+        onClose={() => setArchiveConfirmOpen(false)}
+      />
     </div>
   );
 }
 
 // ─── Lista de archivadas (paginada, carga perezosa) ────────────────────────────
 
-function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
+function ArchivedNotesList({ onRestored, canWrite }: { onRestored: () => void; canWrite: boolean }) {
   const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchArchived = useCallback(
@@ -901,12 +934,14 @@ function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
 
   async function handleRestore(id: string) {
     setRestoringId(id);
+    setRestoreError(null);
     try {
       await restoreClinicalNote(id);
       setRefreshKey((k) => k + 1); // refresca esta lista de archivadas
       onRestored();                // refresca la lista de activas en el padre
-    } catch { /* silencioso */ }
-    finally { setRestoringId(null); }
+    } catch {
+      setRestoreError("No se pudo restaurar la nota. Intenta de nuevo.");
+    } finally { setRestoringId(null); }
   }
 
   return (
@@ -915,6 +950,9 @@ function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
         <span className="text-sm font-semibold text-amber-700">Historias archivadas</span>
         <span className="text-xs text-gray-400">({total})</span>
       </div>
+      {restoreError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2 mb-3">{restoreError}</div>
+      )}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -935,7 +973,7 @@ function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
                   <p className="font-semibold text-sm text-gray-600">{note.pet?.name ?? "Mascota"}</p>
                   <p className="text-xs text-gray-400">{note.pet?.species}</p>
                 </div>
-                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">Archivada</span>
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Archivada</span>
               </div>
               {note.chiefComplaint && (
                 <p className="text-sm text-gray-500 mb-1 line-clamp-1">{note.chiefComplaint}</p>
@@ -945,13 +983,15 @@ function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
                 <p className="text-xs text-gray-300">
                   {new Date(note.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
                 </p>
-                <button
-                  onClick={() => handleRestore(note.id)}
-                  disabled={restoringId === note.id}
-                  className="text-xs text-amber-700 hover:text-amber-900 font-medium border border-amber-300 px-2 py-1 rounded-lg hover:bg-amber-100 disabled:opacity-50 transition-colors"
-                >
-                  {restoringId === note.id ? "Restaurando..." : "Restaurar"}
-                </button>
+                {canWrite && (
+                  <button
+                    onClick={() => handleRestore(note.id)}
+                    disabled={restoringId === note.id}
+                    className="text-xs text-amber-700 hover:text-amber-900 font-medium border border-amber-300 px-2 py-1 rounded-lg hover:bg-amber-100 disabled:opacity-50 transition-colors"
+                  >
+                    {restoringId === note.id ? "Restaurando..." : "Restaurar"}
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -966,6 +1006,9 @@ function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function ClinicalNotesPage() {
+  const { role } = useRole();
+  const canWrite = role === "ADMIN" || role === "VET";
+
   const [pets, setPets] = useState<Pet[]>([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showCreate, setShowCreate] = useState(false);
@@ -1014,10 +1057,12 @@ export default function ClinicalNotesPage() {
             }`}>
             {showArchived ? "Ver activas" : "Ver archivadas"}
           </button>
-          <button onClick={() => setShowCreate(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
-            ✨ Nueva Historia con IA
-          </button>
+          {canWrite && (
+            <button onClick={() => setShowCreate(true)}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center gap-2">
+              ✨ Nueva Historia con IA
+            </button>
+          )}
         </div>
       </div>
 
@@ -1029,8 +1074,8 @@ export default function ClinicalNotesPage() {
         <div className="flex gap-2 flex-wrap">
           {STATUS_FILTERS.map((f) => (
             <button key={f.value} onClick={() => setStatusFilter(f.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-                statusFilter === f.value ? "bg-blue-600 text-white border-blue-600" : "border-gray-200 text-gray-500 hover:bg-gray-50"
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors border ${
+                statusFilter === f.value ? "bg-primary text-white border-primary" : "bg-white text-gray-600 border-gray-200 hover:border-teal-400"
               }`}>
               {f.label}
             </button>
@@ -1039,7 +1084,7 @@ export default function ClinicalNotesPage() {
       </div>
 
       {/* Archivadas (carga perezosa + paginación propia) */}
-      {showArchived && <ArchivedNotesList onRestored={refreshNotes} />}
+      {showArchived && <ArchivedNotesList onRestored={refreshNotes} canWrite={canWrite} />}
 
       {/* Lista */}
       {loading ? (
@@ -1058,9 +1103,11 @@ export default function ClinicalNotesPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <p>No se encontraron historias clínicas</p>
-          <button onClick={() => setShowCreate(true)} className="mt-3 text-blue-600 text-sm hover:underline">
-            Crear la primera
-          </button>
+          {canWrite && (
+            <button onClick={() => setShowCreate(true)} className="mt-3 text-blue-600 text-sm hover:underline">
+              Crear la primera
+            </button>
+          )}
         </div>
       ) : (
         <>
@@ -1148,7 +1195,7 @@ export default function ClinicalNotesPage() {
         loading={loading}
       />
 
-      {showCreate && (
+      {canWrite && showCreate && (
         <CreateModal
           pets={pets}
           onClose={() => setShowCreate(false)}
@@ -1165,6 +1212,7 @@ export default function ClinicalNotesPage() {
           note={selectedNote}
           onClose={() => setSelectedNote(null)}
           onUpdated={() => { setSelectedNote(null); refreshNotes(); }}
+          canWrite={canWrite}
         />
       )}
     </div>

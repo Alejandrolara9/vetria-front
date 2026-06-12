@@ -59,7 +59,7 @@ export function RenewalWarningModal({ gracePeriodEndsAt }: Props) {
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <button
             onClick={goToBilling}
-            className="flex-1 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-xl text-sm transition-colors"
+            className="flex-1 py-2.5 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl text-sm transition-colors"
           >
             Renovar ahora
           </button>

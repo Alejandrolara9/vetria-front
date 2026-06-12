@@ -6,9 +6,10 @@ import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/Passwo
 import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/SearchInput";
 import { PaginationBar } from "@/components/PaginationBar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 
-type Role = "ADMIN" | "VET" | "RECEPTIONIST";
+type Role = "ADMIN" | "VET" | "RECEPTIONIST" | "AUXILIAR";
 
 interface TeamMember {
   id: string;
@@ -21,12 +22,14 @@ const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Administrador",
   VET: "Veterinario",
   RECEPTIONIST: "Recepcionista",
+  AUXILIAR: "Auxiliar",
 };
 
 const ROLE_COLORS: Record<Role, string> = {
   ADMIN: "bg-purple-100 text-purple-700",
   VET: "bg-blue-100 text-blue-700",
   RECEPTIONIST: "bg-green-100 text-green-700",
+  AUXILIAR: "bg-violet-100 text-violet-700",
 };
 
 export default function TeamPage() {
@@ -36,6 +39,8 @@ export default function TeamPage() {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", password: "", role: "VET" as Role });
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const fetchTeam = useCallback(
     async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
@@ -109,9 +114,16 @@ export default function TeamPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`¿Eliminar a ${name}?`)) return;
+    setMemberToDelete({ id, name });
+    setDeleteConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    if (!memberToDelete) return;
+    setDeleteConfirmOpen(false);
     try {
-      await api.delete(`/users/${id}`);
+      await api.delete(`/users/${memberToDelete.id}`);
+      setMemberToDelete(null);
       handleRefresh();
     } catch (error: unknown) {
       const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -210,6 +222,7 @@ export default function TeamPage() {
                 >
                   <option value="VET">Veterinario</option>
                   <option value="RECEPTIONIST">Recepcionista</option>
+                  <option value="AUXILIAR">Auxiliar</option>
                   <option value="ADMIN">Administrador</option>
                 </select>
               </div>
@@ -296,6 +309,7 @@ export default function TeamPage() {
                 >
                   <option value="VET">Veterinario</option>
                   <option value="RECEPTIONIST">Recepcionista</option>
+                  <option value="AUXILIAR">Auxiliar</option>
                   <option value="ADMIN">Administrador</option>
                 </select>
               </div>
@@ -348,26 +362,28 @@ export default function TeamPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${ROLE_COLORS[member.role]}`}>
+                <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[member.role]}`}>
                   {ROLE_LABELS[member.role]}
                 </span>
                 <button
                   onClick={() => startEdit(member)}
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                   title="Editar"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
+                  Editar
                 </button>
                 <button
                   onClick={() => handleDelete(member.id, member.name)}
-                  className="text-muted-foreground hover:text-red-500 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
                   title="Eliminar"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
+                  Eliminar
                 </button>
               </div>
             </div>
@@ -382,6 +398,13 @@ export default function TeamPage() {
         total={total}
         onPageChange={setPage}
         loading={loading}
+      />
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={`¿Eliminar a ${memberToDelete?.name}?`}
+        variant="danger"
+        onConfirm={doDelete}
+        onClose={() => { setDeleteConfirmOpen(false); setMemberToDelete(null); }}
       />
     </div>
   );

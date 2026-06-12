@@ -9,6 +9,7 @@ import { PaginationBar } from "@/components/PaginationBar";
 import { PrescriptionCard } from "@/components/prescriptions/PrescriptionCard";
 import type { PaginatedResponse } from "@/types/pagination";
 import { deletePrescription, type Prescription, type PrescriptionStatus } from "@/services/prescriptions";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 const STATUS_LABEL: Record<PrescriptionStatus, string> = {
   DRAFT: "Borrador",
@@ -30,6 +31,8 @@ export default function PrescriptionsPage() {
   const [statusFilter, setStatusFilter] = useState<PrescriptionStatus | "ALL">("ALL");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [prescriptionToDelete, setPrescriptionToDelete] = useState<Prescription | null>(null);
 
   const fetchPrescriptions = useCallback(
     async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
@@ -60,10 +63,17 @@ export default function PrescriptionsPage() {
   } = usePagination<Prescription>({ fetchFn: fetchPrescriptions });
 
   async function handleDelete(p: Prescription) {
-    if (!confirm(`¿Eliminar la fórmula de ${p.pet.name}?`)) return;
-    setDeletingId(p.id);
+    setPrescriptionToDelete(p);
+    setDeleteConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    if (!prescriptionToDelete) return;
+    setDeleteConfirmOpen(false);
+    setDeletingId(prescriptionToDelete.id);
     try {
-      await deletePrescription(p.id);
+      await deletePrescription(prescriptionToDelete.id);
+      setPrescriptionToDelete(null);
       setRefreshKey((k) => k + 1);
     } catch {
       alert("No se pudo eliminar la fórmula");
@@ -178,7 +188,7 @@ export default function PrescriptionsPage() {
                     <td className="px-4 py-3 text-gray-600">{p.vet.name}</td>
                     <td className="px-4 py-3 text-gray-500">{formatDate(p.issueDate)}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLOR[p.status]}`}>
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[p.status]}`}>
                         {STATUS_LABEL[p.status]}
                       </span>
                     </td>
@@ -231,6 +241,14 @@ export default function PrescriptionsPage() {
         total={total}
         onPageChange={setPage}
         loading={loading}
+      />
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={`¿Eliminar la fórmula de ${prescriptionToDelete?.pet.name}?`}
+        variant="danger"
+        loading={deletingId !== null}
+        onConfirm={doDelete}
+        onClose={() => { setDeleteConfirmOpen(false); setPrescriptionToDelete(null); }}
       />
     </div>
   );

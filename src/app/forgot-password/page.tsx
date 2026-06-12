@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
                 <p className="text-slate-500 text-xs">¿No lo ves? Revisa la carpeta de spam.</p>
                 <Link
                   href="/login"
-                  className="inline-block mt-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-all"
+                  className="inline-block mt-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl text-sm transition-all"
                 >
                   Volver al inicio de sesión
                 </Link>
@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/30 text-sm"
+                    className="w-full py-3.5 bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-teal-600/30 text-sm"
                   >
                     {loading ? "Enviando..." : "Enviar enlace de recuperación →"}
                   </button>

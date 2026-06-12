@@ -3,8 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "@/services/api";
 import { usePagination } from "@/hooks/usePagination";
+import { useRole } from "@/hooks/useRole";
 import { SearchInput } from "@/components/SearchInput";
 import { PaginationBar } from "@/components/PaginationBar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 import {
   getInventoryStats,
@@ -71,9 +73,9 @@ function formatCurrency(value: number): string {
 
 function SkeletonRow() {
   return (
-    <tr className="border-b border-border">
+    <tr className="border-t border-gray-100">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <td key={i} className="px-6 py-4">
+        <td key={i} className="px-4 py-3">
           <div className="h-4 bg-gray-200 rounded animate-pulse" />
         </td>
       ))}
@@ -370,7 +372,7 @@ function ProductModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving
                 ? "Guardando..."
@@ -612,7 +614,7 @@ function MovementModal({
             <button
               type="submit"
               disabled={saving || wouldGoNegative || qty <= 0}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving ? "Registrando..." : "Registrar Movimiento"}
             </button>
@@ -633,6 +635,9 @@ function MovementModal({
 // ─── Pagina principal ─────────────────────────────────────────────────────────
 
 export default function InventoryPage() {
+  const { role } = useRole();
+  const isAdmin = role === "ADMIN";
+
   const [stats, setStats] = useState<InventoryStats | null>(null);
   const [lowStockItems, setLowStockItems] = useState<Product[]>([]);
 
@@ -645,6 +650,8 @@ export default function InventoryPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [movementProduct, setMovementProduct] = useState<Product | null>(null);
+  const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
+  const [productToDeactivate, setProductToDeactivate] = useState<Product | null>(null);
 
   // Stats y low-stock: fetched independientemente
   const loadSideData = useCallback(async () => {
@@ -699,9 +706,16 @@ export default function InventoryPage() {
   }
 
   async function handleDelete(product: Product) {
-    if (!confirm(`Desactivar el producto "${product.name}"?`)) return;
+    setProductToDeactivate(product);
+    setDeactivateConfirmOpen(true);
+  }
+
+  async function doDeactivate() {
+    if (!productToDeactivate) return;
+    setDeactivateConfirmOpen(false);
     try {
-      await deleteProduct(product.id);
+      await deleteProduct(productToDeactivate.id);
+      setProductToDeactivate(null);
       triggerRefresh();
     } catch (err: unknown) {
       const msg =
@@ -721,12 +735,14 @@ export default function InventoryPage() {
             {stats?.totalProducts ?? 0} productos activos
           </p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
-        >
-          + Nuevo Producto
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+          >
+            + Nuevo Producto
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -884,18 +900,22 @@ export default function InventoryPage() {
                   >
                     Movimiento
                   </button>
-                  <button
-                    onClick={() => setEditingProduct(product)}
-                    className="flex-1 inline-flex items-center justify-center text-sm px-2 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product)}
-                    className="flex-1 inline-flex items-center justify-center text-sm px-2 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-medium transition-colors"
-                  >
-                    Desactivar
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => setEditingProduct(product)}
+                      className="flex-1 inline-flex items-center justify-center text-sm px-2 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
+                    >
+                      Editar
+                    </button>
+                  )}
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDelete(product)}
+                      className="flex-1 inline-flex items-center justify-center text-sm px-2 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-medium transition-colors"
+                    >
+                      Desactivar
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -904,16 +924,16 @@ export default function InventoryPage() {
       )}
 
       {/* Desktop: tabla */}
-      <div className="hidden md:block bg-card-bg rounded-xl border border-border overflow-hidden">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-border">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Producto</th>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Categoria</th>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">SKU</th>
-              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Stock</th>
-              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Precio Venta</th>
-              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Acciones</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Producto</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Categoria</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">SKU</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Stock</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Precio Venta</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -936,29 +956,60 @@ export default function InventoryPage() {
               products.map((product) => {
                 const isLow = product.stock <= product.minStock;
                 return (
-                  <tr key={product.id} className="border-b border-border last:border-0 hover:bg-gray-50">
-                    <td className="px-6 py-4">
+                  <tr key={product.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3">
                       <p className="font-medium">{product.name}</p>
                       {product.description && (
                         <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xs">{product.description}</p>
                       )}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${CATEGORY_COLORS[product.category]}`}>
+                    <td className="px-4 py-3">
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${CATEGORY_COLORS[product.category]}`}>
                         {CATEGORY_LABELS[product.category]}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{product.sku ?? "—"}</td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{product.sku ?? "—"}</td>
+                    <td className="px-4 py-3 text-right">
                       <span className={`font-semibold ${isLow ? "text-red-600" : "text-foreground"}`}>{product.stock}</span>
                       <span className="text-muted-foreground text-xs ml-1">{product.unit}</span>
                       {isLow && <span className="ml-2 text-xs text-red-500">(min: {product.minStock})</span>}
                     </td>
-                    <td className="px-6 py-4 text-right font-medium">{formatCurrency(product.salePrice)}</td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={() => setMovementProduct(product)} className="text-primary hover:underline mr-3 text-xs" title="Registrar movimiento de stock">Movimiento</button>
-                      <button onClick={() => setEditingProduct(product)} className="text-muted-foreground hover:text-foreground hover:underline mr-3 text-xs">Editar</button>
-                      <button onClick={() => handleDelete(product)} className="text-danger hover:underline text-xs">Desactivar</button>
+                    <td className="px-4 py-3 text-right font-medium">{formatCurrency(product.salePrice)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="inline-flex items-center gap-1.5">
+                        <button
+                          onClick={() => setMovementProduct(product)}
+                          title="Registrar movimiento de stock"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+                          </svg>
+                          Movimiento
+                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => setEditingProduct(product)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Editar
+                          </button>
+                        )}
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDelete(product)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Desactivar
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -976,8 +1027,8 @@ export default function InventoryPage() {
         loading={loading}
       />
 
-      {/* Modal crear */}
-      {showCreateModal && (
+      {/* Modal crear — solo ADMIN */}
+      {isAdmin && showCreateModal && (
         <ProductModal
           product={null}
           onClose={() => setShowCreateModal(false)}
@@ -985,8 +1036,8 @@ export default function InventoryPage() {
         />
       )}
 
-      {/* Modal editar */}
-      {editingProduct && (
+      {/* Modal editar — solo ADMIN */}
+      {isAdmin && editingProduct && (
         <ProductModal
           product={editingProduct}
           onClose={() => setEditingProduct(null)}
@@ -1002,6 +1053,13 @@ export default function InventoryPage() {
           onSaved={triggerRefresh}
         />
       )}
+      <ConfirmDialog
+        open={deactivateConfirmOpen}
+        title={`¿Desactivar el producto "${productToDeactivate?.name}"?`}
+        variant="danger"
+        onConfirm={doDeactivate}
+        onClose={() => { setDeactivateConfirmOpen(false); setProductToDeactivate(null); }}
+      />
     </div>
   );
 }

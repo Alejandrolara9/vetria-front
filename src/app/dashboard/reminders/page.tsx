@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { api } from "@/services/api";
+import { useRole } from "@/hooks/useRole";
 import {
   getReminderStats,
   createReminder,
@@ -152,7 +153,7 @@ function ReminderCard({ reminder, showOverdueBadge, onResent }: ReminderCardProp
           <p className="font-semibold text-sm">{reminder.pet?.name ?? "Mascota"}</p>
           <p className="text-xs text-muted-foreground">{reminder.pet?.species}</p>
         </div>
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${EVENT_TYPE_BADGE[eventType]}`}>
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${EVENT_TYPE_BADGE[eventType]}`}>
           {EVENT_TYPE_LABELS[eventType]}
         </span>
       </div>
@@ -184,7 +185,7 @@ function ReminderCard({ reminder, showOverdueBadge, onResent }: ReminderCardProp
 
       {/* Estado + reenviar */}
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[status]}`}>
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[status]}`}>
           {STATUS_LABELS[status]}
         </span>
         <div className="flex items-center gap-2">
@@ -399,7 +400,7 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving ? "Guardando..." : "Crear Recordatorio"}
             </button>
@@ -421,6 +422,9 @@ function CreateReminderModal({ pets, onClose, onCreated }: CreateModalProps) {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function RemindersPage() {
+  const { role } = useRole();
+  const canCreateEdit = role === "ADMIN" || role === "VET";
+
   const [activeTab, setActiveTab] = useState<TabId>("upcoming");
   const [pets, setPets] = useState<Pet[]>([]);
   const [stats, setStats] = useState<ReminderStats | null>(null);
@@ -577,12 +581,14 @@ export default function RemindersPage() {
             </svg>
             {sending ? "Enviando..." : "Enviar ahora"}
           </button>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
-          >
-            + Nuevo Recordatorio
-          </button>
+          {canCreateEdit && (
+            <button
+              onClick={() => setShowCreate(true)}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+            >
+              + Nuevo Recordatorio
+            </button>
+          )}
         </div>
       </div>
 
@@ -760,10 +766,10 @@ export default function RemindersPage() {
                     setAllStatusFilter(s.value);
                     setAllPage(1);
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors border ${
                     allStatusFilter === s.value
                       ? "bg-primary text-white border-primary"
-                      : "border-border text-muted-foreground hover:bg-gray-50"
+                      : "border-gray-200 text-gray-600 hover:border-teal-400"
                   }`}
                 >
                   {s.label}
@@ -792,16 +798,16 @@ export default function RemindersPage() {
               </div>
 
               {/* Desktop: tabla */}
-              <div className="hidden md:block bg-card-bg rounded-xl border border-border overflow-hidden">
+              <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 bg-white">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-border">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vencimiento</th>
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dias</th>
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Notif.</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Mascota</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Vencimiento</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Dias</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Notif.</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -814,13 +820,13 @@ export default function RemindersPage() {
                       ).length;
 
                       return (
-                        <tr key={r.id} className="border-b border-border last:border-0 hover:bg-gray-50">
+                        <tr key={r.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3">
                             <p className="font-medium">{r.pet?.name ?? "—"}</p>
                             <p className="text-xs text-muted-foreground">{r.pet?.species}</p>
                           </td>
                           <td className="px-4 py-3">
-                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EVENT_TYPE_BADGE[eventType]}`}>
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${EVENT_TYPE_BADGE[eventType]}`}>
                               {EVENT_TYPE_LABELS[eventType]}
                             </span>
                           </td>
@@ -831,7 +837,7 @@ export default function RemindersPage() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[status]}`}>
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[status]}`}>
                               {STATUS_LABELS[status]}
                             </span>
                           </td>
@@ -854,8 +860,8 @@ export default function RemindersPage() {
         </div>
       )}
 
-      {/* Modal de creación */}
-      {showCreate && (
+      {/* Modal de creación — solo ADMIN / VET */}
+      {canCreateEdit && showCreate && (
         <CreateReminderModal
           pets={pets}
           onClose={() => setShowCreate(false)}

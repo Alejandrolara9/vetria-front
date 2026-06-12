@@ -238,7 +238,7 @@ export function PrescriptionFromNoteModal({ medications, petId, vetId, clinicalN
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="flex-1 px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 px-4 py-2 text-sm text-white bg-primary rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
             {loading ? "Creando..." : "Crear y enviar receta"}
           </button>
