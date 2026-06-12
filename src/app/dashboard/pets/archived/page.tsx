@@ -83,32 +83,35 @@ export default function ArchivedPetsPage() {
           <p className="text-sm">Las mascotas eliminadas aparecerán aquí</p>
         </div>
       ) : (
-        <div className="bg-card-bg rounded-xl border border-border overflow-hidden">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-gray-50">
-                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Mascota</th>
-                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Especie / Raza</th>
-                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Tutor</th>
-                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Archivada el</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Acción</th>
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Mascota</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Especie / Raza</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tutor</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Archivada el</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Acción</th>
               </tr>
             </thead>
             <tbody>
               {pets.map((pet) => (
-                <tr key={pet.id} className="border-b border-border last:border-0 hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium">{pet.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground">
+                <tr key={pet.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 font-medium">{pet.name}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
                     {pet.species}{pet.breed ? ` - ${pet.breed}` : ""}
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground">{pet.client.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{formatDate(pet.deletedAt)}</td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-4 py-3 text-sm text-gray-600">{pet.client.name}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{formatDate(pet.deletedAt)}</td>
+                  <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => handleRestore(pet)}
                       disabled={restoring === pet.id}
-                      className="px-3 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg hover:bg-green-100 disabled:opacity-50 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-green-200 text-xs font-medium text-green-700 hover:bg-green-50 transition-colors disabled:opacity-50"
                     >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
                       {restoring === pet.id ? "Restaurando..." : "Restaurar"}
                     </button>
                   </td>
