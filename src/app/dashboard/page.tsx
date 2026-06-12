@@ -57,26 +57,34 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [statsError, setStatsError] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
   async function loadData() {
+    setStatsError(false);
     try {
       const [userRes, clientsRes, petsRes, appointmentsRes, remindersRes] = await Promise.all([
         api.get("/users/me"),
-        api.get("/clients"),
-        api.get("/pets"),
+        api.get("/clients").catch(() => null),
+        api.get("/pets").catch(() => null),
         api.get("/appointments/stats/today").catch(() => ({ data: { total: 0, confirmed: 0, completed: 0, pending: 0 } })),
         api.get("/reminders/stats").catch(() => ({ data: { scheduled: 0, overdue: 0, confirmed: 0 } })),
       ]);
       setUserName(userRes.data?.name || "");
-      setStats({
-        clients: clientsRes.data?.length || 0,
-        pets: petsRes.data?.length || 0,
-        appointmentsToday: appointmentsRes.data,
-        reminders: remindersRes.data,
-      });
-    } catch { /* silent */ }
+      if (clientsRes === null && petsRes === null && appointmentsRes === null && remindersRes === null) {
+        setStatsError(true);
+      } else {
+        setStats({
+          clients: clientsRes?.data?.length ?? 0,
+          pets: petsRes?.data?.length ?? 0,
+          appointmentsToday: appointmentsRes.data,
+          reminders: remindersRes.data,
+        });
+      }
+    } catch {
+      setStatsError(true);
+    }
     finally { setLoading(false); }
   }
 
@@ -112,6 +120,18 @@ export default function DashboardPage() {
             </Card>
           ))}
         </div>
+      ) : statsError ? (
+        <Card>
+          <CardContent className="p-5 flex items-center justify-between gap-4">
+            <p className="text-sm text-red-700">No se pudieron cargar las estadísticas.</p>
+            <button
+              onClick={loadData}
+              className="px-3 py-1.5 text-sm font-medium border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              Reintentar
+            </button>
+          </CardContent>
+        </Card>
       ) : stats ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {STAT_CARDS(stats).map((card) => (
