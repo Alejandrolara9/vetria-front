@@ -71,7 +71,7 @@ interface Pet {
 
 function StatusBadge({ status }: { status: ClinicalNoteStatus }) {
   return (
-    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_BADGE[status]}`}>
+    <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[status]}`}>
       {STATUS_LABELS[status]}
     </span>
   );
@@ -969,7 +969,7 @@ function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
                   <p className="font-semibold text-sm text-gray-600">{note.pet?.name ?? "Mascota"}</p>
                   <p className="text-xs text-gray-400">{note.pet?.species}</p>
                 </div>
-                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">Archivada</span>
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Archivada</span>
               </div>
               {note.chiefComplaint && (
                 <p className="text-sm text-gray-500 mb-1 line-clamp-1">{note.chiefComplaint}</p>
@@ -1063,8 +1063,8 @@ export default function ClinicalNotesPage() {
         <div className="flex gap-2 flex-wrap">
           {STATUS_FILTERS.map((f) => (
             <button key={f.value} onClick={() => setStatusFilter(f.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-                statusFilter === f.value ? "bg-blue-600 text-white border-blue-600" : "border-gray-200 text-gray-500 hover:bg-gray-50"
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors border ${
+                statusFilter === f.value ? "bg-primary text-white border-primary" : "bg-white text-gray-600 border-gray-200 hover:border-teal-400"
               }`}>
               {f.label}
             </button>

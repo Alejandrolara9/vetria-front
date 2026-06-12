@@ -78,9 +78,9 @@ function formatDate(dateStr: string | null | undefined): string {
 
 function SkeletonRow() {
   return (
-    <tr className="border-b border-border">
+    <tr className="border-t border-gray-100">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <td key={i} className="px-6 py-4">
+        <td key={i} className="px-4 py-3">
           <div className="h-4 bg-gray-200 rounded animate-pulse" />
         </td>
       ))}
@@ -1089,7 +1089,7 @@ export default function InvoicesPage() {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="font-bold text-gray-900 text-base">{formatCurrency(inv.total)}</p>
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-semibold mt-1 inline-block ${STATUS_COLORS[inv.status]}`}>
+                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${STATUS_COLORS[inv.status]}`}>
                     {STATUS_LABELS[inv.status]}
                   </span>
                 </div>
@@ -1127,17 +1127,17 @@ export default function InvoicesPage() {
       )}
 
       {/* Desktop: tabla */}
-      <div className="hidden md:block bg-card-bg rounded-xl border border-border overflow-hidden">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-border">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Numero</th>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Cliente</th>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Mascota</th>
-              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Total</th>
-              <th className="text-center px-6 py-3 font-medium text-muted-foreground">Estado</th>
-              <th className="text-left px-6 py-3 font-medium text-muted-foreground">Fecha</th>
-              <th className="text-right px-6 py-3 font-medium text-muted-foreground">Acciones</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Numero</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Cliente</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Mascota</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Total</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -1157,25 +1157,52 @@ export default function InvoicesPage() {
               </tr>
             ) : (
               invoices.map((inv) => (
-                <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-gray-50">
-                  <td className="px-6 py-4 font-mono font-semibold text-primary">{inv.number}</td>
-                  <td className="px-6 py-4 font-medium">{inv.client.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{inv.pet ? inv.pet.name : "—"}</td>
-                  <td className="px-6 py-4 text-right font-semibold">{formatCurrency(inv.total)}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[inv.status]}`}>
+                <tr key={inv.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 font-mono font-semibold text-primary">{inv.number}</td>
+                  <td className="px-4 py-3 font-medium">{inv.client.name}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{inv.pet ? inv.pet.name : "—"}</td>
+                  <td className="px-4 py-3 text-right font-semibold">{formatCurrency(inv.total)}</td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[inv.status]}`}>
                       {STATUS_LABELS[inv.status]}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground">{formatDate(inv.issuedAt)}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button onClick={() => setSelectedInvoice(inv)} className="text-primary hover:underline mr-3">Ver</button>
-                    {inv.status === "ISSUED" && (
-                      <button onClick={() => handleMarkPaid(inv)} className="text-green-600 hover:underline mr-3">Pagar</button>
-                    )}
-                    {inv.status === "DRAFT" && (
-                      <button onClick={() => handleDelete(inv)} className="text-danger hover:underline">Eliminar</button>
-                    )}
+                  <td className="px-4 py-3 text-sm text-gray-600">{formatDate(inv.issuedAt)}</td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="inline-flex items-center gap-1.5">
+                      <button
+                        onClick={() => setSelectedInvoice(inv)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Ver
+                      </button>
+                      {inv.status === "ISSUED" && (
+                        <button
+                          onClick={() => handleMarkPaid(inv)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-green-200 text-xs font-medium text-green-700 hover:bg-green-50 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Pagar
+                        </button>
+                      )}
+                      {inv.status === "DRAFT" && (
+                        <button
+                          onClick={() => handleDelete(inv)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Eliminar
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

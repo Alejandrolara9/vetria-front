@@ -188,7 +188,7 @@ export default function PrescriptionsPage() {
                     <td className="px-4 py-3 text-gray-600">{p.vet.name}</td>
                     <td className="px-4 py-3 text-gray-500">{formatDate(p.issueDate)}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLOR[p.status]}`}>
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[p.status]}`}>
                         {STATUS_LABEL[p.status]}
                       </span>
                     </td>

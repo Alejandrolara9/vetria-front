@@ -1228,22 +1228,22 @@ export default function AppointmentsPage() {
           </select>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm min-w-[560px] bg-card-bg">
-            <thead className="bg-gray-50 border-b border-border">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+          <table className="w-full text-sm min-w-[560px]">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mascota</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Veterinario</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fecha y hora</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Mascota</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Veterinario</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha y hora</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
               </tr>
             </thead>
             <tbody>
               {tableLoading && tableAppointments.length === 0 ? (
                 <>
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="border-b border-border">
+                    <tr key={i} className="border-t border-gray-100">
                       {[1, 2, 3, 4, 5].map((c) => (
                         <td key={c} className="px-4 py-3">
                           <div className="h-4 bg-gray-200 rounded animate-pulse" />
@@ -1265,23 +1265,23 @@ export default function AppointmentsPage() {
                   <tr
                     key={appt.id}
                     onClick={() => setSelectedAppointment(appt)}
-                    className="border-b border-border last:border-0 hover:bg-gray-50 cursor-pointer"
+                    className="border-t border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     <td className="px-4 py-3 font-medium">{appt.pet.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{appt.vet.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-4 py-3 text-sm text-gray-600">{appt.vet.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
                       {parseLocalDate(appt.date).toLocaleDateString("es-CO", {
                         weekday: "short", day: "numeric", month: "short",
                       })}{" "}
                       {appt.startTime}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs px-2 py-0.5 rounded-full border bg-blue-100 text-blue-800 border-blue-300">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border bg-blue-100 text-blue-800 border-blue-300">
                         {appt.title}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_BADGE[appt.status]}`}>
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[appt.status]}`}>
                         {STATUS_LABELS[appt.status]}
                       </span>
                     </td>
