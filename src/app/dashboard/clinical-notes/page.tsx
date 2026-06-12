@@ -25,6 +25,7 @@ import { buildTranscript } from "@/lib/voice-transcript";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationBar } from "@/components/PaginationBar";
 import { AppointmentSuggestionModal } from "@/components/AppointmentSuggestionModal";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { type AppointmentSuggestion } from "@/services/clinical-notes";
 import { PrescriptionFromNoteModal } from "@/components/PrescriptionFromNoteModal";
 import type { MedicationItem } from "@/services/clinical-notes";
@@ -567,6 +568,8 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   const [viewMode, setViewMode] = useState<"preview" | "edit">("preview");
   const [appointmentSuggestion, setAppointmentSuggestion] = useState<AppointmentSuggestion | null>(null);
   const [pendingMedications, setPendingMedications] = useState<MedicationItem[] | null>(null);
+  const [rejectConfirmOpen, setRejectConfirmOpen] = useState(false);
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -630,7 +633,11 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   }
 
   async function handleReject() {
-    if (!confirm("¿Rechazar esta historia clínica?")) return;
+    setRejectConfirmOpen(true);
+  }
+
+  async function doReject() {
+    setRejectConfirmOpen(false);
     setActing(true); setError(null);
     try {
       await reviewClinicalNote(note.id, { status: "REJECTED", vetFeedback: vetFeedback.trim() || undefined });
@@ -642,7 +649,11 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
   }
 
   async function handleDelete() {
-    if (!confirm("¿Archivar esta historia clínica? Podrás recuperarla desde 'Ver archivadas'.")) return;
+    setArchiveConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    setArchiveConfirmOpen(false);
     setActing(true);
     try {
       await deleteClinicalNote(note.id);
@@ -880,6 +891,23 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
           }}
         />
       )}
+      <ConfirmDialog
+        open={rejectConfirmOpen}
+        title="¿Rechazar esta historia clínica?"
+        variant="danger"
+        loading={acting}
+        onConfirm={doReject}
+        onClose={() => setRejectConfirmOpen(false)}
+      />
+      <ConfirmDialog
+        open={archiveConfirmOpen}
+        title="¿Archivar esta historia clínica?"
+        description="Podrás recuperarla desde 'Ver archivadas'."
+        variant="danger"
+        loading={acting}
+        onConfirm={doDelete}
+        onClose={() => setArchiveConfirmOpen(false)}
+      />
     </div>
   );
 }

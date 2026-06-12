@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import Link from "next/link";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface ArchivedPet {
   id: string;
@@ -18,6 +19,8 @@ export default function ArchivedPetsPage() {
   const [pets, setPets] = useState<ArchivedPet[]>([]);
   const [loading, setLoading] = useState(true);
   const [restoring, setRestoring] = useState<string | null>(null);
+  const [restoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
+  const [petToRestore, setPetToRestore] = useState<ArchivedPet | null>(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -32,11 +35,18 @@ export default function ArchivedPetsPage() {
     }
   }
 
-  async function handleRestore(id: string) {
-    if (!confirm("¿Restaurar esta mascota?")) return;
-    setRestoring(id);
+  async function handleRestore(pet: ArchivedPet) {
+    setPetToRestore(pet);
+    setRestoreConfirmOpen(true);
+  }
+
+  async function doRestore() {
+    if (!petToRestore) return;
+    setRestoreConfirmOpen(false);
+    setRestoring(petToRestore.id);
     try {
-      await api.post(`/pets/${id}/restore`, {});
+      await api.post(`/pets/${petToRestore.id}/restore`, {});
+      setPetToRestore(null);
       await loadData();
     } catch (error: unknown) {
       const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -95,7 +105,7 @@ export default function ArchivedPetsPage() {
                   <td className="px-6 py-4 text-muted-foreground">{formatDate(pet.deletedAt)}</td>
                   <td className="px-6 py-4 text-right">
                     <button
-                      onClick={() => handleRestore(pet.id)}
+                      onClick={() => handleRestore(pet)}
                       disabled={restoring === pet.id}
                       className="px-3 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg hover:bg-green-100 disabled:opacity-50 transition-colors"
                     >
@@ -108,6 +118,14 @@ export default function ArchivedPetsPage() {
           </table>
         </div>
       )}
+      <ConfirmDialog
+        open={restoreConfirmOpen}
+        title="¿Restaurar esta mascota?"
+        variant="default"
+        loading={restoring !== null}
+        onConfirm={doRestore}
+        onClose={() => { setRestoreConfirmOpen(false); setPetToRestore(null); }}
+      />
     </div>
   );
 }

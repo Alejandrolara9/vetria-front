@@ -16,6 +16,7 @@ import { searchCatalog, type CatalogItem } from "@/services/catalog";
 import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/SearchInput";
 import { PaginationBar } from "@/components/PaginationBar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
@@ -652,19 +653,29 @@ function InvoiceDetailModal({
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [statusConfirmOpen, setStatusConfirmOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<{ invoiceId: string; newStatus: string } | null>(null);
+  const [deleteInvoiceConfirmOpen, setDeleteInvoiceConfirmOpen] = useState(false);
+
+  const statusLabels: Record<string, string> = {
+    ISSUED: "¿Emitir esta factura?",
+    PAID: "¿Marcar como pagada?",
+    CANCELLED: "¿Cancelar esta factura?",
+  };
 
   async function handleStatusChange(newStatus: InvoiceStatus) {
-    const labels: Record<string, string> = {
-      ISSUED: "Emitir esta factura?",
-      PAID: "Marcar como pagada?",
-      CANCELLED: "Cancelar esta factura? Esta accion no se puede deshacer.",
-    };
-    if (!confirm(labels[newStatus])) return;
+    setPendingStatusChange({ invoiceId: invoice.id, newStatus });
+    setStatusConfirmOpen(true);
+  }
 
+  async function doStatusChange() {
+    if (!pendingStatusChange) return;
+    setStatusConfirmOpen(false);
     try {
       setLoading(true);
       setError("");
-      await updateInvoice(invoice.id, { status: newStatus });
+      await updateInvoice(pendingStatusChange.invoiceId, { status: pendingStatusChange.newStatus as InvoiceStatus });
+      setPendingStatusChange(null);
       onUpdated();
       onClose();
     } catch (err: unknown) {
@@ -676,7 +687,11 @@ function InvoiceDetailModal({
   }
 
   async function handleDelete() {
-    if (!confirm("Eliminar esta factura? Esta accion no se puede deshacer.")) return;
+    setDeleteInvoiceConfirmOpen(true);
+  }
+
+  async function doDeleteInvoice() {
+    setDeleteInvoiceConfirmOpen(false);
     try {
       setLoading(true);
       await deleteInvoice(invoice.id);
@@ -865,6 +880,23 @@ function InvoiceDetailModal({
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={statusConfirmOpen}
+        title={pendingStatusChange ? statusLabels[pendingStatusChange.newStatus] ?? "¿Confirmar cambio de estado?" : ""}
+        variant="default"
+        loading={loading}
+        onConfirm={doStatusChange}
+        onClose={() => { setStatusConfirmOpen(false); setPendingStatusChange(null); }}
+      />
+      <ConfirmDialog
+        open={deleteInvoiceConfirmOpen}
+        title="¿Eliminar esta factura?"
+        description="Esta acción no se puede deshacer."
+        variant="danger"
+        loading={loading}
+        onConfirm={doDeleteInvoice}
+        onClose={() => setDeleteInvoiceConfirmOpen(false)}
+      />
     </div>
   );
 }
@@ -879,6 +911,10 @@ export default function InvoicesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [quickPayConfirmOpen, setQuickPayConfirmOpen] = useState(false);
+  const [invoiceForQuickPay, setInvoiceForQuickPay] = useState<Invoice | null>(null);
+  const [quickDeleteConfirmOpen, setQuickDeleteConfirmOpen] = useState(false);
+  const [invoiceForQuickDelete, setInvoiceForQuickDelete] = useState<Invoice | null>(null);
 
   const fetchInvoices = useCallback(
     async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
@@ -929,9 +965,16 @@ export default function InvoicesPage() {
   }
 
   async function handleMarkPaid(invoice: Invoice) {
-    if (!confirm(`Marcar ${invoice.number} como pagada?`)) return;
+    setInvoiceForQuickPay(invoice);
+    setQuickPayConfirmOpen(true);
+  }
+
+  async function doMarkPaid() {
+    if (!invoiceForQuickPay) return;
+    setQuickPayConfirmOpen(false);
     try {
-      await updateInvoice(invoice.id, { status: "PAID" });
+      await updateInvoice(invoiceForQuickPay.id, { status: "PAID" });
+      setInvoiceForQuickPay(null);
       handleRefresh();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -940,9 +983,16 @@ export default function InvoicesPage() {
   }
 
   async function handleDelete(invoice: Invoice) {
-    if (!confirm(`Eliminar la factura ${invoice.number}? Esta accion no se puede deshacer.`)) return;
+    setInvoiceForQuickDelete(invoice);
+    setQuickDeleteConfirmOpen(true);
+  }
+
+  async function doQuickDelete() {
+    if (!invoiceForQuickDelete) return;
+    setQuickDeleteConfirmOpen(false);
     try {
-      await deleteInvoice(invoice.id);
+      await deleteInvoice(invoiceForQuickDelete.id);
+      setInvoiceForQuickDelete(null);
       handleRefresh();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -1160,6 +1210,21 @@ export default function InvoicesPage() {
           onUpdated={handleRefresh}
         />
       )}
+      <ConfirmDialog
+        open={quickPayConfirmOpen}
+        title={`¿Marcar ${invoiceForQuickPay?.number} como pagada?`}
+        variant="default"
+        onConfirm={doMarkPaid}
+        onClose={() => { setQuickPayConfirmOpen(false); setInvoiceForQuickPay(null); }}
+      />
+      <ConfirmDialog
+        open={quickDeleteConfirmOpen}
+        title={`¿Eliminar la factura ${invoiceForQuickDelete?.number}?`}
+        description="Esta acción no se puede deshacer."
+        variant="danger"
+        onConfirm={doQuickDelete}
+        onClose={() => { setQuickDeleteConfirmOpen(false); setInvoiceForQuickDelete(null); }}
+      />
     </div>
   );
 }

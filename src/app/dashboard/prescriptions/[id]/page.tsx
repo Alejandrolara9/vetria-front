@@ -10,6 +10,7 @@ import {
   type Prescription,
   type PrescriptionStatus,
 } from "@/services/prescriptions";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 const STATUS_LABEL: Record<PrescriptionStatus, string> = {
   DRAFT: "Borrador",
@@ -46,6 +47,8 @@ export default function PrescriptionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   useEffect(() => {
     getPrescription(id)
@@ -59,7 +62,11 @@ export default function PrescriptionDetailPage() {
   }
 
   async function handleSend() {
-    if (!confirm("¿Generar el PDF y enviar la fórmula al email del propietario?")) return;
+    setSendConfirmOpen(true);
+  }
+
+  async function doSend() {
+    setSendConfirmOpen(false);
     setActionLoading("send");
     try {
       const updated = await sendPrescription(id);
@@ -73,7 +80,11 @@ export default function PrescriptionDetailPage() {
 
   async function handleDelete() {
     if (!prescription) return;
-    if (!confirm(`¿Eliminar la fórmula de ${prescription.pet.name}?`)) return;
+    setDeleteConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    setDeleteConfirmOpen(false);
     setActionLoading("delete");
     try {
       await deletePrescription(id);
@@ -268,6 +279,24 @@ export default function PrescriptionDetailPage() {
           <p className="text-xs text-gray-500 mt-1">T.P. {p.vet.licenseNumber}</p>
         )}
       </div>
+      <ConfirmDialog
+        open={sendConfirmOpen}
+        title="¿Generar el PDF y enviar la fórmula?"
+        description="Se enviará al email del propietario."
+        variant="default"
+        confirmLabel="Generar y enviar"
+        loading={actionLoading === "send"}
+        onConfirm={doSend}
+        onClose={() => setSendConfirmOpen(false)}
+      />
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={`¿Eliminar la fórmula de ${prescription?.pet.name}?`}
+        variant="danger"
+        loading={actionLoading === "delete"}
+        onConfirm={doDelete}
+        onClose={() => setDeleteConfirmOpen(false)}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   deleteAttachment,
   type Attachment,
 } from "@/services/attachments";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 const FILE_ICON: Record<string, string> = { IMAGE: "🖼️", PDF: "📄" };
 
@@ -43,6 +44,8 @@ export function AttachmentsPanel({
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [viewingId, setViewingId] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [attachmentToDelete, setAttachmentToDelete] = useState<Attachment | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>("auto");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -108,12 +111,19 @@ export function AttachmentsPanel({
     }
   };
 
-  const handleDelete = async (attachment: Attachment) => {
-    if (!confirm(`¿Eliminar "${attachment.filename}"?`)) return;
-    setDeletingId(attachment.id);
+  const handleDelete = (attachment: Attachment) => {
+    setAttachmentToDelete(attachment);
+    setDeleteConfirmOpen(true);
+  };
+
+  const doDelete = async () => {
+    if (!attachmentToDelete) return;
+    setDeleteConfirmOpen(false);
+    setDeletingId(attachmentToDelete.id);
     try {
-      await deleteAttachment(attachment.id);
-      setAttachments((prev) => prev.filter((a) => a.id !== attachment.id));
+      await deleteAttachment(attachmentToDelete.id);
+      setAttachments((prev) => prev.filter((a) => a.id !== attachmentToDelete.id));
+      setAttachmentToDelete(null);
     } catch {
       alert("Error al eliminar el archivo");
     } finally {
@@ -256,6 +266,14 @@ export function AttachmentsPanel({
           );
         })}
       </div>
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={`¿Eliminar "${attachmentToDelete?.filename}"?`}
+        variant="danger"
+        loading={deletingId !== null}
+        onConfirm={doDelete}
+        onClose={() => { setDeleteConfirmOpen(false); setAttachmentToDelete(null); }}
+      />
     </div>
   );
 }

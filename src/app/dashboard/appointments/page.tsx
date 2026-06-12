@@ -6,6 +6,7 @@ import { api } from "@/services/api";
 import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/SearchInput";
 import { PaginationBar } from "@/components/PaginationBar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 import {
   listAppointments,
@@ -488,6 +489,7 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [showAttendForm, setShowAttendForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const inferredType = inferAppointmentType(appointment.title);
   const [attendForm, setAttendForm] = useState({
@@ -577,7 +579,11 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
   }
 
   async function handleDelete() {
-    if (!confirm("Eliminar esta cita permanentemente?")) return;
+    setDeleteConfirmOpen(true);
+  }
+
+  async function doDelete() {
+    setDeleteConfirmOpen(false);
     setActing(true);
     try {
       await deleteAppointment(appointment.id);
@@ -837,6 +843,15 @@ function AppointmentDetailModal({ appointment, onClose, onUpdated }: DetailModal
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="¿Eliminar esta cita?"
+        description="Esta acción no se puede deshacer."
+        variant="danger"
+        loading={acting}
+        onConfirm={doDelete}
+        onClose={() => setDeleteConfirmOpen(false)}
+      />
     </div>
   );
 }
