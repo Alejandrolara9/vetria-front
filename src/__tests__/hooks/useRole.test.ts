@@ -43,6 +43,13 @@ describe("useRole", () => {
     expect(result.current.role).toBe("RECEPTIONIST");
   });
 
+  it("returns AUXILIAR role after successful fetch", async () => {
+    mockGet.mockResolvedValue({ data: { role: "AUXILIAR" } });
+    const { result } = renderHook(() => useRole());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.role).toBe("AUXILIAR");
+  });
+
   it("returns null role for unknown role value", async () => {
     mockGet.mockResolvedValue({ data: { role: "SUPERADMIN" } });
     const { result } = renderHook(() => useRole());

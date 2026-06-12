@@ -9,7 +9,7 @@ import { PaginationBar } from "@/components/PaginationBar";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { PaginatedResponse } from "@/types/pagination";
 
-type Role = "ADMIN" | "VET" | "RECEPTIONIST";
+type Role = "ADMIN" | "VET" | "RECEPTIONIST" | "AUXILIAR";
 
 interface TeamMember {
   id: string;
@@ -22,12 +22,14 @@ const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Administrador",
   VET: "Veterinario",
   RECEPTIONIST: "Recepcionista",
+  AUXILIAR: "Auxiliar",
 };
 
 const ROLE_COLORS: Record<Role, string> = {
   ADMIN: "bg-purple-100 text-purple-700",
   VET: "bg-blue-100 text-blue-700",
   RECEPTIONIST: "bg-green-100 text-green-700",
+  AUXILIAR: "bg-violet-100 text-violet-700",
 };
 
 export default function TeamPage() {
@@ -220,6 +222,7 @@ export default function TeamPage() {
                 >
                   <option value="VET">Veterinario</option>
                   <option value="RECEPTIONIST">Recepcionista</option>
+                  <option value="AUXILIAR">Auxiliar</option>
                   <option value="ADMIN">Administrador</option>
                 </select>
               </div>
@@ -306,6 +309,7 @@ export default function TeamPage() {
                 >
                   <option value="VET">Veterinario</option>
                   <option value="RECEPTIONIST">Recepcionista</option>
+                  <option value="AUXILIAR">Auxiliar</option>
                   <option value="ADMIN">Administrador</option>
                 </select>
               </div>
