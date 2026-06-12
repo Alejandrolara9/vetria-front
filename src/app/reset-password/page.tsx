@@ -120,7 +120,7 @@ function ResetPasswordForm() {
         <button
           type="submit"
           disabled={loading || !isPasswordStrong(password) || password !== confirm}
-          className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/30 text-sm"
+          className="w-full py-3.5 bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-teal-600/30 text-sm"
         >
           {loading ? "Guardando..." : "Establecer nueva contraseña →"}
         </button>

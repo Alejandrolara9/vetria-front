@@ -618,7 +618,7 @@ function ProtocolModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50 transition-colors"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50 transition-colors"
             >
               {saving ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear Protocolo"}
             </button>
@@ -662,7 +662,7 @@ function EmptyState({ onNew }: { onNew: () => void }) {
       <div>
         <button
           onClick={onNew}
-          className="px-5 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
+          className="px-5 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
         >
           + Crear primer protocolo
         </button>
@@ -842,7 +842,7 @@ export default function ProtocolsPage() {
         </div>
         <button
           onClick={openCreate}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium whitespace-nowrap"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium whitespace-nowrap"
         >
           + Nuevo Protocolo
         </button>

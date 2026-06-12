@@ -115,7 +115,7 @@ export function PetFormModal({ clientId, pet, onSave, onClose }: PetFormModalPro
           <div className="flex gap-2 mt-1">
             <button
               type="submit" disabled={saving}
-              className="flex-1 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 text-sm font-medium disabled:opacity-50"
+              className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving ? "Guardando..." : pet ? "Actualizar" : "Guardar"}
             </button>

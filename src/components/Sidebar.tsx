@@ -240,7 +240,7 @@ function CreditModal({ onClose }: { onClose: () => void }) {
           <button
             onClick={handleCheckout}
             disabled={selected === null || submitting}
-            className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
           >
             {submitting ? "Redirigiendo..." : "Pagar con MercadoPago"}
           </button>

@@ -447,7 +447,7 @@ function CreateModal({ pets, onClose, onCreated }: CreateModalProps) {
 
             <div className="flex gap-2 pt-2">
               <button type="submit"
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center justify-center gap-2">
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium flex items-center justify-center gap-2">
                 ✨ Generar Historia con IA
               </button>
               <button type="button" onClick={onClose}
@@ -826,7 +826,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
                 {acting ? "Procesando..." : "✓ Aprobar"}
               </button>
               <button onClick={handleEditAndApprove} disabled={acting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 font-medium">
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90 disabled:opacity-50 font-medium">
                 {acting ? "Guardando..." : "Guardar edición y aprobar"}
               </button>
               <button onClick={handleReject} disabled={acting}
@@ -1021,7 +1021,7 @@ export default function ClinicalNotesPage() {
             {showArchived ? "Ver activas" : "Ver archivadas"}
           </button>
           <button onClick={() => setShowCreate(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center gap-2">
             ✨ Nueva Historia con IA
           </button>
         </div>

@@ -210,7 +210,7 @@ function ServiceModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover text-sm font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium disabled:opacity-50"
             >
               {saving ? "Guardando..." : initial ? "Guardar cambios" : "Crear Servicio"}
             </button>
@@ -299,7 +299,7 @@ export default function ServicesPage() {
         </div>
         <button
           onClick={openCreate}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
         >
           + Nuevo Servicio
         </button>
