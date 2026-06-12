@@ -95,9 +95,9 @@ function formatDays(days: number | null | undefined): string {
 
 function SkeletonRow() {
   return (
-    <tr className="border-b border-border">
+    <tr className="border-t border-gray-100">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <td key={i} className="px-5 py-4">
+        <td key={i} className="px-4 py-3">
           <div className="h-4 bg-gray-100 rounded-full animate-pulse" />
         </td>
       ))}
@@ -974,26 +974,26 @@ export default function ProtocolsPage() {
             </div>
 
             {/* ── Vista desktop: tabla ───────────────────────────────────── */}
-            <div className="hidden md:block rounded-xl border border-border overflow-hidden shadow-sm">
+            <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 bg-white">
               <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-border">
-                    <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Protocolo</th>
-                    <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Especie</th>
-                    <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Recurrencia</th>
-                    <th className="text-left px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Notificaciones</th>
-                    <th className="text-center px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Estado</th>
-                    <th className="text-right px-5 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide">Acciones</th>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Protocolo</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Especie</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Recurrencia</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Notificaciones</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100">
                   {loading ? (
                     <><SkeletonRow /><SkeletonRow /><SkeletonRow /></>
                   ) : (
                     protocols.map((protocol) => (
-                      <tr key={protocol.id} className="hover:bg-gray-50/70 transition-colors">
+                      <tr key={protocol.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                         {/* Nombre */}
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex items-start gap-2.5">
                             <div>
                               <p className="font-semibold text-gray-900 leading-tight">{protocol.name}</p>
@@ -1007,17 +1007,17 @@ export default function ProtocolsPage() {
                           </div>
                         </td>
                         {/* Especie */}
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${SPECIES_COLORS[protocol.species] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${SPECIES_COLORS[protocol.species] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
                             {protocol.species}
                           </span>
                         </td>
                         {/* Recurrencia */}
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3 text-sm">
                           <span className="font-semibold text-gray-800">{formatDays(protocol.intervalDays)}</span>
                         </td>
                         {/* Notificaciones (pre + post combinados) */}
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
                               <span>▲</span>{protocol.preReminderDays}d antes
@@ -1028,23 +1028,24 @@ export default function ProtocolsPage() {
                           </div>
                         </td>
                         {/* Estado */}
-                        <td className="px-5 py-4 text-center">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${protocol.active ? "bg-green-50 text-green-700 border border-green-200" : "bg-gray-100 text-gray-400 border border-gray-200"}`}>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${protocol.active ? "bg-green-50 text-green-700 border border-green-200" : "bg-gray-100 text-gray-400 border border-gray-200"}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${protocol.active ? "bg-green-500" : "bg-gray-400"}`} />
                             {protocol.active ? "Activo" : "Inactivo"}
                           </span>
                         </td>
                         {/* Acciones */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center justify-end gap-1">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => openEdit(protocol)}
                               title="Editar"
-                              className="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-blue-50 transition-colors"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                             >
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
+                              Editar
                             </button>
                             {protocol.tenantId !== null ? (
                               confirmDeleteId === protocol.id ? (
@@ -1057,11 +1058,12 @@ export default function ProtocolsPage() {
                                 <button
                                   onClick={() => { setConfirmDeleteId(protocol.id); setDeleteError(null); }}
                                   title="Eliminar"
-                                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
                                 >
                                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                   </svg>
+                                  Eliminar
                                 </button>
                               )
                             ) : (
