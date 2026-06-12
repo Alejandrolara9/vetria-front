@@ -888,6 +888,7 @@ function DetailModal({ note: initialNote, onClose, onUpdated }: DetailModalProps
 
 function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
   const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchArchived = useCallback(
@@ -901,12 +902,14 @@ function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
 
   async function handleRestore(id: string) {
     setRestoringId(id);
+    setRestoreError(null);
     try {
       await restoreClinicalNote(id);
       setRefreshKey((k) => k + 1); // refresca esta lista de archivadas
       onRestored();                // refresca la lista de activas en el padre
-    } catch { /* silencioso */ }
-    finally { setRestoringId(null); }
+    } catch {
+      setRestoreError("No se pudo restaurar la nota. Intenta de nuevo.");
+    } finally { setRestoringId(null); }
   }
 
   return (
@@ -915,6 +918,9 @@ function ArchivedNotesList({ onRestored }: { onRestored: () => void }) {
         <span className="text-sm font-semibold text-amber-700">Historias archivadas</span>
         <span className="text-xs text-gray-400">({total})</span>
       </div>
+      {restoreError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2 mb-3">{restoreError}</div>
+      )}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
