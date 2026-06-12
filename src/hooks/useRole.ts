@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 
-export type UserRole = "ADMIN" | "VET" | "RECEPTIONIST";
+export type UserRole = "ADMIN" | "VET" | "RECEPTIONIST" | "AUXILIAR";
 
 interface UseRoleResult {
   role: UserRole | null;
@@ -23,7 +23,7 @@ export function useRole(): UseRoleResult {
       .get<{ role: string }>("/users/me")
       .then(({ data }) => {
         const raw = data.role as UserRole;
-        if (raw === "ADMIN" || raw === "VET" || raw === "RECEPTIONIST") {
+        if (raw === "ADMIN" || raw === "VET" || raw === "RECEPTIONIST" || raw === "AUXILIAR") {
           setRole(raw);
         }
       })
