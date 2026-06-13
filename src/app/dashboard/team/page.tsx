@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { api } from "@/services/api";
+import { createUser, resetUserPassword } from "@/services/user-profile";
+import { generatePassword } from "@/lib/generatePassword";
 import PasswordStrengthChecklist, { isPasswordStrong } from "@/components/PasswordStrengthChecklist";
 import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/SearchInput";
@@ -35,12 +37,30 @@ const ROLE_COLORS: Record<Role, string> = {
 export default function TeamPage() {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "VET" as Role });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "VET" as Role,
+    sendCredentials: false,
+  });
+  const [showPassword, setShowPassword] = useState(false);
+
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", password: "", role: "VET" as Role });
   const [refreshKey, setRefreshKey] = useState(0);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string } | null>(null);
+
+  // Current user id — fetched from /users/me to hide reset action on own row
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Reset password flow
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [memberToReset, setMemberToReset] = useState<{ id: string; name: string } | null>(null);
+  const [resetResult, setResetResult] = useState<{ tempPassword: string; name: string } | null>(null);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const fetchTeam = useCallback(
     async (pg: number, lim: number, srch: string, signal: AbortSignal) => {
@@ -49,10 +69,14 @@ export default function TeamPage() {
         limit: String(lim),
         ...(srch ? { search: srch } : {}),
       });
-      const res = await api.get<PaginatedResponse<TeamMember>>(`/users?${params}`, { signal });
-      return res.data;
+      const [teamRes, meRes] = await Promise.all([
+        api.get<PaginatedResponse<TeamMember>>(`/users?${params}`, { signal }),
+        currentUserId ? Promise.resolve(null) : api.get<{ id: string }>("/users/me", { signal }),
+      ]);
+      if (meRes) setCurrentUserId(meRes.data.id);
+      return teamRes.data;
     },
-    [refreshKey] // eslint-disable-line react-hooks/exhaustive-deps
+    [refreshKey, currentUserId] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const {
@@ -70,12 +94,25 @@ export default function TeamPage() {
     setRefreshKey((k) => k + 1);
   }
 
+  function handleGeneratePassword() {
+    const pwd = generatePassword(12);
+    setForm((f) => ({ ...f, password: pwd, sendCredentials: true }));
+    setShowPassword(true);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.post("/users", form);
-      setForm({ name: "", email: "", password: "", role: "VET" });
+      await createUser({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role,
+        ...(form.sendCredentials ? { sendCredentials: true } : {}),
+      });
+      setForm({ name: "", email: "", password: "", role: "VET", sendCredentials: false });
+      setShowPassword(false);
       setShowForm(false);
       handleRefresh();
     } catch (error: unknown) {
@@ -131,6 +168,35 @@ export default function TeamPage() {
     }
   }
 
+  function handleResetRequest(id: string, name: string) {
+    setMemberToReset({ id, name });
+    setResetConfirmOpen(true);
+  }
+
+  async function doResetPassword() {
+    if (!memberToReset) return;
+    setResetLoading(true);
+    try {
+      const result = await resetUserPassword(memberToReset.id);
+      setResetConfirmOpen(false);
+      setResetResult({ tempPassword: result.tempPassword, name: memberToReset.name });
+      setMemberToReset(null);
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? "Error al restablecer contraseña");
+      setResetConfirmOpen(false);
+    } finally {
+      setResetLoading(false);
+    }
+  }
+
+  async function handleCopyPassword() {
+    if (!resetResult) return;
+    await navigator.clipboard.writeText(resetResult.tempPassword);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -165,7 +231,7 @@ export default function TeamPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Crear usuario</h2>
-              <button onClick={() => setShowForm(false)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => { setShowForm(false); setShowPassword(false); }} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -196,14 +262,46 @@ export default function TeamPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Contraseña</label>
-                <input
-                  type="password"
-                  required
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Mínimo 8 caracteres"
-                />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary pr-9"
+                      placeholder="Mínimo 8 caracteres"
+                    />
+                    {form.password && (
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        title={showPassword ? "Ocultar" : "Mostrar"}
+                      >
+                        {showPassword ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-4.477-9-7S7 5 12 5c1.1 0 2.16.19 3.125.535M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGeneratePassword}
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+                    title="Generar contraseña segura"
+                  >
+                    Generar
+                  </button>
+                </div>
                 {form.password && (
                   <div className="mt-2 p-2.5 bg-gray-50 rounded-lg border">
                     <PasswordStrengthChecklist
@@ -212,6 +310,20 @@ export default function TeamPage() {
                     />
                   </div>
                 )}
+              </div>
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={form.sendCredentials}
+                    onChange={(e) => setForm({ ...form, sendCredentials: e.target.checked })}
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <span className="text-sm">Enviar credenciales al correo</span>
+                </label>
+                <p className="text-xs text-muted-foreground mt-0.5 ml-6">
+                  El usuario recibirá sus credenciales y deberá cambiar la contraseña al iniciar sesión.
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Rol</label>
@@ -229,7 +341,7 @@ export default function TeamPage() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => { setShowForm(false); setShowPassword(false); }}
                   className="flex-1 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
                 >
                   Cancelar
@@ -361,10 +473,23 @@ export default function TeamPage() {
                   <p className="text-xs text-muted-foreground">{member.email}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap justify-end">
                 <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[member.role]}`}>
                   {ROLE_LABELS[member.role]}
                 </span>
+                {/* Restablecer contraseña — hidden on own row */}
+                {member.id !== currentUserId && (
+                  <button
+                    onClick={() => handleResetRequest(member.id, member.name)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-200 text-xs font-medium text-amber-700 hover:bg-amber-50 transition-colors"
+                    title="Restablecer contraseña"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                    Restablecer
+                  </button>
+                )}
                 <button
                   onClick={() => startEdit(member)}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
@@ -399,6 +524,8 @@ export default function TeamPage() {
         onPageChange={setPage}
         loading={loading}
       />
+
+      {/* Confirm: eliminar */}
       <ConfirmDialog
         open={deleteConfirmOpen}
         title={`¿Eliminar a ${memberToDelete?.name}?`}
@@ -406,6 +533,68 @@ export default function TeamPage() {
         onConfirm={doDelete}
         onClose={() => { setDeleteConfirmOpen(false); setMemberToDelete(null); }}
       />
+
+      {/* Confirm: restablecer contraseña */}
+      <ConfirmDialog
+        open={resetConfirmOpen}
+        title="¿Restablecer contraseña?"
+        description={`Se generará una nueva contraseña temporal y se enviará al correo de ${memberToReset?.name ?? "este usuario"}. Deberá cambiarla al iniciar sesión.`}
+        confirmLabel="Restablecer"
+        loading={resetLoading}
+        onConfirm={doResetPassword}
+        onClose={() => { if (!resetLoading) { setResetConfirmOpen(false); setMemberToReset(null); } }}
+      />
+
+      {/* Result modal: temp password */}
+      {resetResult && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+              </div>
+              <h3 className="text-base font-semibold text-gray-900">Contraseña restablecida</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">
+              Contraseña temporal para <strong>{resetResult.name}</strong>:
+            </p>
+            <div className="bg-gray-50 border rounded-lg px-4 py-3 mb-3 flex items-center justify-between gap-3">
+              <code className="font-mono text-sm text-gray-900 break-all">{resetResult.tempPassword}</code>
+              <button
+                onClick={handleCopyPassword}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                {copySuccess ? (
+                  <>
+                    <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Copiado
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copiar
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+              También se envió al correo del usuario. Solo se muestra una vez.
+            </p>
+            <button
+              onClick={() => { setResetResult(null); setCopySuccess(false); }}
+              className="w-full px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

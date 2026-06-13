@@ -4,6 +4,8 @@ import {
   getMyProfile,
   updateMyProfile,
   setMyPassword,
+  resetUserPassword,
+  createUser,
   uploadMySignature,
   type UserProfile,
 } from "../../services/user-profile";
@@ -81,6 +83,58 @@ describe("setMyPassword", () => {
     mock.onPatch("/users/me/password").reply(400, { message: "Contraseña actual incorrecta" });
     await expect(
       setMyPassword({ currentPassword: "incorrecta", newPassword: "Nueva123!" })
+    ).rejects.toThrow();
+  });
+});
+
+describe("resetUserPassword", () => {
+  it("POSTea /users/:id/reset-password y retorna la contraseña temporal", async () => {
+    mock.onPost("/users/user-42/reset-password").reply(200, { tempPassword: "Temp@1234" });
+    const result = await resetUserPassword("user-42");
+    expect(result.tempPassword).toBe("Temp@1234");
+    expect(mock.history.post[0].url).toBe("/users/user-42/reset-password");
+  });
+
+  it("propaga el error si el usuario no existe", async () => {
+    mock.onPost("/users/bad-id/reset-password").reply(404, { message: "Usuario no encontrado" });
+    await expect(resetUserPassword("bad-id")).rejects.toThrow();
+  });
+});
+
+describe("createUser", () => {
+  it("POSTea /users con los campos básicos", async () => {
+    mock.onPost("/users").reply(201);
+    await expect(
+      createUser({ name: "Ana López", email: "ana@vet.co", password: "Abc@1234", role: "VET" })
+    ).resolves.toBeUndefined();
+    const body = JSON.parse(mock.history.post[0].data);
+    expect(body).toMatchObject({ name: "Ana López", email: "ana@vet.co", role: "VET" });
+  });
+
+  it("incluye sendCredentials cuando se pasa como true", async () => {
+    mock.onPost("/users").reply(201);
+    await createUser({
+      name: "Ana López",
+      email: "ana@vet.co",
+      password: "Abc@1234",
+      role: "VET",
+      sendCredentials: true,
+    });
+    const body = JSON.parse(mock.history.post[0].data);
+    expect(body.sendCredentials).toBe(true);
+  });
+
+  it("no incluye sendCredentials cuando se omite", async () => {
+    mock.onPost("/users").reply(201);
+    await createUser({ name: "Pedro R", email: "pedro@vet.co", password: "Abc@1234", role: "RECEPTIONIST" });
+    const body = JSON.parse(mock.history.post[0].data);
+    expect(body.sendCredentials).toBeUndefined();
+  });
+
+  it("propaga el error si el email ya existe", async () => {
+    mock.onPost("/users").reply(409, { message: "Email ya registrado" });
+    await expect(
+      createUser({ name: "Dup", email: "dup@vet.co", password: "Abc@1234", role: "VET" })
     ).rejects.toThrow();
   });
 });
