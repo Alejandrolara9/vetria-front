@@ -22,6 +22,7 @@ const ROUTE_ROLES: Record<string, Role[]> = {
   "/dashboard/team": ["ADMIN"],
   "/dashboard/settings/branding": ["ADMIN"],
   "/dashboard/settings/profile": ["VET", "ADMIN"],
+  // /dashboard/change-password is intentionally omitted — all roles may access it
 };
 
 export default function DashboardLayout({
@@ -35,16 +36,18 @@ export default function DashboardLayout({
   const [role, setRole] = useState<Role | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [gracePeriodEndsAt, setGracePeriodEndsAt] = useState<string | null>(null);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   // Fetch role once on mount — 401 is handled by api.ts interceptor (redirects to /login?expired=1)
   useEffect(() => {
-    api.get<{ role: string }>("/users/me")
+    api.get<{ role: string; mustChangePassword?: boolean }>("/users/me")
       .then(({ data }) => {
         const raw = data.role as string;
         if (VALID_ROLES.includes(raw as Role)) {
           setRole(raw as Role);
+          setMustChangePassword(data.mustChangePassword === true);
         } else {
           redirect("/login");
         }
@@ -59,9 +62,15 @@ export default function DashboardLayout({
       .catch(() => {});
   }, []);
 
-  // Check route permissions whenever role or pathname changes
+  // Check route permissions and forced password change whenever role or pathname changes
   useEffect(() => {
     if (!role) return;
+
+    // If user must change password, force redirect (unless already there)
+    if (mustChangePassword && pathname !== "/dashboard/change-password") {
+      router.replace("/dashboard/change-password");
+      return;
+    }
 
     const requiredRoles = Object.entries(ROUTE_ROLES).find(([path]) =>
       pathname === path || pathname.startsWith(path + "/")
@@ -73,7 +82,7 @@ export default function DashboardLayout({
     }
 
     setReady(true);
-  }, [role, pathname, router]);
+  }, [role, mustChangePassword, pathname, router]);
 
   if (!ready) {
     return (
