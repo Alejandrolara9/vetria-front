@@ -58,10 +58,10 @@ const STATUS_COLORS: Record<InvoiceStatus, string> = {
 };
 
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("es-MX", {
+  return new Intl.NumberFormat("es-CO", {
     style: "currency",
-    currency: "MXN",
-    minimumFractionDigits: 2,
+    currency: "COP",
+    minimumFractionDigits: 0,
   }).format(amount);
 }
 
@@ -220,7 +220,7 @@ function ItemDescriptionInput({
                       Servicio
                     </span>
                     <span className="font-semibold text-xs">
-                      ${item.price.toLocaleString("es-MX")}
+                      ${item.price.toLocaleString("es-CO")}
                     </span>
                   </div>
                 </button>
@@ -253,7 +253,7 @@ function ItemDescriptionInput({
                       Producto
                     </span>
                     <span className="font-semibold text-xs">
-                      ${item.price.toLocaleString("es-MX")}
+                      ${item.price.toLocaleString("es-CO")}
                     </span>
                   </div>
                 </button>

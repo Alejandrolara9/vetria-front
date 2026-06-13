@@ -656,7 +656,7 @@ export default function RemindersPage() {
               value={upcomingSearch}
               onChange={setUpcomingSearch}
               placeholder="Buscar mascota o tutor..."
-              disabled={upcomingLoading}
+              loading={upcomingLoading}
             />
           </div>
           {upcomingLoading && upcomingReminders.length === 0 ? (
@@ -705,7 +705,7 @@ export default function RemindersPage() {
               value={overdueSearch}
               onChange={setOverdueSearch}
               placeholder="Buscar mascota o tutor..."
-              disabled={overdueLoading}
+              loading={overdueLoading}
             />
           </div>
           {overdueLoading && overdueReminders.length === 0 ? (
@@ -756,7 +756,7 @@ export default function RemindersPage() {
               value={allSearch}
               onChange={setAllSearch}
               placeholder="Buscar mascota o tutor..."
-              disabled={allLoading}
+              loading={allLoading}
             />
             <div className="flex gap-2 flex-wrap">
               {allStatuses.map((s) => (

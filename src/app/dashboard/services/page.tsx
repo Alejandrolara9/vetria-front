@@ -18,10 +18,10 @@ import type { PaginatedResponse } from "@/types/pagination";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("es-MX", {
+  return new Intl.NumberFormat("es-CO", {
     style: "currency",
-    currency: "MXN",
-    minimumFractionDigits: 2,
+    currency: "COP",
+    minimumFractionDigits: 0,
   }).format(amount);
 }
 
@@ -321,7 +321,7 @@ export default function ServicesPage() {
           value={search}
           onChange={setSearch}
           placeholder="Buscar servicio por nombre..."
-          disabled={loading}
+          loading={loading}
         />
         <select
           className="px-4 py-2 border border-border rounded-lg text-sm bg-white"
