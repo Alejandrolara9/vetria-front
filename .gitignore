@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 .claude/
 .worktrees/
+
+# tooling / generated artifacts
+.codegraph/
+/reports/junit.xml

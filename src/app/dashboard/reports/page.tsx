@@ -20,10 +20,10 @@ import {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("es-MX", {
+  return new Intl.NumberFormat("es-CO", {
     style: "currency",
-    currency: "MXN",
-    minimumFractionDigits: 2,
+    currency: "COP",
+    minimumFractionDigits: 0,
   }).format(value);
 }
 
@@ -464,14 +464,14 @@ function AppointmentsTab() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-border">
+              <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-border">
                 <tr>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Fecha</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Servicio</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Mascota</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Cliente</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Veterinario</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Estado</th>
+                  <th className="text-left px-6 py-3">Fecha</th>
+                  <th className="text-left px-6 py-3">Servicio</th>
+                  <th className="text-left px-6 py-3">Mascota</th>
+                  <th className="text-left px-6 py-3">Cliente</th>
+                  <th className="text-left px-6 py-3">Veterinario</th>
+                  <th className="text-left px-6 py-3">Estado</th>
                 </tr>
               </thead>
               <tbody>
@@ -510,7 +510,7 @@ function AppointmentsTab() {
                       <td className="px-6 py-3">{appt.vet?.name ?? "—"}</td>
                       <td className="px-6 py-3">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             STATUS_COLORS[appt.status] ??
                             "bg-gray-100 text-gray-600"
                           }`}
@@ -817,14 +817,14 @@ function FinancialTab() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-border">
+              <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-border">
                 <tr>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">N°</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Cliente</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Mascota</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Fecha</th>
-                  <th className="text-right px-6 py-3 font-medium text-muted-foreground">Total</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Estado</th>
+                  <th className="text-left px-6 py-3">N°</th>
+                  <th className="text-left px-6 py-3">Cliente</th>
+                  <th className="text-left px-6 py-3">Mascota</th>
+                  <th className="text-left px-6 py-3">Fecha</th>
+                  <th className="text-right px-6 py-3">Total</th>
+                  <th className="text-left px-6 py-3">Estado</th>
                 </tr>
               </thead>
               <tbody>
@@ -853,7 +853,7 @@ function FinancialTab() {
                       </td>
                       <td className="px-6 py-3">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             STATUS_COLORS[inv.status] ??
                             "bg-gray-100 text-gray-600"
                           }`}
@@ -934,13 +934,13 @@ function InventoryTab() {
             </h3>
           </div>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-border">
+            <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-border">
               <tr>
-                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Producto</th>
-                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Categoria</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Stock actual</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Stock minimo</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Costo unit.</th>
+                <th className="text-left px-6 py-3">Producto</th>
+                <th className="text-left px-6 py-3">Categoria</th>
+                <th className="text-right px-6 py-3">Stock actual</th>
+                <th className="text-right px-6 py-3">Stock minimo</th>
+                <th className="text-right px-6 py-3">Costo unit.</th>
               </tr>
             </thead>
             <tbody>
@@ -977,14 +977,14 @@ function InventoryTab() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-border">
+              <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-border">
                 <tr>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Producto</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Tipo</th>
-                  <th className="text-right px-6 py-3 font-medium text-muted-foreground">Cantidad</th>
-                  <th className="text-right px-6 py-3 font-medium text-muted-foreground">Stock resultante</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Motivo</th>
-                  <th className="text-left px-6 py-3 font-medium text-muted-foreground">Fecha</th>
+                  <th className="text-left px-6 py-3">Producto</th>
+                  <th className="text-left px-6 py-3">Tipo</th>
+                  <th className="text-right px-6 py-3">Cantidad</th>
+                  <th className="text-right px-6 py-3">Stock resultante</th>
+                  <th className="text-left px-6 py-3">Motivo</th>
+                  <th className="text-left px-6 py-3">Fecha</th>
                 </tr>
               </thead>
               <tbody>
@@ -1203,14 +1203,14 @@ function RemindersTab() {
             <h3 className="font-semibold">Recordatorios por tipo de evento</h3>
           </div>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-border">
+            <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-border">
               <tr>
-                <th className="text-left px-6 py-3 font-medium text-muted-foreground">Tipo</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Total</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Programados</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Enviados</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Confirmados</th>
-                <th className="text-right px-6 py-3 font-medium text-muted-foreground">Vencidos</th>
+                <th className="text-left px-6 py-3">Tipo</th>
+                <th className="text-right px-6 py-3">Total</th>
+                <th className="text-right px-6 py-3">Programados</th>
+                <th className="text-right px-6 py-3">Enviados</th>
+                <th className="text-right px-6 py-3">Confirmados</th>
+                <th className="text-right px-6 py-3">Vencidos</th>
               </tr>
             </thead>
             <tbody>

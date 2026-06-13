@@ -1198,7 +1198,7 @@ export default function AppointmentsPage() {
             value={tableSearch}
             onChange={setTableSearch}
             placeholder="Buscar por mascota o veterinario..."
-            disabled={tableLoading}
+            loading={tableLoading}
           />
           <input
             type="date"

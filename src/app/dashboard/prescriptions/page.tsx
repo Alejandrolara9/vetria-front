@@ -131,7 +131,7 @@ export default function PrescriptionsPage() {
             value={search}
             onChange={setSearch}
             placeholder="Buscar paciente, propietario o veterinario..."
-            disabled={loading}
+            loading={loading}
           />
         </div>
         <select

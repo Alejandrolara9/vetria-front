@@ -221,7 +221,7 @@ export default function TeamPage() {
           value={search}
           onChange={setSearch}
           placeholder="Buscar por nombre o email..."
-          disabled={loading}
+          loading={loading}
         />
       </div>
 
