@@ -62,10 +62,10 @@ const ALL_CATEGORIES: ProductCategory[] = [
 ];
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("es-MX", {
+  return new Intl.NumberFormat("es-CO", {
     style: "currency",
-    currency: "MXN",
-    minimumFractionDigits: 2,
+    currency: "COP",
+    minimumFractionDigits: 0,
   }).format(value);
 }
 
@@ -819,7 +819,7 @@ export default function InventoryPage() {
           value={search}
           onChange={setSearch}
           placeholder="Buscar por nombre..."
-          disabled={loading}
+          loading={loading}
         />
         <select
           className="px-4 py-2 border border-border rounded-lg text-sm bg-white"

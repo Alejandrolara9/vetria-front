@@ -95,7 +95,7 @@ export default function ClientsPage() {
           value={search}
           onChange={setSearch}
           placeholder="Buscar por cliente, teléfono, email o mascota…"
-          disabled={loading}
+          loading={loading}
         />
       </div>
 
